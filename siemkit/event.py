@@ -508,7 +508,7 @@ class Cef(AbstractEventFormat):
 
         cef_json = {
             'deviceVendor': 'CyberSIEM Community',
-            'deviceProduct': 'CEF Library',
+            'deviceProduct': 'SIEM Kit',
             'deviceVersion': 0,
             'deviceEventClassId': 100,
             'name': 'https://github.com/DK26/cef-prototype',  # https://github.com/cybersiem/community
