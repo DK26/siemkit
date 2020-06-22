@@ -35,7 +35,7 @@ def ago(*args, **kwargs) -> datetime:
 
 def to_timestamp(datetime_: datetime, utc=False) -> int:
     """
-    Turns a datetime into a Milliseconds Epoch ("Java Timestamp").
+    Turns a datetime into a Milliseconds Epoch Timestamp ("Java Timestamp").
 
     :param datetime_: datetime object
     :param utc: When True, will change the `datetime_` object to its relative UTC time.
@@ -51,7 +51,7 @@ def to_timestamp(datetime_: datetime, utc=False) -> int:
 
 def from_timestamp(timestamp) -> datetime:
     """
-    Create a datetime out of a Milliseconds Epoch ("Java Timestamp").
+    Create a datetime out of a Milliseconds Epoch Timestamp ("Java Timestamp").
     :param timestamp:
     :return:
     """
