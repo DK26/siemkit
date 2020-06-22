@@ -33,9 +33,9 @@ def ago(*args, **kwargs) -> datetime:
     return datetime.now() - timedelta(*args, **kwargs)
 
 
-def timestamp(datetime_: datetime, utc=False) -> int:
+def to_timestamp(datetime_: datetime, utc=False) -> int:
     """
-    Turns a datetime into a Java Timestamp (Milliseconds Epoch).
+    Turns a datetime into a Milliseconds Epoch ("Java Timestamp").
 
     :param datetime_: datetime object
     :param utc: When True, will change the `datetime_` object to its relative UTC time.
@@ -48,3 +48,22 @@ def timestamp(datetime_: datetime, utc=False) -> int:
 
     return floor(ts * 1000)
 
+
+def from_timestamp(timestamp) -> datetime:
+    """
+    Create a datetime out of a Milliseconds Epoch ("Java Timestamp").
+    :param timestamp:
+    :return:
+    """
+    ts = floor(int(timestamp) / 1000)
+    return datetime.fromtimestamp(ts)
+
+
+def to_format(datetime_: datetime, format_="%b %d %Y %H:%M:%S") -> str:
+    """
+    Convert datetime to a default format.
+    :param datetime_:
+    :param format_:
+    :return:
+    """
+    return datetime_.strftime(format_)
