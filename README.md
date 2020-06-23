@@ -1,1 +1,1 @@
-# community
+# CyberSIEM Open-Source Community
