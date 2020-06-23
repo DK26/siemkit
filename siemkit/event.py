@@ -36,6 +36,16 @@ from collections.abc import Iterable
 # ToDo: Automatic Time Format detection -> Comfortable but requires an external library + performance penalty.
 
 
+def filter_fields(events, allowed_fields):
+    """
+    Filter fields that are not within the `allowed_fields` argument. Yielding events with discarded unknown fields.
+    :param events:
+    :param allowed_fields:
+    :return:
+    """
+    yield  # event
+
+
 def validated(events, validator):
     """
     A new comer friendly generator for filtering non-validated events
