@@ -15,6 +15,38 @@
 from datetime import datetime
 from datetime import timedelta
 from math import floor
+from time import sleep
+
+
+def sleep(*args, **kwargs):
+    """
+    Calculates timedelta for sleeping
+
+    e.g.
+        sleep(days=3)
+        sleep(days=3 * 365)  #  Sleep 3 years
+
+        All arguments are passed to the underlying timedelta() object.
+            sleep(days=0, seconds=0, microseconds=0, milliseconds=0, minutes=0, hours=0, weeks=0)
+
+    """
+    sleep(timedelta(*args, **kwargs).total_seconds())
+
+
+def millis(*args, **kwargs) -> int:
+    """
+    Calculates timedelta to milliseconds
+
+    e.g.
+        millis(days=3)
+        millis(days=3 * 365)  # 3 Years in milliseconds
+
+        All arguments are passed to the underlying timedelta() object.
+            millis(days=0, seconds=0, microseconds=0, milliseconds=0, minutes=0, hours=0, weeks=0)
+
+    :return milliseconds
+    """
+    return floor(timedelta(*args, **kwargs).total_seconds() * 1000)
 
 
 def ago(*args, **kwargs) -> datetime:
