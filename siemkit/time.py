@@ -24,7 +24,7 @@ def sleep(*args, **kwargs):
 
     e.g.
         sleep(days=3)
-        sleep(days=3 * 365)  #  Sleep 3 years
+        sleep(days=365 * 3)  #  Sleep 3 years
 
         All arguments are passed to the underlying timedelta() object.
             sleep(days=0, seconds=0, microseconds=0, milliseconds=0, minutes=0, hours=0, weeks=0)
@@ -39,7 +39,7 @@ def millis(*args, **kwargs) -> int:
 
     e.g.
         millis(days=3)
-        millis(days=3 * 365)  # 3 Years in milliseconds
+        millis(days=365 * 3)  # 3 Years in milliseconds
 
         All arguments are passed to the underlying timedelta() object.
             millis(days=0, seconds=0, microseconds=0, milliseconds=0, minutes=0, hours=0, weeks=0)
@@ -55,7 +55,7 @@ def ago(*args, **kwargs) -> datetime:
 
     e.g.
         ago(days=3)
-        ago(days=3 * 365)  # 3 Years ago
+        ago(days=365 * 3)  # 3 Years ago
 
     All arguments are passed to the underlying timedelta() object.
         ago(days=0, seconds=0, microseconds=0, milliseconds=0, minutes=0, hours=0, weeks=0)
