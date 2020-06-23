@@ -35,6 +35,17 @@ from collections.abc import Iterable
 # ToDo: Manual Time Format with Declared fields as time -> Directed for performance
 # ToDo: Automatic Time Format detection -> Comfortable but requires an external library + performance penalty.
 
+
+def validated(events, validator):
+    """
+    A new comer friendly generator for filtering non-validated events
+    :param events: An events collection / iterable
+    :param validator: A validation, filter function
+    :return: Validated events
+    """
+    yield
+
+
 def generator(amount=-1):
     # ToDo: yield random event data for simulations
     pass
@@ -170,7 +181,8 @@ class AbstractEventFormat(dict):
         output=None,
         tcp=None,
         udp=None,
-        file=None
+        file=None,
+        size_limit=1024
     ):
     
         """
@@ -196,6 +208,7 @@ class AbstractEventFormat(dict):
             tcp                 - TCP IP:Port address or collection of addresses to send events to over TCP protocol
             udp                 - UDP IP:Port address or collection of addresses to send events to over UDP protocol 
             file                - File path to output an events file
+            size_limit          - The event size limit. In order to avoid potential size exploits.
         """
         
         if key_assertion is None:
