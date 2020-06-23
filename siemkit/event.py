@@ -46,6 +46,16 @@ def validated(events, validator):
     yield
 
 
+def entities(events, aggregation_base):
+    """
+    Generate entities out of events, creating time-lines.
+    :param events:
+    :param aggregation_base:
+    :return:
+    """
+    yield
+
+
 def generator(amount=-1):
     # ToDo: yield random event data for simulations
     pass
