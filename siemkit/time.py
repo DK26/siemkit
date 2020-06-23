@@ -15,7 +15,7 @@
 from datetime import datetime
 from datetime import timedelta
 from math import floor
-from time import sleep
+import time
 
 
 def sleep(*args, **kwargs):
@@ -30,7 +30,7 @@ def sleep(*args, **kwargs):
             sleep(days=0, seconds=0, microseconds=0, milliseconds=0, minutes=0, hours=0, weeks=0)
 
     """
-    sleep(timedelta(*args, **kwargs).total_seconds())
+    time.sleep(timedelta(*args, **kwargs).total_seconds())
 
 
 def millis(*args, **kwargs) -> int:
