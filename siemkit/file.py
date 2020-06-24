@@ -344,17 +344,21 @@ open(file, mode='r', buffering=-1, encoding=None, errors=None, newline=None, clo
 
                     01, 02, …, 53
     ========= ===============================================================
+
+    :param datetime_: A datetime object to format the file name by.
+                        By default, a new datetime is generated
+                         with a current time.
     """
 
     if isinstance(datetime_, datetime):
-        ts = datetime_
+        dt = datetime_
     elif utc:
-        ts = datetime.utcnow()
+        dt = datetime.utcnow()
     else:
-        ts = datetime.now()
+        dt = datetime.now()
 
     return builtin_open(
-        ts.strftime(file),
+        dt.strftime(file),
         mode=mode,
         buffering=buffering,
         encoding=encoding,
