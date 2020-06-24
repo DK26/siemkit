@@ -14,6 +14,7 @@
 
 from datetime import datetime
 from datetime import timedelta
+from datetime import timezone
 from math import floor
 import time
 
@@ -60,7 +61,7 @@ def ago(*args, **kwargs) -> datetime:
     All arguments are passed to the underlying timedelta() object.
         ago(days=0, seconds=0, microseconds=0, milliseconds=0, minutes=0, hours=0, weeks=0)
 
-    :return datetime
+    :return A 'datetime' object.
     """
     return datetime.now() - timedelta(*args, **kwargs)
 
@@ -81,13 +82,19 @@ def to_timestamp(datetime_: datetime, utc=False) -> int:
     return floor(ts * 1000)
 
 
-def from_timestamp(timestamp) -> datetime:
+def from_timestamp(timestamp, utc=False) -> datetime:
     """
     Create a datetime out of a Milliseconds Epoch Timestamp ("Java Timestamp").
     :param timestamp:
-    :return:
+    :param utc: If True, this will return a 'datetime' object that is self-aware of its UTC timezone status.
+                This will keep its behaviour consistent when interacting with its methods.
+    :return: A 'datetime' object.
     """
     ts = floor(int(timestamp) / 1000)
+
+    if utc:
+        return datetime.fromtimestamp(ts, timezone.utc)
+
     return datetime.fromtimestamp(ts)
 
 
