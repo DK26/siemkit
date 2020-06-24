@@ -29,8 +29,7 @@ def open(
         utc=False,
         datetime_=None
 ):
-    """
-open(file, mode='r', buffering=-1, encoding=None, errors=None, newline=None, closefd=True, opener=None, local_time=False)
+    """open(file, mode='r', buffering=-1, encoding=None, errors=None, newline=None, closefd=True, opener=None, local_time=False)
     Open file and return a stream.  Raise OSError upon failure.
 
     file is either a text or byte string giving the name (and the path
@@ -150,8 +149,9 @@ open(file, mode='r', buffering=-1, encoding=None, errors=None, newline=None, clo
     opened in a text mode, and for bytes a BytesIO can be used like a file
     opened in a binary mode.
 
-    :param file: A string representing the file path. May contain strftime time
-                    format strings ("strftime() and strptime() Format Codes").
+    :param file: A string representing the file name or full path.
+                    May contain strftime time format strings
+                    ("strftime() and strptime() Format Codes").
 
     Source: https://docs.python.org/3/library/datetime.html
     ========= ===============================================================
