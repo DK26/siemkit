@@ -161,72 +161,72 @@ def open(
 
                 Example:
 
-                    Sun, Mon, …, Sat (en_US);
-                    So, Mo, …, Sa (de_DE)
+                    Sun, Mon, ..., Sat (en_US);
+                    So, Mo, ..., Sa (de_DE)
     --------- ---------------------------------------------------------------
     %A       	Weekday as locale's full name.
 
                 Example:
 
-                    Sunday, Monday, …, Saturday (en_US);
-                    Sonntag, Montag, …, Samstag (de_DE)
+                    Sunday, Monday, ..., Saturday (en_US);
+                    Sonntag, Montag, ..., Samstag (de_DE)
     --------- ---------------------------------------------------------------
     %w       	Weekday as a decimal number, where 0 is Sunday
                  and 6 is Saturday.
 
                 Example:
 
-                    0, 1, …, 6
+                    0, 1, ..., 6
     --------- ---------------------------------------------------------------
     %d       	Day of the month as a zero-padded decimal number.
 
                 Example:
 
-                    01, 02, …, 31
+                    01, 02, ..., 31
     --------- ---------------------------------------------------------------
     %b       	Month as locale's abbreviated name.
 
                 Example:
 
-                    Jan, Feb, …, Dec (en_US);
-                    Jan, Feb, …, Dez (de_DE)
+                    Jan, Feb, ..., Dec (en_US);
+                    Jan, Feb, ..., Dez (de_DE)
     --------- ---------------------------------------------------------------
     %B       	Month as locale's full name.
 
                 Example:
 
-                    January, February, …, December (en_US);
-                    Januar, Februar, …, Dezember (de_DE)
+                    January, February, ..., December (en_US);
+                    Januar, Februar, ..., Dezember (de_DE)
     --------- ---------------------------------------------------------------
     %m       	open a disk file for updating (reading and writing)
 
                 Example:
 
-                    01, 02, …, 12
+                    01, 02, ..., 12
     --------- ---------------------------------------------------------------
     %y       	Year without century as a zero-padded decimal number.
 
                 Example:
 
-                    00, 01, …, 99
+                    00, 01, ..., 99
     --------- ---------------------------------------------------------------
     %Y       	Year with century as a decimal number.
 
                 Example:
 
-                    0001, 0002, …, 2013, 2014, …, 9998, 9999
+                    0001, 0002, ..., 2013, 2014, ..., 9998, 9999
     --------- ---------------------------------------------------------------
     %H       	Hour (24-hour clock) as a zero-padded decimal number.
 
                 Example:
 
-                    00, 01, …, 23
+                    00, 01, ..., 23
     --------- ---------------------------------------------------------------
     %I       	Hour (12-hour clock) as a zero-padded decimal number.
 
                 Example:
 
-                    01, 02, …, 12
+                    01, 02, ..., 12
     --------- ---------------------------------------------------------------
     %p       	Locale's equivalent of either AM or PM.
 
@@ -239,19 +239,19 @@ def open(
 
                 Example:
 
-                    00, 01, …, 59
+                    00, 01, ..., 59
     --------- ---------------------------------------------------------------
     %S       	Second as a zero-padded decimal number.
 
                 Example:
 
-                    00, 01, …, 59
+                    00, 01, ..., 59
     --------- ---------------------------------------------------------------
     %f       	Microsecond as a decimal number, zero-padded on the left.
 
                 Example:
 
-                    000000, 000001, …, 999999
+                    000000, 000001, ..., 999999
     --------- ---------------------------------------------------------------
     %z       	UTC offset in the form ±HHMM[SS[.ffffff]] (empty string if
                  the object is naive).
@@ -270,7 +270,7 @@ def open(
 
                 Example:
 
-                    001, 002, …, 366
+                    001, 002, ..., 366
     --------- ---------------------------------------------------------------
     %U       	Week number of the year (Sunday as the first day of the week)
                  as a zero padded decimal number. All days in a new year
@@ -278,7 +278,7 @@ def open(
 
                 Example:
 
-                    00, 01, …, 53
+                    00, 01, ..., 53
     --------- ---------------------------------------------------------------
     %W       	Week number of the year (Monday as the first day of the week)
                  as a decimal number. All days in a new year preceding the
@@ -286,7 +286,7 @@ def open(
 
                 Example:
 
-                    00, 01, …, 53
+                    00, 01, ..., 53
     --------- ---------------------------------------------------------------
     %c       	Locale's appropriate date and time representation.
 
@@ -329,20 +329,20 @@ def open(
 
                 Example:
 
-                    0001, 0002, …, 2013, 2014, …, 9998, 9999
+                    0001, 0002, ..., 2013, 2014, ..., 9998, 9999
     --------- ---------------------------------------------------------------
     %u       	ISO 8601 weekday as a decimal number where 1 is Monday.
 
                 Example:
 
-                    1, 2, …, 7
+                    1, 2, ..., 7
     --------- ---------------------------------------------------------------
     %V      	ISO 8601 week as a decimal number with Monday as the first
                  day of the week. Week 01 is the week containing Jan 4.
 
                 Example:
 
-                    01, 02, …, 53
+                    01, 02, ..., 53
     ========= ===============================================================
 
     :param utc: If True, the time format of the file name will based
