@@ -29,7 +29,8 @@ def open(
         utc=False,
         datetime_=None
 ):
-    """open(file, mode='r', buffering=-1, encoding=None, errors=None, newline=None, closefd=True, opener=None, local_time=False)
+    """
+open(file, mode='r', buffering=-1, encoding=None, errors=None, newline=None, closefd=True, opener=None, local_time=False)
     Open file and return a stream.  Raise OSError upon failure.
 
     file is either a text or byte string giving the name (and the path
@@ -157,14 +158,14 @@ def open(
     ========= ===============================================================
     Directive Meaning
     --------- ---------------------------------------------------------------
-    %a       	Weekday as locale’s abbreviated name.
+    %a       	Weekday as locale's abbreviated name.
 
                 Example:
 
                     Sun, Mon, …, Sat (en_US);
                     So, Mo, …, Sa (de_DE)
     --------- ---------------------------------------------------------------
-    %A       	Weekday as locale’s full name.
+    %A       	Weekday as locale's full name.
 
                 Example:
 
@@ -184,14 +185,14 @@ def open(
 
                     01, 02, …, 31
     --------- ---------------------------------------------------------------
-    %b       	Month as locale’s abbreviated name.
+    %b       	Month as locale's abbreviated name.
 
                 Example:
 
                     Jan, Feb, …, Dec (en_US);
                     Jan, Feb, …, Dez (de_DE)
     --------- ---------------------------------------------------------------
-    %B       	Month as locale’s full name.
+    %B       	Month as locale's full name.
 
                 Example:
 
@@ -228,7 +229,7 @@ def open(
 
                     01, 02, …, 12
     --------- ---------------------------------------------------------------
-    %p       	Locale’s equivalent of either AM or PM.
+    %p       	Locale's equivalent of either AM or PM.
 
                 Example:
 
@@ -288,14 +289,14 @@ def open(
 
                     00, 01, …, 53
     --------- ---------------------------------------------------------------
-    %c       	Locale’s appropriate date and time representation.
+    %c       	Locale's appropriate date and time representation.
 
                 Example:
 
                     Tue Aug 16 21:30:00 1988 (en_US);
                     Di 16 Aug 21:30:00 1988 (de_DE)
     --------- ---------------------------------------------------------------
-    %x       	Locale’s appropriate date representation.
+    %x       	Locale's appropriate date representation.
 
                 Example:
 
@@ -303,7 +304,7 @@ def open(
                     08/16/1988 (en_US);
                     16.08.1988 (de_DE)
     --------- ---------------------------------------------------------------
-    %X       	Locale’s appropriate time representation.
+    %X       	Locale's appropriate time representation.
 
                 Example:
 
