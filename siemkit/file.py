@@ -30,13 +30,15 @@ def open(
         datetime_=None
 ):
     """
-    Open file and return a stream.  Raise OSError upon failure.
+    Open file, optionally with time format, and return a stream.
+    Raise OSError upon failure.
 
-    file is either a text or byte string giving the name (and the path
-    if the file isn't in the current working directory) of the file to
-    be opened or an integer file descriptor of the file to be
-    wrapped. (If a file descriptor is given, it is closed when the
-    returned I/O object is closed, unless closefd is set to False.)
+    file is either a text or byte string that may contain time format
+    strings giving the name (and the path if the file isn't in the current
+    working directory) of the file to be opened or an integer file
+    descriptor of the file to be wrapped. (If a file descriptor is given,
+    it is closed when the returned I/O object is closed, unless closefd is
+    set to False.)
 
     mode is an optional string that specifies the mode in which the file
     is opened. It defaults to 'r' which means open for reading in text
