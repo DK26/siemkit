@@ -345,6 +345,12 @@ def open(
                     01, 02, …, 53
     ========= ===============================================================
 
+    :param utc: If True, the time format of the file name will based
+                    on current UTC time.
+
+                Notice: This parameter is ignored if a `datetime_`
+                         argument is given.
+
     :param datetime_: A datetime object to format the file name by.
                         By default, a new datetime is generated
                          with a current time.
