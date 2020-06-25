@@ -13,6 +13,7 @@
 #   limitations under the License.
 
 from datetime import datetime
+from glob import iglob
 
 builtin_open = open
 
