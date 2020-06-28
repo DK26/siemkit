@@ -13,7 +13,6 @@
 #   limitations under the License.
 
 from datetime import datetime
-from glob import iglob
 
 builtin_open = open
 
@@ -31,6 +30,31 @@ def open(
         datetime_=None
 ):
     """
+    Create a file stream addressing the file name with an attached timestamp.
+
+    Example:
+
+    ```
+    with open('my_file_%y%m%d.txt', 'w') as fs:
+        fs.write("Hello, world!")
+    ```
+
+    If this is executed in the 4th of July, 2020,
+    the produced output file will then be `my_file_20200704.txt`.
+
+    Optionally, the timestamp could be customized by passing a datetime object argument
+    to the `datetime_` parameter.
+
+    ```
+    from datetime import datetime
+    dt = datetime(day=4, month=7, year=1947)
+
+    with open('my_file_%y%m%d.txt', 'w', datetime_=dt) as fs:
+        fs.write("Hello, world!")
+    ```
+
+    The rest of the `open` function acts the same as Python's builtin version:
+
     Open file, optionally with time format, and return a stream.
     Raise OSError upon failure.
 
@@ -201,7 +225,7 @@ def open(
                     January, February, ..., December (en_US);
                     Januar, Februar, ..., Dezember (de_DE)
     --------- ---------------------------------------------------------------
-    %m       	open a disk file for updating (reading and writing)
+    %m       	Month as a zero-padded decimal number.
 
                 Example:
 
