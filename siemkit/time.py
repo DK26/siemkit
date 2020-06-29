@@ -20,6 +20,12 @@ from math import floor
 import time
 
 
+DEFAULT = {
+    'format': "%b %d %Y %H:%M:%S",
+    'tz': None
+}
+
+
 def sleep(*args, **kwargs):
     """
     Calculates timedelta for sleeping
@@ -67,7 +73,7 @@ def ago(*args, **kwargs) -> datetime:
     return datetime.now() - timedelta(*args, **kwargs)
 
 
-def to_timestamp(datetime_: datetime, utc=False) -> int:
+def to_timestamp(datetime_: datetime, utc: bool = False) -> int:
     """
     Turns a datetime into a Milliseconds Epoch Timestamp ("Java Timestamp").
 
@@ -83,7 +89,7 @@ def to_timestamp(datetime_: datetime, utc=False) -> int:
     return floor(ts * 1000)
 
 
-def from_timestamp(timestamp, localize=False, tz=None) -> datetime:
+def from_timestamp(timestamp: 'int or str of milliseconds', localize: bool = False, tz: tzinfo = None) -> datetime:
     """
     Create a datetime out of a Milliseconds Epoch Timestamp ("Java Timestamp").
     :param timestamp: Milliseconds epoch timestamp.
@@ -95,19 +101,38 @@ def from_timestamp(timestamp, localize=False, tz=None) -> datetime:
     ts = int(timestamp) / 1000
 
     if localize:
+        if not tz:
+            tz = DEFAULT.get("tz")
         return utc_to_tz(datetime.fromtimestamp(ts), tz=tz)
 
     return datetime.fromtimestamp(ts)
 
 
-def to_format(datetime_: datetime, format_="%b %d %Y %H:%M:%S") -> str:
+def to_format(datetime_: datetime, format_: str = None) -> str:
     """
     Convert datetime to a default format.
     :param datetime_:
     :param format_:
     :return:
     """
+    if not format_:
+        format_ = DEFAULT.get("format", "%b %d %Y %H:%M:%S")
+
     return datetime_.strftime(format_)
+
+
+def from_format(date_string: str, format_: str = None) -> datetime:
+    """
+    Format a time string into datetime.
+    In essence, same as `datetime.strptime()`, however its purpose is to standardize the `time.py` library.
+    :param date_string:
+    :param format_:
+    :return:
+    """
+    if not format_:
+        format_ = DEFAULT.get("format", "%b %d %Y %H:%M:%S")
+
+    return datetime.strptime(date_string, format_)
 
 
 def utc_to_tz(datetime_: datetime, tz: tzinfo = None) -> datetime:
@@ -118,4 +143,7 @@ def utc_to_tz(datetime_: datetime, tz: tzinfo = None) -> datetime:
     :param tz:
     :return:
     """
+    if not tz:
+        tz = DEFAULT.get("tz")
+
     return datetime_.replace(tzinfo=timezone.utc).astimezone(tz=tz)
