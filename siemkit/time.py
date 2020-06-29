@@ -112,8 +112,8 @@ def to_format(datetime_: datetime, format_="%b %d %Y %H:%M:%S") -> str:
 
 def utc_to_tz(datetime_: datetime, tz: tzinfo = None) -> datetime:
     """
-    Convert a UTC datetime object to another time zone.
-        by default will convert to local time zone.
+    Converts a UTC datetime object to a different time zone.
+        by default will convert to the system's local time zone.
     :param datetime_:
     :param tz:
     :return:
