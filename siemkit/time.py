@@ -72,7 +72,7 @@ def to_timestamp(datetime_: datetime, utc=False) -> int:
     Turns a datetime into a Milliseconds Epoch Timestamp ("Java Timestamp").
 
     :param datetime_: datetime object
-    :param utc: When True, will change the `datetime_` object to its relative UTC time.
+    :param utc: If True, converts the local time zone datetime object to a UTC timestamp.
     :return: Milliseconds Epoch Timestamp
     """
     ts = datetime_.timestamp()
@@ -83,18 +83,19 @@ def to_timestamp(datetime_: datetime, utc=False) -> int:
     return floor(ts * 1000)
 
 
-def from_timestamp(timestamp, utc=False) -> datetime:
+def from_timestamp(timestamp, localize=False, tz=None) -> datetime:
     """
     Create a datetime out of a Milliseconds Epoch Timestamp ("Java Timestamp").
-    :param timestamp:
-    :param utc: If True, this will return a 'datetime' object that is self-aware of its UTC timezone status.
-                This will keep its behaviour consistent when interacting with its methods.
+    :param timestamp: Milliseconds epoch timestamp.
+    :param localize: If True, converts UTC timestamp to a localized datetime.
+    :param tz: Timezone for the UTC timestamp localization.
+                By default uses the local system time zone (None).
     :return: A 'datetime' object.
     """
     ts = int(timestamp) / 1000
 
-    if utc:
-        return datetime.fromtimestamp(ts, timezone.utc)
+    if localize:
+        return utc_to_tz(datetime.fromtimestamp(ts), tz=tz)
 
     return datetime.fromtimestamp(ts)
 
