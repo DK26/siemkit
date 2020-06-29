@@ -15,6 +15,7 @@
 from datetime import datetime
 from datetime import timedelta
 from datetime import timezone
+from datetime import tzinfo
 from math import floor
 import time
 
@@ -106,3 +107,14 @@ def to_format(datetime_: datetime, format_="%b %d %Y %H:%M:%S") -> str:
     :return:
     """
     return datetime_.strftime(format_)
+
+
+def utc_to_tz(datetime_: datetime, tz: tzinfo = None) -> datetime:
+    """
+    Convert a UTC datetime object to another time zone.
+        by default will convert to local time zone.
+    :param datetime_:
+    :param tz:
+    :return:
+    """
+    return datetime_.replace(tzinfo=timezone.utc).astimezone(tz=tz)
