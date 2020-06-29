@@ -92,6 +92,9 @@ def to_timestamp(datetime_: datetime, utc: bool = False) -> int:
 def from_timestamp(timestamp: 'int or str of milliseconds', localize: bool = False, tz: tzinfo = None) -> datetime:
     """
     Create a datetime out of a Milliseconds Epoch Timestamp ("Java Timestamp").
+
+     A default time zone can be assigned globally to `siemkit.time.DEFAULT['tz']`.
+
     :param timestamp: Milliseconds epoch timestamp.
     :param localize: If True, converts UTC timestamp to a localized datetime.
     :param tz: Timezone for the UTC timestamp localization.
@@ -110,7 +113,9 @@ def from_timestamp(timestamp: 'int or str of milliseconds', localize: bool = Fal
 
 def to_format(datetime_: datetime, format_: str = None) -> str:
     """
-    Convert datetime to a default format.
+    Convert a datetime to a default or given time format.
+     A default time format can be assigned globally to `siemkit.time.DEFAULT['format']`.
+
     :param datetime_:
     :param format_:
     :return:
@@ -123,8 +128,9 @@ def to_format(datetime_: datetime, format_: str = None) -> str:
 
 def from_format(date_string: str, format_: str = None) -> datetime:
     """
-    Format a time string into datetime.
-    In essence, same as `datetime.strptime()`, however its purpose is to standardize the `time.py` library.
+    Format a time string with a default or given time format into a datetime.
+     A default time format can be assigned globally to `siemkit.time.DEFAULT['format']`.
+
     :param date_string:
     :param format_:
     :return:
@@ -139,6 +145,9 @@ def utc_to_tz(datetime_: datetime, tz: tzinfo = None) -> datetime:
     """
     Converts a UTC datetime object to a different time zone.
         by default will convert to the system's local time zone.
+
+     A default time zone can be assigned globally to `siemkit.time.DEFAULT['tz']`.
+
     :param datetime_:
     :param tz:
     :return:
