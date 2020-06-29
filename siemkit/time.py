@@ -91,7 +91,7 @@ def from_timestamp(timestamp, utc=False) -> datetime:
                 This will keep its behaviour consistent when interacting with its methods.
     :return: A 'datetime' object.
     """
-    ts = floor(int(timestamp) / 1000)
+    ts = int(timestamp) / 1000
 
     if utc:
         return datetime.fromtimestamp(ts, timezone.utc)
