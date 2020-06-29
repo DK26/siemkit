@@ -22,11 +22,13 @@ from math import floor
 
 from time import time
 from collections.abc import Iterable
+from collections import deque
 
-#import dateparser  # This can't be good for performance. Need performance? know your formats!
+
+# import dateparser  # This can't be good for performance. Need performance? know your formats!
 
 
-#def get_timestamp(string_time):
+# def get_timestamp(string_time):
 #    ts = dateparser.parse(string_time).timestamp() * 1000
 #    return str(ts)
 
@@ -72,7 +74,6 @@ def generator(amount=-1):
 
 
 class AbstractEventFormat(dict):
-
     __aliases = {}
 
     @staticmethod
@@ -99,13 +100,13 @@ class AbstractEventFormat(dict):
                 return bytes(str(value), 'utf-8')
             elif type(value) is str:
                 value = bytes(value, 'utf-8')
-            
+
             # ToDo: Time it vs str.translate()
             # Although fast, this is not efficient. Looking for a better solution.
-            
+
             value = value.replace(b'\\', rb'\\')  # According to documentations, this is the right behaviour.
             # CommonEventFormatV25.pdf page 7
-            
+
             if is_header:
                 value = (value
                          .replace(b'\n', b' ')
@@ -114,20 +115,20 @@ class AbstractEventFormat(dict):
                 value = (value
                          .replace(b'\n', rb'\n')
                          .replace(b'\r', rb'\r'))
-                    
+
             value = value.replace(b'\t', rb'\t')
-            
+
             if is_header:
                 value = value.replace(b'|', rb'\|')
             else:
                 value = value.replace(b'=', rb'\=')
 
             return value
-            
+
             """value = value.translate(
                 bytes.maketrans(b'\\' rb'\\')
             )"""
-            
+
             """
             value = value.translate(
                 str.maketrans({
@@ -135,7 +136,7 @@ class AbstractEventFormat(dict):
                 })
             )
             """
-  
+
         result = bytearray(b'')
 
         result.extend(b'|'.join((escape(data[header], is_header=True) for header in headers)))
@@ -145,7 +146,7 @@ class AbstractEventFormat(dict):
                 #result.extend(b'%s|' % data[header])
             except KeyError:
                 pass"""
-        
+
         result.extend(b'|')
 
         def generate_extensions(data_):
@@ -180,31 +181,31 @@ class AbstractEventFormat(dict):
         pass
 
     def __init__(
-        self, 
-        format_,
-        version,
-        headers, 
-        data={},
-        raw=b'',
-        aliases={}, 
-        key_declaration=set(),
-        warnings=False, 
-        key_assertion=None,
-        value_assertaion=None,
-        deserializer=None,
-        serializer=None,
-        syslog_header=None,
-        timestamp_fields=set(), 
-        to_timestamp=None, 
-        from_timestamp=None,
-        allow_empty_keys=False,
-        output=None,
-        tcp=None,
-        udp=None,
-        file=None,
-        size_limit=1024
+            self,
+            format_,
+            version,
+            headers,
+            data={},
+            raw=b'',
+            aliases={},
+            key_declaration=set(),
+            warnings=False,
+            key_assertion=None,
+            value_assertaion=None,
+            deserializer=None,
+            serializer=None,
+            syslog_header=None,
+            timestamp_fields=set(),
+            to_timestamp=None,
+            from_timestamp=None,
+            allow_empty_keys=False,
+            output=None,
+            tcp=None,
+            udp=None,
+            file=None,
+            size_limit=1024
     ):
-    
+
         """
             format_             - Format name, as will be presented in serialized form (CEF, LEEF, etc.)
             version             - Format Version: 0, 1, 0.1, 1.0, etc. (CEF:0, LEEF:1.0)
@@ -226,11 +227,11 @@ class AbstractEventFormat(dict):
             output              - An object, or collection of objects, that implement the write() method in order
                                     to serialize changes. e.g. Network Socket, File, etc.
             tcp                 - TCP IP:Port address or collection of addresses to send events to over TCP protocol
-            udp                 - UDP IP:Port address or collection of addresses to send events to over UDP protocol 
+            udp                 - UDP IP:Port address or collection of addresses to send events to over UDP protocol
             file                - File path to output an events file
             size_limit          - The event size limit. In order to avoid potential size exploits.
         """
-        
+
         if key_assertion is None:
             key_assertion = AbstractEventFormat.key_assertion
         self.__key_assertion = key_assertion
@@ -252,14 +253,13 @@ class AbstractEventFormat(dict):
 
         # ToDo: If 'restrict_keys', allow /assert only access to the given keys. -> replaced with 'assert_key' function
         # If given a wrong one, throw missing key/attribute exception.
-        
+
         self.__format = format_
         self.__version = version
         self.__format_version = bytes("{}:{}|".format(format_, version), 'utf-8')
 
         # Assumption: If you provide a JSON, and RAW then JSON is static info where RAW is dynamical.
         if data:
-
             """# Clone external dict to avoid changing anything
             json = dict(json)
 
@@ -272,7 +272,7 @@ class AbstractEventFormat(dict):
             self.update(data)
         if raw:
             self.update(deserializer(headers, raw))
- 
+
         # self.update(json)
 
         self.__headers_order = headers  # Important to know the order
@@ -283,28 +283,34 @@ class AbstractEventFormat(dict):
         # After all values are set for the first time, use them as default for the `clear()` command.
         self.__default_state = {}
         self.__default_state.update(self)
-        
+
         self.__raw = raw
         self.__detected_changes = True
-        
+
         self.__timestamp_fields = timestamp_fields
         self.__to_timestamp = to_timestamp
         self.__from_timestamp = from_timestamp
-        
-        self.__output = output
-        
+
+        if output is not None and not any(
+                isinstance(output, type_) for type_
+                in (list, tuple, set, deque)
+        ):
+            self.__output = (output,)
+        else:
+            self.__output = output
+
     def __build(self):
         return bytes(self.__format_version + self.__serializer(self.__headers_order, self))
-    
+
     def raw(self):
         # ToDo: For CEF: Make an aggregation version too + b'cnt='
-        
+
         if self.__detected_changes:
             self.__raw = self.__build()
             self.__detected_changes = False
-        
+
         return self.__raw
-    
+
     def parse(self, raw):
         # ToDo: Check if raw is byte or str
         # ToDo: Support Syslog header
@@ -314,7 +320,7 @@ class AbstractEventFormat(dict):
         #   for which each format standard will refer differently
         # ToDo: Aggregate only if data was not sent(aka self.write() <- Have it reset the aggregation to 1)
         pass
-        
+
     def update(self, d, **f):
 
         # Force key translation by re-assigning
@@ -325,6 +331,19 @@ class AbstractEventFormat(dict):
             self[key] = value
 
         return self
+
+    def write(self):
+
+        size = 0
+
+        if self.__output:
+
+            payload = bytes(self) + b'\r\n'
+
+            for output in self.__output:
+                size += output.write(payload)
+
+        return size
 
     def __get(self, key, ignore_exception=False):
 
@@ -397,101 +416,13 @@ class AbstractEventFormat(dict):
         if traceback:
             raise
 
-        # ToDo: Move this logic to write(self, object/collection of objects or self.__output)
+        # Done: Move this logic to write(self, object/collection of objects or self.__output)
         if self.__output:
-
-            payload = bytes(self) + b'\r\n'
-
-            if isinstance(self.__output, Iterable):
-                for output in self.__output:
-                    output.write(payload)
-            else:
-                self.__output.write(payload)
+            self.write()
 
         # ToDo: If a parse() method was activated, use super.clear() instead?
         # ToDo: Or use a different writing style for parsing:
-        """
-            with event:
-                while has_events:
-                    event.parse(...) # Includes clear in the process
 
-                    <do something with event>
-
-        """
-        # Or:
-        """
-            while has_events:
-                event.parse(...) # Includes clear in the process
-                with event:
-                    my_data = event.sourceAddress
-                    # Clear on exit
-        """
-        # Or:
-        """
-            while has_events:
-                with event.parse(...) as parsed_event:
-                    my_data = parsed_event.sourceAddress
-                    # Clear on exit
-        """
-        # Or:
-        """
-            with event:
-                while has_events:
-                    event.parse(...) # Includes clear in the process
-                    my_data = event.sourceAddress
-        """
-        # Or:
-        """
-            event = Cef(listen=('TCP', 514))
-            with event.listen() as incoming_event:
-                my_data = event.sourceAddress
-
-        """
-        # Or: # Favorite! Better example ->
-        """
-            event = Cef()
-            event.clear() # Reset all values
-            event.save() # Save current cleared state. Restoring it will now just clear it.
-
-            with event:
-                while has_events:
-                    event.parse(...) # Automatically super().clear()
-                    my_data = event.sourceAddress
-                    <Do something with or to 'event'>
-        """
-        # Or: # Favorite! Lesser example -> both event.__exit__ and event.parse() call the super().clear(),
-        #   however if any input is assigned, can be easily forwarded.
-        """
-            event = Cef()
-            event.clear() # Reset all values
-            event.save() # Save current cleared state. Restoring it will now just clear it.
-
-            while has_events:
-                with event:
-                    event.parse(...)
-                    my_data = event.sourceAddress
-        """
-        # Or: # Favorite! Lesser example -> both event.__exit__ and event.parse() call the super().clear(),
-        # however if input is assigned, can be forwarded.
-        """
-            event = Cef()
-
-            # Prep for parsing efficiently
-            event.clear() # Reset all values
-            event.save() # Save current cleared state. Restoring it will now just clear it.
-
-            with Cef(tcp=('172.16.106.3', 9514)) as event:
-
-                while has_events:
-
-                    # On every iteration, an event is processed and then forward on __exit__
-                    with event:
-                        event.parse(...)
-                        my_data = event.sourceAddress
-                        event.sourceAddress = <Optional calculation and rrealignment
-
-            
-        """
         self.restore()
         return self
 
@@ -504,10 +435,10 @@ class AbstractEventFormat(dict):
     def restore(self):
         super().clear()
         self.update(self.__default_state)
-        return self # Return to default state
+        return self  # Return to default state
 
-    # ToDo: Allow clearing all values, for parsing
-    # ToDo: Or/And provide an automatic way for "clearing" when using the 'with' statement and receiving data
+    # Done: Allow clearing all values, for parsing
+    # Done: Or/And provide an automatic way for "clearing" when using the 'with' statement and receiving data
     def clear(self):
         # return self.restore()
         return super().clear()
@@ -525,7 +456,7 @@ class AbstractEventFormat(dict):
         # return super().__str__()
         return str(bytes(self), 'utf-8')
 
-    def close(self): # Close all used resources -> Files, Sockets, etc.
+    def close(self):  # Close all used resources -> Files, Sockets, etc.
         pass
 
 
@@ -550,13 +481,12 @@ class Cef(AbstractEventFormat):
             udp=None,
             file=None
     ):
-
         cef_key_declaration = set()
 
         cef_json = {
             'deviceVendor': 'CyberSIEM Community',
             'deviceProduct': 'SIEM Kit',
-            'deviceVersion': 0,
+            'deviceVersion': '0',
             'deviceEventClassId': 100,
             'name': 'https://github.com/DK26/cef-prototype',  # https://github.com/cybersiem/community
             'deviceSeverity': 'Unknown'
@@ -731,25 +661,24 @@ class Leef(AbstractEventFormat):
 
 
 def test():
-    
     m = re.compile('')
     cef_event = "CEF:0|Fake\|Vendor|Fake Product|Device Version|Class ID|Name|Severity|src=127.0.0.1 dst=1.1.1.1 shost=homeland"
-    
-    #headers, result = AbstractEventFormat.serializer("CEF", cef_event)
+
+    # headers, result = AbstractEventFormat.serializer("CEF", cef_event)
 
     leef_event = "LEEF:1.0|Fake\|Vendor|Fake Product|Product Version|Event ID|src=127.0.0.1 dst=1.1.1.1"
 
-    #headers, result = AbstractEventFormat.deserializer("LEEF", leef_event)
+    # headers, result = AbstractEventFormat.deserializer("LEEF", leef_event)
 
-    event = Cef(version=0, 
-        aliases={
-            'name': 'really',
-            'msg': 'baby'
-        }, 
-        data={
-            'name': 'testing | hmm', 
-            'msg': 'original\nnice!=1111 \d \t test'
-        })
+    event = Cef(version=0,
+                aliases={
+                    'name': 'really',
+                    'msg': 'baby'
+                },
+                data={
+                    'name': 'testing | hmm',
+                    'msg': 'original\nnice!=1111 \d \t test'
+                })
 
     print(event.json())
     event.name = 'My Event'
@@ -793,14 +722,13 @@ def test():
 
 
 def dev():
-    
     from telnetlib import Telnet
 
     with Telnet('172.16.106.3', 9514) as session:  # What if a session is loosing connection
         # for any reason? Add retries?
-        
+
         event = Cef(output=session)
-        
+
         with event:
             # event.name = "Development"
             event.sourceAddress = "127.0.0.1"
@@ -874,11 +802,94 @@ def dev_2():
             print(event)
             # payload = event.syslog()
             # print(payload)
-            #session.write(payload + b'\r\n')
-            
+            # session.write(payload + b'\r\n')
+
 
 if __name__ == "__main__":
     # test()
     dev_2()
 
     # Test
+
+#  """
+#             with event:
+#                 while has_events:
+#                     event.parse(...) # Includes clear in the process
+#
+#                     <do something with event>
+#
+#         """
+#         # Or:
+#         """
+#             while has_events:
+#                 event.parse(...) # Includes clear in the process
+#                 with event:
+#                     my_data = event.sourceAddress
+#                     # Clear on exit
+#         """
+#         # Or:
+#         """
+#             while has_events:
+#                 with event.parse(...) as parsed_event:
+#                     my_data = parsed_event.sourceAddress
+#                     # Clear on exit
+#         """
+#         # Or:
+#         """
+#             with event:
+#                 while has_events:
+#                     event.parse(...) # Includes clear in the process
+#                     my_data = event.sourceAddress
+#         """
+#         # Or:
+#         """
+#             event = Cef(listen=('TCP', 514))
+#             with event.listen() as incoming_event:
+#                 my_data = event.sourceAddress
+#
+#         """
+#         # Or: # Favorite! Better example ->
+#         """
+#             event = Cef()
+#             event.clear() # Reset all values
+#             event.save() # Save current cleared state. Restoring it will now just clear it.
+#
+#             with event:
+#                 while has_events:
+#                     event.parse(...) # Automatically super().clear()
+#                     my_data = event.sourceAddress
+#                     <Do something with or to 'event'>
+#         """
+#         # Or: # Favorite! Lesser example -> both event.__exit__ and event.parse() call the super().clear(),
+#         #   however if any input is assigned, can be easily forwarded.
+#         """
+#             event = Cef()
+#             event.clear() # Reset all values
+#             event.save() # Save current cleared state. Restoring it will now just clear it.
+#
+#             while has_events:
+#                 with event:
+#                     event.parse(...)
+#                     my_data = event.sourceAddress
+#         """
+#         # Or: # Favorite! Lesser example -> both event.__exit__ and event.parse() call the super().clear(),
+#         # however if input is assigned, can be forwarded.
+#         """
+#             event = Cef()
+#
+#             # Prep for parsing efficiently
+#             event.clear() # Reset all values
+#             event.save() # Save current cleared state. Restoring it will now just clear it.
+#
+#             with Cef(tcp=('172.16.106.3', 9514)) as event:
+#
+#                 while has_events:
+#
+#                     # On every iteration, an event is processed and then forward on __exit__
+#                     with event:
+#                         event.parse(...)
+#                         my_data = event.sourceAddress
+#                         event.sourceAddress = <Optional calculation and rrealignment
+#
+#
+#         """
