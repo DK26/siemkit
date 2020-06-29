@@ -28,7 +28,7 @@ DEFAULT = {
 
 def sleep(*args, **kwargs):
     """
-    Calculates timedelta for sleeping
+    Sleeps a given time delta parameters.
 
     e.g.
         sleep(days=3)
@@ -43,7 +43,7 @@ def sleep(*args, **kwargs):
 
 def millis(*args, **kwargs) -> int:
     """
-    Calculates timedelta to milliseconds
+    Converts time delta parameters to milliseconds.
 
     e.g.
         millis(days=3)
@@ -59,7 +59,7 @@ def millis(*args, **kwargs) -> int:
 
 def ago(*args, **kwargs) -> datetime:
     """
-    Calculates a timedelta from now.
+    Calculates the date & time from now, in time delta parameters.
 
     e.g.
         ago(days=3)
@@ -75,7 +75,7 @@ def ago(*args, **kwargs) -> datetime:
 
 def to_timestamp(datetime_: datetime, utc: bool = False) -> int:
     """
-    Turns a datetime into a Milliseconds Epoch Timestamp ("Java Timestamp").
+    Turns a datetime object into a milliseconds epoch timestamp ("Java Timestamp").
 
     :param datetime_: datetime object
     :param utc: If True, converts the local time zone datetime object to a UTC timestamp.
@@ -91,7 +91,7 @@ def to_timestamp(datetime_: datetime, utc: bool = False) -> int:
 
 def from_timestamp(timestamp: 'int or str of milliseconds', localize: bool = False, tz: tzinfo = None) -> datetime:
     """
-    Create a datetime out of a Milliseconds Epoch Timestamp ("Java Timestamp").
+    Create a datetime object out of a milliseconds epoch timestamp ("Java Timestamp").
 
      A default time zone can be assigned globally to `siemkit.time.DEFAULT['tz']`.
 
@@ -113,7 +113,7 @@ def from_timestamp(timestamp: 'int or str of milliseconds', localize: bool = Fal
 
 def to_format(datetime_: datetime, format_: str = None) -> str:
     """
-    Convert a datetime to a default or given time format.
+    Convert a datetime object to a default or given time format.
      A default time format can be assigned globally to `siemkit.time.DEFAULT['format']`.
 
     :param datetime_:
@@ -128,7 +128,7 @@ def to_format(datetime_: datetime, format_: str = None) -> str:
 
 def from_format(date_string: str, format_: str = None) -> datetime:
     """
-    Format a time string with a default or given time format into a datetime.
+    Format a time string with a default or given time format into a datetime object.
      A default time format can be assigned globally to `siemkit.time.DEFAULT['format']`.
 
     :param date_string:
