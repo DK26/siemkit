@@ -14,7 +14,7 @@ pip install siemkit
 pip install --upgrade siemkit
 ```
 
-URL:
+Package:
    - https://pypi.org/project/siemkit/  
 
 GitHub: 
