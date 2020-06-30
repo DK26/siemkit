@@ -96,9 +96,14 @@ class AbstractEventFormat(dict):
     def serializer(headers, data):
 
         def escape(value, is_header):
-            if type(value) is int:
+            """if type(value) in (int, bool):
                 return bytes(str(value), 'utf-8')
             elif type(value) is str:
+                value = bytes(value, 'utf-8')"""
+
+            if not type(value) is str:
+                return bytes(str(value), 'utf-8')
+            else:
                 value = bytes(value, 'utf-8')
 
             # ToDo: Time it vs str.translate()
