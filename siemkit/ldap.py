@@ -13,7 +13,6 @@
 #   limitations under the License.
 
 from enum import Enum
-from . import flag
 
 
 # https://support.microsoft.com/en-us/help/305144/how-to-use-useraccountcontrol-to-manipulate-user-account-properties
