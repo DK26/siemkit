@@ -15,28 +15,28 @@
 from enum import Enum
 
 
-def is_on(flags: int, enum_flag: Enum.name) -> bool:
+def is_on(flags: int, enum_flag: Enum) -> bool:
     return (flags & enum_flag.value) == enum_flag.value
 
 
-def set_on(flags: int, enum_flag: Enum.name) -> int:
+def set_on(flags: int, enum_flag: Enum) -> int:
     return flags | enum_flag.value
 
 
-def set_off(flags: int, enum_flag: Enum.name) -> int:
+def set_off(flags: int, enum_flag: Enum) -> int:
     return flags & ~enum_flag.value
 
 
-def toggle(flags: int, enum_flag: Enum.name) -> int:
+def toggle(flags: int, enum_flag: Enum) -> int:
     return flags ^ enum_flag.value
 
 
-def get(flags: int, enum: Enum) -> 'Generates: tuple[Enum.name, bool]':
+def get(flags: int, enum: 'Enum Class') -> 'Generates: tuple[Enum Flag Name, bool]':
     for enum_flag in enum:
         yield enum_flag.name, is_on(flags, enum_flag)
 
 
-def get_active(flags: int, enum: Enum) -> 'Generates: Enum.name':
+def get_active(flags: int, enum: 'Enum Class') -> 'Generates: Enum Flag Name':
     for enum_flag in enum:
         if is_on(flags, enum_flag):
             yield enum_flag.name

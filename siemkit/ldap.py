@@ -12,10 +12,10 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-from enum import Enum
+from enum import IntFlag
 
 
-class UserAccountControlAttributes(Enum):
+class UserAccountControlAttributes(IntFlag):
 
     # https://support.microsoft.com/en-us/help/305144/how-to-use-useraccountcontrol-to-manipulate-user-account-properties
 
@@ -43,7 +43,7 @@ class UserAccountControlAttributes(Enum):
     PARTIAL_SECRETS_ACCOUNT 	    = 0x04000000  	# 67108864
 
 
-class SAMAccountTypeAttributes(Enum):
+class SAMAccountTypeAttributes(IntFlag):
 
     # https://docs.microsoft.com/en-us/windows/win32/adschema/a-samaccounttype
 
