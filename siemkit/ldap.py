@@ -15,8 +15,9 @@
 from enum import Enum
 
 
-# https://support.microsoft.com/en-us/help/305144/how-to-use-useraccountcontrol-to-manipulate-user-account-properties
 class UserAccountControlAttributes(Enum):
+
+    # https://support.microsoft.com/en-us/help/305144/how-to-use-useraccountcontrol-to-manipulate-user-account-properties
 
     SCRIPT                          = 0x0001        # 1
     ACCOUNTDISABLE                  = 0x0002        # 2
@@ -42,8 +43,9 @@ class UserAccountControlAttributes(Enum):
     PARTIAL_SECRETS_ACCOUNT 	    = 0x04000000  	# 67108864
 
 
-# https://docs.microsoft.com/en-us/windows/win32/adschema/a-samaccounttype
 class SAMAccountTypeAttributes(Enum):
+
+    # https://docs.microsoft.com/en-us/windows/win32/adschema/a-samaccounttype
 
     SAM_DOMAIN_OBJECT               = 0x0           # 0
     SAM_GROUP_OBJECT                = 0x10000000    # 268435456
