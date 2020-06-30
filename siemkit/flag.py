@@ -12,29 +12,31 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
+from enum import Enum
 
-def is_on(flags, enum_flag):
+
+def is_on(flags: int, enum_flag: Enum.name) -> bool:
     return (flags & enum_flag.value) == enum_flag.value
 
 
-def set_on(flags, enum_flag):
+def set_on(flags: int, enum_flag: Enum.name) -> int:
     return flags | enum_flag.value
 
 
-def set_off(flags, enum_flag):
+def set_off(flags: int, enum_flag: Enum.name) -> int:
     return flags & ~enum_flag.value
 
 
-def toggle(flags, enum_flag):
+def toggle(flags: int, enum_flag: Enum.name) -> int:
     return flags ^ enum_flag.value
 
 
-def get(flags, enum):
+def get(flags: int, enum: Enum) -> 'Generates: tuple[Enum.name, bool]':
     for enum_flag in enum:
         yield enum_flag.name, is_on(flags, enum_flag)
 
 
-def get_active(flags, enum):
+def get_active(flags: int, enum: Enum) -> 'Generates: Enum.name':
     for enum_flag in enum:
         if is_on(flags, enum_flag):
             yield enum_flag.name
