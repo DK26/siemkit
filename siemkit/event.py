@@ -84,13 +84,22 @@ class AbstractEventFormat(dict):
     def value_assertion(key):
         return True
 
-    @staticmethod
-    def syslog_header(format_="{:%b %d %H:%M:%S} {} {} "):
+    """@staticmethod
+    def syslog_header2(format_="{:%b %d %H:%M:%S} {} {} "):
         import socket
         from datetime import datetime
         fully_qualified_name = socket.getfqdn()
         ip_address = socket.gethostbyname(fully_qualified_name)
-        return format_.format(datetime.now(), ip_address, fully_qualified_name)
+        return format_.format(datetime.now(), ip_address, fully_qualified_name)"""
+
+    @staticmethod
+    def syslog_header(time_format="%b %d %H:%M:%S"):
+        import socket
+        from datetime import datetime
+        fully_qualified_name = socket.getfqdn()
+        ip_address = socket.gethostbyname(fully_qualified_name)
+        return f"{datetime.now().strftime(time_format)} {ip_address} {fully_qualified_name}"
+        # return format_.format(datetime.now(), ip_address, fully_qualified_name)
 
     @staticmethod
     def serializer(headers, data):
@@ -905,4 +914,3 @@ if __name__ == "__main__":
 #
 #
 #         """
-
