@@ -36,5 +36,5 @@ def get(flags, enum):
 
 def get_active(flags, enum):
     for enum_flag in enum:
-        if get(flags, enum_flag):
+        if is_on(flags, enum_flag):
             yield enum_flag.name

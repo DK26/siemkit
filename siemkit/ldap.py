@@ -16,7 +16,7 @@ from enum import Enum
 
 
 # https://support.microsoft.com/en-us/help/305144/how-to-use-useraccountcontrol-to-manipulate-user-account-properties
-class UserAccountControlProperties(Enum):
+class UserAccountControlAttributes(Enum):
 
     SCRIPT                          = 0x0001        # 1
     ACCOUNTDISABLE                  = 0x0002        # 2
@@ -40,4 +40,21 @@ class UserAccountControlProperties(Enum):
     PASSWORD_EXPIRED                = 0x800000 	    # 8388608
     TRUSTED_TO_AUTH_FOR_DELEGATION  = 0x1000000 	# 16777216
     PARTIAL_SECRETS_ACCOUNT 	    = 0x04000000  	# 67108864
+
+
+# https://docs.microsoft.com/en-us/windows/win32/adschema/a-samaccounttype
+class SAMAccountTypeAttributes(Enum):
+
+    SAM_DOMAIN_OBJECT               = 0x0           # 0
+    SAM_GROUP_OBJECT                = 0x10000000    # 268435456
+    SAM_NON_SECURITY_GROUP_OBJECT   = 0x10000001    # 268435457
+    SAM_ALIAS_OBJECT                = 0x20000000    # 536870912
+    SAM_NON_SECURITY_ALIAS_OBJECT   = 0x20000001    # 536870913
+    SAM_USER_OBJECT                 = 0x30000000    # 805306368
+    SAM_NORMAL_USER_ACCOUNT         = 0x30000000    # 805306368
+    SAM_MACHINE_ACCOUNT             = 0x30000001    # 805306369
+    SAM_TRUST_ACCOUNT               = 0x30000002    # 805306370
+    SAM_APP_BASIC_GROUP             = 0x40000000    # 1073741824
+    SAM_APP_QUERY_GROUP             = 0x40000001    # 1073741825
+    SAM_ACCOUNT_TYPE_MAX            = 0x7fffffff    # 2147483647
 
