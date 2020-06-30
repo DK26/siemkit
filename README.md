@@ -2,13 +2,23 @@
 
 * The project gains rapid progress.. coming soon!
 
-## Installation:
+## Installation
 
 ```bash
 pip install siemkit
 ```
-URL: https://pypi.org/project/siemkit/  
-GitHub: https://github.com/cybersiem/community
+
+## Updating
+
+```bash
+pip install --upgrade siemkit
+```
+
+URL:
+   - https://pypi.org/project/siemkit/  
+
+GitHub: 
+   - https://github.com/cybersiem/community
 
 ## Libraries
 
