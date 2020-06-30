@@ -42,14 +42,3 @@ class UserAccountControlProperties(Enum):
     TRUSTED_TO_AUTH_FOR_DELEGATION  = 0x1000000 	# 16777216
     PARTIAL_SECRETS_ACCOUNT 	    = 0x04000000  	# 67108864
 
-
-def properties(user_account_control):
-    for property_ in UserAccountControlProperties:
-        yield property_.name, flag.is_on(user_account_control, property_)
-
-
-def active_properties(user_account_control):
-    for property_ in UserAccountControlProperties:
-        if flag.is_on(user_account_control, property_):
-            yield property_.name
-

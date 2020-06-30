@@ -27,3 +27,14 @@ def set_off(flags, enum_flag):
 
 def toggle(flags, enum_flag):
     return flags ^ enum_flag.value
+
+
+def get(flags, enum):
+    for enum_flag in enum:
+        yield enum_flag.name, is_on(flags, enum_flag)
+
+
+def get_active(flags, enum):
+    for enum_flag in enum:
+        if get(flags, enum_flag):
+            yield enum_flag.name
