@@ -84,13 +84,22 @@ class AbstractEventFormat(dict):
     def value_assertion(key):
         return True
 
-    @staticmethod
-    def syslog_header(format_="{:%b %d %H:%M:%S} {} {} "):
+    """@staticmethod
+    def syslog_header2(format_="{:%b %d %H:%M:%S} {} {} "):
         import socket
         from datetime import datetime
         fully_qualified_name = socket.getfqdn()
         ip_address = socket.gethostbyname(fully_qualified_name)
-        return format_.format(datetime.now(), ip_address, fully_qualified_name)
+        return format_.format(datetime.now(), ip_address, fully_qualified_name)"""
+
+    @staticmethod
+    def syslog_header(time_format="%b %d %H:%M:%S"):
+        import socket
+        from datetime import datetime
+        fully_qualified_name = socket.getfqdn()
+        ip_address = socket.gethostbyname(fully_qualified_name)
+        return f"{datetime.now().strftime(time_format)} {ip_address} {fully_qualified_name}"
+        # return format_.format(datetime.now(), ip_address, fully_qualified_name)
 
     @staticmethod
     def serializer(headers, data):
@@ -486,6 +495,7 @@ class Cef(AbstractEventFormat):
             udp=None,
             file=None
     ):
+
         cef_key_declaration = set()
 
         cef_json = {
@@ -602,7 +612,13 @@ class Cef(AbstractEventFormat):
             cef_key_declaration.add(k)
             cef_key_declaration.add(v)
 
-        cef_aliases.update(aliases)
+        # Done: Enable self (double) aliases
+        for k, v in aliases.items():
+            if v in cef_aliases.keys():
+                cef_aliases[k] = cef_aliases[v]
+            else:
+                cef_aliases[k] = v
+        # cef_aliases.update(aliases)
 
         # Other Key Declaration
         cef_key_declaration.update({
