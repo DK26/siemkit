@@ -486,6 +486,7 @@ class Cef(AbstractEventFormat):
             udp=None,
             file=None
     ):
+
         cef_key_declaration = set()
 
         cef_json = {
@@ -602,7 +603,13 @@ class Cef(AbstractEventFormat):
             cef_key_declaration.add(k)
             cef_key_declaration.add(v)
 
-        cef_aliases.update(aliases)
+        # Done: Enable self (double) aliases
+        for k, v in aliases.items():
+            if v in cef_aliases.keys():
+                cef_aliases[k] = cef_aliases[v]
+            else:
+                cef_aliases[k] = v
+        # cef_aliases.update(aliases)
 
         # Other Key Declaration
         cef_key_declaration.update({
@@ -898,3 +905,4 @@ if __name__ == "__main__":
 #
 #
 #         """
+
