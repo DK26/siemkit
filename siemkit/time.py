@@ -17,6 +17,7 @@ from datetime import timedelta
 from datetime import timezone
 from datetime import tzinfo
 from math import floor
+from enum import Enum
 import time
 
 
@@ -24,6 +25,53 @@ DEFAULT = {
     'format': "%b %d %Y %H:%M:%S",
     'tz': None
 }
+
+
+class Timestamp:
+    @classmethod
+    def from_datetime(cls, datetime_):
+        pass
+
+    @classmethod
+    def to_datetime(cls, timestamp):
+        pass
+
+
+class EpochTimestamp(Timestamp):
+    @classmethod
+    def from_datetime(cls, datetime_):
+        pass
+
+    @classmethod
+    def to_datetime(cls, timestamp):
+        pass
+
+
+class EpochMillisTimestamp(Timestamp):
+    @classmethod
+    def from_datetime(cls, datetime_):
+        pass
+
+    @classmethod
+    def to_datetime(cls, timestamp):
+        pass
+
+
+class LDAPTimestamp(Timestamp):
+    @classmethod
+    def from_datetime(cls, datetime_):
+        pass
+
+    @classmethod
+    def to_datetime(cls, timestamp):
+        pass
+
+
+class TimestampType(Enum):
+
+    EPOCH = EpochTimestamp
+    EPOCH_MILLIS = EpochMillisTimestamp
+    LDAP = LDAPTimestamp
 
 
 def sleep(*args, **kwargs):
