@@ -111,7 +111,7 @@ def query_group_type(group_type: int) -> str:
     return f'(groupType:1.2.840.113556.1.4.803:={group_type})'
 
 
-def dc_parts(domain: str) -> Generator[str]:
+def dc_parts(domain: str) -> Generator[str, None, None]:
     for part in domain.split('.'):
         yield f'dc={part}'
 
