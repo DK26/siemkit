@@ -76,6 +76,18 @@ class GroupTypeAttributes(IntFlag):
     SECURITY_GROUP      = 0x80000000    # 2147483648  # if not a SECURITY_GROUP then it's a DISTRIBUTION_GROUP.
 
 
+class InstanceTypeAttributes(IntFlag):
+
+    # https://docs.microsoft.com/en-us/windows/win32/adschema/a-instancetype
+
+    HEAD_OF_NAMING_CONTEXT                                      = 0x00000001  # 1
+    REPLICA_NOT_INSTANTIATED                                    = 0x00000002  # 2
+    OBJECT_IS_WRITEABLE                                         = 0x00000004  # 4
+    NAMING_CONTEXT_ABOVE_THIS_ONE_IS_HELD                       = 0x00000008  # 8
+    NAMING_CONTEXT_BEING_CONSTRUCTED_BY_REPLICATION_FIRST_TIME  = 0x00000010  # 16
+    NAMING_CONTEXT_BEING_REMOVED_FROM_LOCAL_DSA                 = 0x00000020  # 32
+
+
 class CommonQueries(Enum):
 
     # https://social.technet.microsoft.com/wiki/contents/articles/5392.active-directory-ldap-syntax-filters.aspx

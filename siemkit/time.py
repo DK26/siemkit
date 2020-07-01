@@ -156,3 +156,40 @@ def utc_to_tz(datetime_: datetime, tz: tzinfo = None) -> datetime:
         tz = DEFAULT.get("tz")
 
     return datetime_.replace(tzinfo=timezone.utc).astimezone(tz=tz)
+
+
+def from_filetime(timestamp: int) -> datetime:
+    """
+    Converts a Microsoft Win32 FILETIME timestamp (aka LDAP / Active Directory timestamp)
+     into a datetime object.
+
+    :param timestamp: Microsoft Win32 FILETIME timestamp
+    :return:
+    """
+    filetime_start_time = datetime(1601, 1, 1)
+    extra_nanoseconds_precision = 10_000_000
+
+    epoch_datetime = filetime_start_time + timedelta(
+        seconds=(timestamp / extra_nanoseconds_precision)
+    )
+
+    return epoch_datetime
+
+
+def to_filetime(datetime_: datetime) -> int:
+    """
+    Converts a datetime object into
+     a Microsoft Win32 FILETIME timestamp (aka LDAP / Active Directory timestamp)
+
+    :param datetime_:
+    :return: Microsoft Win32 FILETIME timestamp
+    """
+    datetime_ = datetime_.replace(tzinfo=timezone.utc).astimezone(tz=None)
+
+    epoch_start_time = 116_444_736_000_000_000
+    extra_nanoseconds_precision = 10_000_000
+
+    filetime = (datetime_.timestamp() * extra_nanoseconds_precision) + epoch_start_time
+
+    return int(filetime)
+
