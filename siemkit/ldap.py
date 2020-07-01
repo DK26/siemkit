@@ -79,11 +79,11 @@ class CommonQueries(Enum):
 
     # https://social.technet.microsoft.com/wiki/contents/articles/5392.active-directory-ldap-syntax-filters.aspx
 
-    ALL_USER_OBJECTS =                  '(&(objectCategory=person)(objectClass=user))'
-    ALL_COMPUTER_OBJECTS =              '(objectCategory=computer)'
-    ALL_GROUP_OBJECTS =                 '(objectCategory=group)'
-    ALL_ORGANIZATIONAL_UNIT_OBJECTS =   '(objectCategory=organizationalUnit)'
-    ALL_DOMAIN_OBJECTS =                '(objectCategory=domain)'
+    ALL_USER_OBJECTS                    = '(&(objectCategory=person)(objectClass=user))'
+    ALL_COMPUTER_OBJECTS                = '(objectCategory=computer)'
+    ALL_GROUP_OBJECTS                   = '(objectCategory=group)'
+    ALL_ORGANIZATIONAL_UNIT_OBJECTS     = '(objectCategory=organizationalUnit)'
+    ALL_DOMAIN_OBJECTS                  = '(objectCategory=domain)'
 
 
 def query_sam_account_type(sam_account_type: int) -> str:
