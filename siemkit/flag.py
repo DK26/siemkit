@@ -13,6 +13,9 @@
 #   limitations under the License.
 
 from enum import Enum
+from enum import EnumMeta
+from typing import Generator
+from typing import Tuple
 
 
 def is_on(flags: int, enum_flag: Enum) -> bool:
@@ -31,12 +34,12 @@ def toggle(flags: int, enum_flag: Enum) -> int:
     return flags ^ enum_flag.value
 
 
-def get(flags: int, enum: 'Enum Class') -> 'Generates: tuple[Enum Flag Name, bool]':
+def get(flags: int, enum: EnumMeta) -> Generator[Tuple[Enum, bool]]:
     for enum_flag in enum:
-        yield enum_flag.name, is_on(flags, enum_flag)
+        yield enum_flag, is_on(flags, enum_flag)
 
 
-def get_active(flags: int, enum: 'Enum Class') -> 'Generates: Enum Flag Name':
+def get_active(flags: int, enum: EnumMeta) -> Generator[Enum]:
     for enum_flag in enum:
         if is_on(flags, enum_flag):
-            yield enum_flag.name
+            yield enum_flag
