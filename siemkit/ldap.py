@@ -62,6 +62,19 @@ class SAMAccountTypeAttributes(IntFlag):
     SAM_ACCOUNT_TYPE_MAX            = 0x7fffffff    # 2147483647
 
 
+class GroupTypeAttributes(IntFlag):
+
+    # https://docs.microsoft.com/en-us/windows/win32/adschema/a-grouptype
+
+    CREATED_BY_SYSTEM   = 0x00000001
+    GLOBAL_GROUP        = 0x00000002
+    DOMAIN_LOCAL_GROUP  = 0x00000004
+    UNIVERSAL_GROUP     = 0x00000008
+    APP_BASIC           = 0x00000010
+    APP_QUERY           = 0x00000020
+    SECURITY_GROUP      = 0x80000000  # if not set then it's a DISTRIBUTION_GROUP
+
+
 class CommonQueries(Enum):
 
     # https://social.technet.microsoft.com/wiki/contents/articles/5392.active-directory-ldap-syntax-filters.aspx
@@ -73,5 +86,13 @@ class CommonQueries(Enum):
     ALL_DOMAIN_OBJECTS =                '(objectCategory=domain)'
 
 
-def query_sam_account_type(sam_account_type: int):
+def query_sam_account_type(sam_account_type: int) -> str:
     return f'(sAMAccountType={sam_account_type})'
+
+
+def query_user_account_control_attribute(user_account_control_attribute: int) -> str:
+    return f'(userAccountControl:1.2.840.113556.1.4.803:={user_account_control_attribute})'
+
+
+def query_group_type(group_type: int) -> str:
+    return f'(groupType:1.2.840.113556.1.4.803:={group_type})'
