@@ -34,7 +34,7 @@ def toggle(flags: int, enum_flag: Enum) -> int:
     return flags ^ enum_flag.value
 
 
-def get(flags: int, enum: EnumMeta) -> Generator[Tuple[Enum, bool]]:
+def get(flags: int, enum: EnumMeta) -> Generator[Tuple[Enum, bool], None, None]:
     """
     Yields given `flags` integer as Enums with their boolean status.
     :param flags:
@@ -45,7 +45,7 @@ def get(flags: int, enum: EnumMeta) -> Generator[Tuple[Enum, bool]]:
         yield enum_flag, is_on(flags, enum_flag)
 
 
-def get_active(flags: int, enum: EnumMeta) -> Generator[Enum]:
+def get_active(flags: int, enum: EnumMeta) -> Generator[Enum, None, None]:
     """
     Yields active Enum flags from the given `flags` integer parameter.
     :param flags:
