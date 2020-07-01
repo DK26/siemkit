@@ -14,6 +14,7 @@
 
 from enum import IntFlag
 from enum import Enum
+from typing import Generator
 
 
 class UserAccountControlAttributes(IntFlag):
@@ -96,3 +97,12 @@ def query_user_account_control_attribute(user_account_control_attribute: int) ->
 
 def query_group_type(group_type: int) -> str:
     return f'(groupType:1.2.840.113556.1.4.803:={group_type})'
+
+
+def dc_parts(domain: str) -> Generator[str]:
+    for part in domain.split('.'):
+        yield f'dc={part}'
+
+
+def dc(domain: str) -> str:
+    return ','.join(dc_parts(domain))
