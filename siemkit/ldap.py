@@ -25,23 +25,23 @@ class UserAccountControlAttributes(IntFlag):
     HOMEDIR_REQUIRED                = 0x0008        # 8
     LOCKOUT                         = 0x0010        # 16
     PASSWD_NOTREQD                  = 0x0020        # 32
-    PASSWD_CANT_CHANGE              = 0x0040 	    # 64
-    ENCRYPTED_TEXT_PWD_ALLOWED      = 0x0080 	    # 128
-    TEMP_DUPLICATE_ACCOUNT          = 0x0100 	    # 256
-    NORMAL_ACCOUNT                  = 0x0200 	    # 512
-    INTERDOMAIN_TRUST_ACCOUNT       = 0x0800 	    # 2048
-    WORKSTATION_TRUST_ACCOUNT       = 0x1000 	    # 4096
-    SERVER_TRUST_ACCOUNT            = 0x2000 	    # 8192
-    DONT_EXPIRE_PASSWORD            = 0x10000 	    # 65536
-    MNS_LOGON_ACCOUNT               = 0x20000 	    # 131072
-    SMARTCARD_REQUIRED              = 0x40000 	    # 262144
-    TRUSTED_FOR_DELEGATION          = 0x80000 	    # 524288
-    NOT_DELEGATED                   = 0x100000 	    # 1048576
-    USE_DES_KEY_ONLY                = 0x200000 	    # 2097152
-    DONT_REQ_PREAUTH                = 0x400000 	    # 4194304
-    PASSWORD_EXPIRED                = 0x800000 	    # 8388608
-    TRUSTED_TO_AUTH_FOR_DELEGATION  = 0x1000000 	# 16777216
-    PARTIAL_SECRETS_ACCOUNT         = 0x04000000  	# 67108864
+    PASSWD_CANT_CHANGE              = 0x0040        # 64
+    ENCRYPTED_TEXT_PWD_ALLOWED      = 0x0080        # 128
+    TEMP_DUPLICATE_ACCOUNT          = 0x0100        # 256
+    NORMAL_ACCOUNT                  = 0x0200        # 512
+    INTERDOMAIN_TRUST_ACCOUNT       = 0x0800        # 2048
+    WORKSTATION_TRUST_ACCOUNT       = 0x1000        # 4096
+    SERVER_TRUST_ACCOUNT            = 0x2000        # 8192
+    DONT_EXPIRE_PASSWORD            = 0x10000       # 65536
+    MNS_LOGON_ACCOUNT               = 0x20000       # 131072
+    SMARTCARD_REQUIRED              = 0x40000       # 262144
+    TRUSTED_FOR_DELEGATION          = 0x80000       # 524288
+    NOT_DELEGATED                   = 0x100000      # 1048576
+    USE_DES_KEY_ONLY                = 0x200000      # 2097152
+    DONT_REQ_PREAUTH                = 0x400000      # 4194304
+    PASSWORD_EXPIRED                = 0x800000      # 8388608
+    TRUSTED_TO_AUTH_FOR_DELEGATION  = 0x1000000     # 16777216
+    PARTIAL_SECRETS_ACCOUNT         = 0x04000000    # 67108864
 
 
 class SAMAccountTypeAttributes(IntFlag):
@@ -66,13 +66,13 @@ class GroupTypeAttributes(IntFlag):
 
     # https://docs.microsoft.com/en-us/windows/win32/adschema/a-grouptype
 
-    CREATED_BY_SYSTEM   = 0x00000001
-    GLOBAL_GROUP        = 0x00000002
-    DOMAIN_LOCAL_GROUP  = 0x00000004
-    UNIVERSAL_GROUP     = 0x00000008
-    APP_BASIC           = 0x00000010
-    APP_QUERY           = 0x00000020
-    SECURITY_GROUP      = 0x80000000  # if not set then it's a DISTRIBUTION_GROUP
+    CREATED_BY_SYSTEM   = 0x00000001    # 1
+    GLOBAL_GROUP        = 0x00000002    # 2
+    DOMAIN_LOCAL_GROUP  = 0x00000004    # 4
+    UNIVERSAL_GROUP     = 0x00000008    # 8
+    APP_BASIC           = 0x00000010    # 16
+    APP_QUERY           = 0x00000020    # 32
+    SECURITY_GROUP      = 0x80000000    # 2147483648  # if not a SECURITY_GROUP then it's a DISTRIBUTION_GROUP.
 
 
 class CommonQueries(Enum):
