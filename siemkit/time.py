@@ -18,8 +18,10 @@ from datetime import timezone
 from datetime import tzinfo
 from math import floor
 from enum import Enum
+from abc import ABC
 import time
 
+UTC = timezone.utc
 
 DEFAULT = {
     'format': "%b %d %Y %H:%M:%S",
@@ -27,55 +29,129 @@ DEFAULT = {
 }
 
 
-class Timestamp:
+class Timestamp(ABC):
 
     @classmethod
-    def from_datetime(cls, datetime_):
+    def from_datetime(cls, datetime_, tz=None):
         pass
 
     @classmethod
-    def to_datetime(cls, timestamp):
+    def to_datetime(cls, timestamp, tz=None):
+        pass
+
+    @classmethod
+    def delta(cls, *args, **kwargs):
         pass
 
 
 class EpochTimestamp(Timestamp):
 
     @classmethod
-    def from_datetime(cls, datetime_):
-        pass
+    def from_datetime(cls, datetime_, tz=None) -> int:
+        return floor(datetime_.astimezone(tz=tz).timestamp())
 
     @classmethod
-    def to_datetime(cls, timestamp):
-        pass
+    def to_datetime(cls, timestamp, tz=None) -> datetime:
+        return datetime.fromtimestamp(timestamp).replace(tzinfo=tz)
+
+    @classmethod
+    def delta(cls, *args, **kwargs):
+        return floor(timedelta(*args, **kwargs).total_seconds())
 
 
 class EpochMillisTimestamp(Timestamp):
 
-    @classmethod
-    def from_datetime(cls, datetime_):
-        pass
+    PRECISION = 1_000
 
     @classmethod
-    def to_datetime(cls, timestamp):
-        pass
+    def from_datetime(cls, datetime_, tz=None) -> int:
+        return floor(datetime_.astimezone(tz=tz).timestamp() * cls.PRECISION)
+
+    @classmethod
+    def to_datetime(cls, timestamp, tz=None) -> datetime:
+        return datetime.fromtimestamp(int(timestamp) / cls.PRECISION).replace(tzinfo=tz)
+
+    @classmethod
+    def delta(cls, *args, **kwargs):
+        return floor(timedelta(*args, **kwargs).total_seconds() * cls.PRECISION)
 
 
 class LDAPTimestamp(Timestamp):
 
-    @classmethod
-    def from_datetime(cls, datetime_):
-        pass
+    LDAP_START_TIME = datetime(1601, 1, 1)
+
+    EPOCH_START_TIME = 116_444_736_000_000_000
+
+    PRECISION = 10_000_000
 
     @classmethod
-    def to_datetime(cls, timestamp):
+    def from_datetime(cls, datetime_, tz=None):
+        #datetime_ = utc_to_tz(datetime_, tz=None)  # Replace default UTC timezone to local (None).
+
+        datetime_ = datetime_.astimezone(tz=tz)
+
+        ldap_timestamp = (datetime_.timestamp() * cls.PRECISION) + cls.EPOCH_START_TIME
+
+        return floor(ldap_timestamp)
+
+    @classmethod
+    def to_datetime(cls, timestamp, tz=None):
+
+        epoch_datetime = cls.LDAP_START_TIME + timedelta(
+            seconds=(timestamp / cls.PRECISION)
+        )
+
+        return epoch_datetime.replace(tzinfo=tz)
+
+    @classmethod
+    def delta(cls, *args, **kwargs):
         pass
 
 
-class TimestampType(Enum):
+def from_filetime(timestamp: int) -> datetime:
+    """
+    Converts a Microsoft Win32 FILETIME timestamp (aka LDAP / Active Directory timestamp)
+     into a datetime object.
+
+    :param timestamp: Microsoft Win32 FILETIME timestamp
+    :return:
+    """
+    filetime_start_time = datetime(1601, 1, 1)
+    extra_nanoseconds_precision = 10_000_000
+
+    epoch_datetime = filetime_start_time + timedelta(
+        seconds=(timestamp / extra_nanoseconds_precision)
+    )
+
+    return epoch_datetime
+
+
+def to_filetime(datetime_: datetime) -> int:
+    """
+    Converts a datetime object into
+     a Microsoft Win32 FILETIME timestamp (aka LDAP / Active Directory timestamp)
+
+    :param datetime_:
+    :return: Microsoft Win32 FILETIME timestamp
+    """
+    datetime_ = utc_to_tz(datetime_, tz=None)  # Replace default UTC timezone to local (None).
+
+    epoch_start_time = 116_444_736_000_000_000
+    extra_nanoseconds_precision = 10_000_000
+
+    filetime = (datetime_.timestamp() * extra_nanoseconds_precision) + epoch_start_time
+
+    return int(filetime)
+
+
+class TimeType(Enum):
 
     EPOCH = EpochTimestamp
     EPOCH_MILLIS = EpochMillisTimestamp
     LDAP = LDAPTimestamp
+
+    def __repr__(self):
+        return self.value
 
 
 def sleep(*args, **kwargs):
@@ -136,16 +212,16 @@ def ago(*args, **kwargs) -> datetime:
     return datetime.now() - timedelta(*args, **kwargs)
 
 
-def dev_ago():
-    pass
+def dev_delta(type_=TimeType.EPOCH_MILLIS, *args, **kwargs) -> int:
+    return type_.value.delta(*args, **kwargs)
 
 
-def dev_to_timestamp(datetime_: datetime, tz=None, converter=TimestampType.EPOCH_MILLIS) -> int:
-    return converter.from_datetime(datetime_, tz)
+def dev_to_timestamp(datetime_: datetime, tz=None, type_=TimeType.EPOCH_MILLIS) -> int:
+    return type_.value.from_datetime(datetime_, tz)
 
 
-def dev_from_timestamp(timestamp: int, tz=None, converter=TimestampType.EPOCH_MILLIS) -> datetime:
-    return converter.value.to_datetime(timestamp, tz)
+def dev_from_timestamp(timestamp: int, tz=None, type_=TimeType.EPOCH_MILLIS) -> datetime:
+    return type_.value.to_datetime(timestamp, tz)
 
 
 def to_timestamp(datetime_: datetime, utc: bool = False) -> int:
@@ -231,40 +307,3 @@ def utc_to_tz(datetime_: datetime, tz: tzinfo = None) -> datetime:
         tz = DEFAULT.get("tz")
 
     return datetime_.replace(tzinfo=timezone.utc).astimezone(tz=tz)
-
-
-def from_filetime(timestamp: int) -> datetime:
-    """
-    Converts a Microsoft Win32 FILETIME timestamp (aka LDAP / Active Directory timestamp)
-     into a datetime object.
-
-    :param timestamp: Microsoft Win32 FILETIME timestamp
-    :return:
-    """
-    filetime_start_time = datetime(1601, 1, 1)
-    extra_nanoseconds_precision = 10_000_000
-
-    epoch_datetime = filetime_start_time + timedelta(
-        seconds=(timestamp / extra_nanoseconds_precision)
-    )
-
-    return epoch_datetime
-
-
-def to_filetime(datetime_: datetime) -> int:
-    """
-    Converts a datetime object into
-     a Microsoft Win32 FILETIME timestamp (aka LDAP / Active Directory timestamp)
-
-    :param datetime_:
-    :return: Microsoft Win32 FILETIME timestamp
-    """
-    datetime_ = utc_to_tz(datetime_, tz=None)  # Replace default UTC timezone to local (None).
-
-    epoch_start_time = 116_444_736_000_000_000
-    extra_nanoseconds_precision = 10_000_000
-
-    filetime = (datetime_.timestamp() * extra_nanoseconds_precision) + epoch_start_time
-
-    return int(filetime)
-
