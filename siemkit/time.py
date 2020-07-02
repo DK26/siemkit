@@ -168,7 +168,7 @@ def time_type(time_type_enum: TimeType) -> Timestamp:
 
     if time_type_enum is None or not (isclass(time_type_enum.value)
                                       and issubclass(time_type_enum.value, Timestamp)):
-        time_type_class = default['type'].value
+        time_type_class = default.get('type', TimeType.EPOCH_MILLIS).value
     else:
         time_type_class = time_type_enum.value
 
