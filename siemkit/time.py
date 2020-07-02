@@ -89,6 +89,11 @@ def sleep(*args, **kwargs):
     time.sleep(timedelta(*args, **kwargs).total_seconds())
 
 
+def to_millis(datetime_: datetime, tz=None) -> int:
+
+    return floor(utc_to_tz(datetime_, tz).timestamp() * 1000)
+
+
 def millis(*args, **kwargs) -> int:
     """
     Converts time delta parameters to milliseconds.
@@ -232,7 +237,7 @@ def to_filetime(datetime_: datetime) -> int:
     :param datetime_:
     :return: Microsoft Win32 FILETIME timestamp
     """
-    datetime_ = datetime_.replace(tzinfo=timezone.utc).astimezone(tz=None)
+    datetime_ = utc_to_tz(datetime_, tz=None)  # Replace default UTC timezone to local (None).
 
     epoch_start_time = 116_444_736_000_000_000
     extra_nanoseconds_precision = 10_000_000
