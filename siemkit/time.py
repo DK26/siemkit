@@ -28,6 +28,7 @@ DEFAULT = {
 
 
 class Timestamp:
+
     @classmethod
     def from_datetime(cls, datetime_):
         pass
@@ -38,6 +39,7 @@ class Timestamp:
 
 
 class EpochTimestamp(Timestamp):
+
     @classmethod
     def from_datetime(cls, datetime_):
         pass
@@ -48,6 +50,7 @@ class EpochTimestamp(Timestamp):
 
 
 class EpochMillisTimestamp(Timestamp):
+
     @classmethod
     def from_datetime(cls, datetime_):
         pass
@@ -58,6 +61,7 @@ class EpochMillisTimestamp(Timestamp):
 
 
 class LDAPTimestamp(Timestamp):
+
     @classmethod
     def from_datetime(cls, datetime_):
         pass
@@ -90,7 +94,13 @@ def sleep(*args, **kwargs):
 
 
 def to_millis(datetime_: datetime, tz=None) -> int:
+    """
+    Convert a datetime object to milliseconds.
 
+    :param datetime_:
+    :param tz:
+    :return: milliseconds epoch timestamp
+    """
     return floor(utc_to_tz(datetime_, tz).timestamp() * 1000)
 
 
@@ -105,7 +115,7 @@ def millis(*args, **kwargs) -> int:
         All arguments are passed to the underlying timedelta() object.
             millis(days=0, seconds=0, microseconds=0, milliseconds=0, minutes=0, hours=0, weeks=0)
 
-    :return milliseconds
+    :return milliseconds epoch timestamp
     """
     return floor(timedelta(*args, **kwargs).total_seconds() * 1000)
 
@@ -132,7 +142,7 @@ def to_timestamp(datetime_: datetime, utc: bool = False) -> int:
 
     :param datetime_: datetime object
     :param utc: If True, converts the local time zone datetime object to a UTC timestamp.
-    :return: Milliseconds Epoch Timestamp
+    :return: milliseconds epoch timestamp
     """
     ts = datetime_.timestamp()
 
