@@ -136,12 +136,16 @@ def ago(*args, **kwargs) -> datetime:
     return datetime.now() - timedelta(*args, **kwargs)
 
 
+def dev_ago():
+    pass
+
+
 def dev_to_timestamp(datetime_: datetime, tz=None, converter=TimestampType.EPOCH_MILLIS) -> int:
     return converter.from_datetime(datetime_, tz)
 
 
 def dev_from_timestamp(timestamp: int, tz=None, converter=TimestampType.EPOCH_MILLIS) -> datetime:
-    return converter.to_datetime(timestamp, tz)
+    return converter.value.to_datetime(timestamp, tz)
 
 
 def to_timestamp(datetime_: datetime, utc: bool = False) -> int:
