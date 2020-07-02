@@ -87,7 +87,7 @@ class EpochTimestamp(Timestamp):
         return datetime.fromtimestamp(timestamp).replace(tzinfo=tz)
 
     @classmethod
-    def delta(cls, *args, **kwargs):
+    def delta(cls, *args, **kwargs) -> int:
         return floor(timedelta(*args, **kwargs).total_seconds())
 
 
@@ -104,7 +104,7 @@ class EpochMillisTimestamp(Timestamp):
         return datetime.fromtimestamp(int(timestamp) / cls.PRECISION).replace(tzinfo=tz)
 
     @classmethod
-    def delta(cls, *args, **kwargs):
+    def delta(cls, *args, **kwargs) -> int:
         return floor(timedelta(*args, **kwargs).total_seconds() * cls.PRECISION)
 
 
@@ -121,7 +121,7 @@ class LDAPTimestamp(Timestamp):
     PRECISION = 10_000_000
 
     @classmethod
-    def from_datetime(cls, datetime_: datetime, tz: tzinfo = None):
+    def from_datetime(cls, datetime_: datetime, tz: tzinfo = None) -> int:
 
         datetime_ = datetime_.astimezone(tz=tz)
 
@@ -130,7 +130,7 @@ class LDAPTimestamp(Timestamp):
         return floor(ldap_timestamp)
 
     @classmethod
-    def to_datetime(cls, timestamp: int, tz: tzinfo = None):
+    def to_datetime(cls, timestamp: int, tz: tzinfo = None) -> datetime:
 
         epoch_datetime = cls.LDAP_START_TIME + timedelta(
             seconds=(timestamp / cls.PRECISION)
@@ -141,7 +141,7 @@ class LDAPTimestamp(Timestamp):
         return epoch_datetime.replace(tzinfo=tz)
 
     @classmethod
-    def delta(cls, *args, **kwargs):
+    def delta(cls, *args, **kwargs) -> int:
         return floor(timedelta(*args, **kwargs).total_seconds() * cls.PRECISION)
 
 
