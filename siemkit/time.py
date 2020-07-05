@@ -28,7 +28,7 @@ UTC = timezone.utc
 
 def pick_timedelta(timedelta_, *args, **kwargs) -> timedelta:
     """
-    Picks between given a timedelta object or timedelta arguments such as: days, minutes, etc.
+    Picks between a given timedelta object or timedelta arguments such as: days, minutes, etc.
         If a timedelta object is passed as an argument, the rest of the arguments will be ignored.
 
     :param timedelta_: timedelta object
