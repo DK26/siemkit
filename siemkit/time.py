@@ -26,7 +26,7 @@ import time
 UTC = timezone.utc
 
 
-class Timestamp(ABC):
+class TimestampInterface(ABC):
     """
     An interface for implementing a proper Timestamp.
         Once you implement it, make sure you also define it in the `TimeType` enum class.
@@ -76,7 +76,7 @@ class Timestamp(ABC):
         pass
 
 
-class EpochTimestamp(Timestamp):
+class EpochTimestamp(TimestampInterface):
 
     @classmethod
     def from_datetime(cls, datetime_: datetime, tz: tzinfo = None) -> int:
@@ -91,7 +91,7 @@ class EpochTimestamp(Timestamp):
         return floor(timedelta(*args, **kwargs).total_seconds())
 
 
-class EpochMillisTimestamp(Timestamp):
+class EpochMillisTimestamp(TimestampInterface):
 
     PRECISION = 1_000
 
@@ -108,7 +108,7 @@ class EpochMillisTimestamp(Timestamp):
         return floor(timedelta(*args, **kwargs).total_seconds() * cls.PRECISION)
 
 
-class LDAPTimestamp(Timestamp):
+class LDAPTimestamp(TimestampInterface):
     """
     Converts a Microsoft Win32 FILETIME timestamp (aka LDAP / Active Directory timestamp)
      into & from a datetime object.
@@ -159,15 +159,19 @@ default = {
 }
 
 
-def time_type(time_type_enum: TimeType) -> Timestamp:
+def time_type(time_type_enum: TimeType) -> TimestampInterface:
     """
-    Return reference to a Timestamp class of a given TimeType enum argument or the default Timestamp.
+    Returns a reference to a TimestampInterface object of a given TimeType enum argument
+     or the default TimestampInterface object.
+
     :param time_type_enum:
-    :return: Timestamp Class reference
+    :return: TimestampInterface reference
     """
+    if isinstance(time_type_enum, TimestampInterface):
+        return time_type_enum
 
     if time_type_enum is None or not (isclass(time_type_enum.value)
-                                      and issubclass(time_type_enum.value, Timestamp)):
+                                      and issubclass(time_type_enum.value, TimestampInterface)):
         time_type_class = default.get('type', TimeType.EPOCH_MILLIS).value
     else:
         time_type_class = time_type_enum.value
@@ -187,6 +191,7 @@ def sleep(*args, **kwargs):
             sleep(days=0, seconds=0, microseconds=0, milliseconds=0, minutes=0, hours=0, weeks=0)
 
     """
+
     time.sleep(timedelta(*args, **kwargs).total_seconds())
 
 
@@ -205,6 +210,7 @@ def ago(type_: TimeType = None, *args, **kwargs) -> int:
 
     :return A 'datetime' object.
     """
+
     return time_type(type_).from_datetime(datetime.now() - timedelta(*args, **kwargs))
 
 
