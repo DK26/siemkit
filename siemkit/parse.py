@@ -33,6 +33,24 @@ import dateparser
 def time(time_string: str) -> datetime.datetime:
     """
     Parse a time string into a datetime object.
+
+        e.g.:
+
+        A string of:
+         "21/11/1988"
+
+        Results in:
+         datetime.datetime(1988, 11, 21, 0, 0)
+
+    Relative time ("ago") is also supported:
+
+        A string of:
+         "1 day ago"
+
+        Results in a `datetime` object set to 1 day before
+         the current time of execution.
+
+
     :param time_string:
     :return: datetime object
     """
