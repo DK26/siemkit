@@ -12,10 +12,67 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
+import datetime
 
-def time():
-    pass
+import pytimeparse
+# * pytimeparse - MIT License
+#     by: wroberts
+#     source: https://github.com/wroberts/pytimeparse
+
+import hfilesize
+#  * hfilesize - MIT License
+#     by: simonzack
+#     source: https://github.com/simonzack/hfilesize
+
+import dateparser
+# * dateparser - BSD 3-Clause License
+#     source: https://github.com/scrapinghub/dateparser
+#     license: https://github.com/scrapinghub/dateparser/blob/master/LICENSE
 
 
-def size():
-    pass
+def time(time_string: str) -> datetime.datetime:
+    """
+    Parse a time string into a datetime object.
+    :param time_string:
+    :return: datetime object
+    """
+    return dateparser.parse(time_string)
+
+
+def timedelta(time_delta_string: str) -> datetime.timedelta:
+    """
+    Parse a time delta string into a timedelta object
+
+        e.g.:
+
+        A string of:
+         "2 weeks, 1 day, 12 hours, 30 minutes and 15 seconds"
+
+        Results in:
+         datetime.timedelta(days=15, seconds=45015)
+
+    :param time_delta_string:
+    :return: timedelta object
+    """
+    time_delta_string = time_delta_string.lower().replace("and", '')
+    return datetime.timedelta(seconds=pytimeparse.parse(time_delta_string))
+
+
+def size(size_string: str) -> int:
+    """
+    Parse a file or bandwidth string unit size to a bytes size.
+
+        e.g.:
+
+        A string of:
+            "10MB"
+
+        Results in:
+            10485760
+
+    :param size_string:
+    :return:
+    """
+    return hfilesize.FileSize(size_string)
+
+

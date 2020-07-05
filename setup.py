@@ -7,7 +7,7 @@ with open("README.md", "r") as fh:
 setup(
     name='siemkit',
     version='0.0.7',
-    packages=['siemkit'] + find_packages(),
+    packages=['siemkit', 'hfilesize'] + find_packages(),
     include_package_data=True,
     url='https://github.com/cybersiem',
     license='Apache 2.0',
