@@ -7,7 +7,7 @@ with open("README.md", "r") as fh:
 setup(
     name='siemkit',
     version='0.0.7',
-    packages=['siemkit', 'hfilesize', 'pytimeparse', 'dateparser'] + find_packages(),
+    packages=['siemkit', 'hfilesize'] + find_packages(),
     include_package_data=True,
     url='https://github.com/cybersiem',
     license='Apache 2.0',
@@ -29,6 +29,18 @@ setup(
         "Topic :: System :: Monitoring",
         "Topic :: System :: Logging",
         "Topic :: Software Development :: Libraries"
+    ],
+    keywords=[
+        'SIEM',
+        'CEF',
+        'LEEF',
+        'SOC',
+        'CYBERSIEM',
+        'KIT'
+    ],
+    install_requires=[
+        'pytimeparse',
+        'dateparser',
     ],
     python_requires='>=3.6'
 )
