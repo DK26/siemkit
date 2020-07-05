@@ -41,7 +41,7 @@ class TimestampInterface(ABC):
         :param tz: Timezone to convert to. Default is None.
         :return:
         """
-        pass
+        raise NotImplementedError("'from_datetime()' method must be implemented.")
 
     @classmethod
     @abstractmethod
@@ -52,7 +52,7 @@ class TimestampInterface(ABC):
         :param tz: Timezone of the the timestamp to let the datetime know its timezone.
         :return:
         """
-        pass
+        raise NotImplementedError("'to_datetime()' method must be implemented.")
 
     @classmethod
     @abstractmethod
@@ -73,7 +73,7 @@ class TimestampInterface(ABC):
         :param kwargs:
         :return:
         """
-        pass
+        raise NotImplementedError("'delta()' method must be implemented.")
 
 
 class EpochTimestamp(TimestampInterface):
