@@ -283,3 +283,13 @@ def utc_to_tz(datetime_: datetime, tz: tzinfo = None) -> datetime:
         tz = default.get("tz")
 
     return datetime_.replace(tzinfo=timezone.utc).astimezone(tz=tz)
+
+
+def current_timestamp(type_: TimeType = None, tz: tzinfo = None) -> int:
+    """
+    Create a current timestamp.
+    :param type_: Timestamp type (default: time.TimeType.EPOCH_MILLIS)
+    :param tz: Optional timezone. For UTC use `datetime.timezone.utc`.
+    :return: Timestamp
+    """
+    return time_type(type_).from_datetime(datetime.now().astimezone(tz=tz))
