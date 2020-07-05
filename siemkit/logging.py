@@ -12,3 +12,30 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
+
+from traceback import extract_tb
+from datetime import datetime
+import sys
+
+
+def format_exception(e):
+    timestamp = datetime.now().isoformat()
+    error_message = f"[{timestamp}] {type(e).__name__}: {e} \n{extract_tb(e)}"
+    return error_message
+
+
+def format_message(msg):
+    timestamp = datetime.now().isoformat()
+    message = f"[{timestamp}] {msg}"
+    return message
+
+
+def print_exception(e):
+    print(format_exception(e), file=sys.stderr)
+
+
+def print_message(msg, file=sys.stdout):
+    print(format_message(msg), file=file)
+
+
+
