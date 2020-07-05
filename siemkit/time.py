@@ -26,11 +26,29 @@ import time
 UTC = timezone.utc
 
 
+def pick_timedelta(timedelta_, *args, **kwargs) -> timedelta:
+    """
+    Picks between given a timedelta object or timedelta arguments such as: days, minutes, etc.
+        If a timedelta object is passed as an argument, the rest of the arguments will be ignored.
+
+    :param timedelta_: timedelta object
+    :param args & kwargs: days=0, seconds=0, microseconds=0, milliseconds=0, minutes=0, hours=0, weeks=0
+    :return: The timedelta object to be passed to the caller.
+    """
+    if isinstance(timedelta_, timedelta):
+        given_timedelta = timedelta_
+    else:
+        given_timedelta = timedelta(*args, **kwargs)
+    return given_timedelta
+
+
 class Timestamp(ABC):
     """
     An interface for implementing a proper Timestamp.
         Once you implement it, make sure you also define it in the `TimeType` enum class.
     """
+
+    PRECISION = 1
 
     @classmethod
     @abstractmethod
@@ -41,7 +59,7 @@ class Timestamp(ABC):
         :param tz: Timezone to convert to. Default is None.
         :return:
         """
-        pass
+        raise NotImplementedError("'from_datetime()' method must be implemented.")
 
     @classmethod
     @abstractmethod
@@ -52,11 +70,10 @@ class Timestamp(ABC):
         :param tz: Timezone of the the timestamp to let the datetime know its timezone.
         :return:
         """
-        pass
+        raise NotImplementedError("'to_datetime()' method must be implemented.")
 
     @classmethod
-    @abstractmethod
-    def delta(cls, *args, **kwargs) -> int:
+    def delta(cls, timedelta_: timedelta = None, *args, **kwargs) -> int:
         """
         A static method to convert time delta arguments into time units of this time type.
 
@@ -69,14 +86,17 @@ class Timestamp(ABC):
             All arguments are passed to the underlying timedelta() object.
                 delta(days=0, seconds=0, microseconds=0, milliseconds=0, minutes=0, hours=0, weeks=0)
 
+        :param timedelta_: A timedelta object. Overrides any other time delta parameters.
         :param args:
         :param kwargs:
         :return:
         """
-        pass
+        return floor(pick_timedelta(timedelta_, *args, **kwargs).total_seconds() * cls.PRECISION)
 
 
 class EpochTimestamp(Timestamp):
+
+    PRECISION = 1
 
     @classmethod
     def from_datetime(cls, datetime_: datetime, tz: tzinfo = None) -> int:
@@ -85,10 +105,6 @@ class EpochTimestamp(Timestamp):
     @classmethod
     def to_datetime(cls, timestamp: int, tz: tzinfo = None) -> datetime:
         return datetime.fromtimestamp(timestamp).replace(tzinfo=tz)
-
-    @classmethod
-    def delta(cls, *args, **kwargs) -> int:
-        return floor(timedelta(*args, **kwargs).total_seconds())
 
 
 class EpochMillisTimestamp(Timestamp):
@@ -102,10 +118,6 @@ class EpochMillisTimestamp(Timestamp):
     @classmethod
     def to_datetime(cls, timestamp: int, tz: tzinfo = None) -> datetime:
         return datetime.fromtimestamp(int(timestamp) / cls.PRECISION).replace(tzinfo=tz)
-
-    @classmethod
-    def delta(cls, *args, **kwargs) -> int:
-        return floor(timedelta(*args, **kwargs).total_seconds() * cls.PRECISION)
 
 
 class LDAPTimestamp(Timestamp):
@@ -140,10 +152,6 @@ class LDAPTimestamp(Timestamp):
 
         return epoch_datetime.replace(tzinfo=tz)
 
-    @classmethod
-    def delta(cls, *args, **kwargs) -> int:
-        return floor(timedelta(*args, **kwargs).total_seconds() * cls.PRECISION)
-
 
 class TimeType(Enum):
 
@@ -161,10 +169,14 @@ default = {
 
 def time_type(time_type_enum: TimeType) -> Timestamp:
     """
-    Return reference to a Timestamp class of a given TimeType enum argument or the default Timestamp.
+    Returns a reference to a Timestamp object of a given TimeType enum argument
+     or the default Timestamp object.
+
     :param time_type_enum:
-    :return: Timestamp Class reference
+    :return: Timestamp reference
     """
+    if isinstance(time_type_enum, Timestamp):
+        return time_type_enum
 
     if time_type_enum is None or not (isclass(time_type_enum.value)
                                       and issubclass(time_type_enum.value, Timestamp)):
@@ -175,9 +187,9 @@ def time_type(time_type_enum: TimeType) -> Timestamp:
     return time_type_class
 
 
-def sleep(*args, **kwargs):
+def sleep(timedelta_: timedelta = None, *args, **kwargs):
     """
-    Sleeps a given time delta parameters.
+    Sleeps a given time delta parameters or a timedelta object period.
 
     e.g.
         sleep(days=3)
@@ -186,11 +198,16 @@ def sleep(*args, **kwargs):
         All arguments are passed to the underlying timedelta() object.
             sleep(days=0, seconds=0, microseconds=0, milliseconds=0, minutes=0, hours=0, weeks=0)
 
+        action_wait_period = timedelta(days=1, hours=12)
+        sleep(action_wait_period)
+    or
+        sleep(timedelta_=action_wait_period)
+
     """
-    time.sleep(timedelta(*args, **kwargs).total_seconds())
+    time.sleep(pick_timedelta(timedelta_, *args, **kwargs).total_seconds())
 
 
-def ago(type_: TimeType = None, *args, **kwargs) -> int:
+def ago(timedelta_: timedelta = None, type_: TimeType = None, *args, **kwargs) -> int:
     """
     Calculates the date & time from now, in time delta parameters.
 
@@ -205,11 +222,12 @@ def ago(type_: TimeType = None, *args, **kwargs) -> int:
 
     :return A 'datetime' object.
     """
-    return time_type(type_).from_datetime(datetime.now() - timedelta(*args, **kwargs))
+
+    return time_type(type_).from_datetime(datetime.now() - pick_timedelta(timedelta_, *args, **kwargs))
 
 
-def delta(type_: TimeType = None, *args, **kwargs) -> int:
-    return time_type(type_).delta(*args, **kwargs)
+def delta(timedelta_: timedelta = None, type_: TimeType = None, *args, **kwargs) -> int:
+    return time_type(type_).delta(timedelta_, *args, **kwargs)
 
 
 def to_timestamp(datetime_: datetime, tz=None, type_: TimeType = None) -> int:

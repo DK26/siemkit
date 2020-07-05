@@ -88,7 +88,7 @@ class InstanceTypeAttributes(IntFlag):
     NAMING_CONTEXT_BEING_REMOVED_FROM_LOCAL_DSA                 = 0x00000020  # 32
 
 
-class CommonQueries(Enum):
+class CommonQueries(str, Enum):
 
     # https://social.technet.microsoft.com/wiki/contents/articles/5392.active-directory-ldap-syntax-filters.aspx
 
@@ -97,12 +97,6 @@ class CommonQueries(Enum):
     ALL_GROUP_OBJECTS                   = '(objectCategory=group)'
     ALL_ORGANIZATIONAL_UNIT_OBJECTS     = '(objectCategory=organizationalUnit)'
     ALL_DOMAIN_OBJECTS                  = '(objectCategory=domain)'
-
-    def __repr__(self):
-        return self.value
-
-    def __str__(self):
-        return self.value
 
 
 def query_sam_account_type(sam_account_type: int) -> str:

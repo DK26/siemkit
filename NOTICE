@@ -1,4 +1,4 @@
-This product includes software developed at CyberSIEM (https://www.cybersiem.com)
+This product includes software developed at CyberSIEM (R) (https://www.cybersiem.com)
 
 This NOTICE file includes contributors credit.
 
@@ -6,6 +6,23 @@ This NOTICE file includes contributors credit.
 Contributors / Authors
 ======================
 - Created by David Krasnitsky @dk26 (https://github.com/DK26)
+
+
+Third-Party Libraries:
+======================
+* hfilesize - MIT License
+    by: simonzack
+    source: https://github.com/simonzack/hfilesize
+    license: https://opensource.org/licenses/MIT
+
+* pytimeparse - MIT License
+    by: wroberts
+    source: https://github.com/wroberts/pytimeparse
+    license: https://github.com/wroberts/pytimeparse/blob/master/LICENSE.rst
+
+* dateparser - BSD 3-Clause License
+    source: https://github.com/scrapinghub/dateparser
+    license: https://github.com/scrapinghub/dateparser/blob/master/LICENSE
 
 
 Apache License 2.0 -- About this NOTICE file:
