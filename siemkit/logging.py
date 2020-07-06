@@ -59,7 +59,7 @@ def print_debug(msg, file=None, debug_mode=None):
         debug_mode = settings['debug_mode']
 
     if debug_mode:
-        print_message(msg, file=file)
+        print_message(f"DEBUG | {msg}", file=file)
 
 
 
