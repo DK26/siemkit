@@ -38,20 +38,28 @@ def format_message(msg):
 
 
 def print_exception(e):
-    print(format_exception(e), file=sys.stderr)
+    file = settings['stderr']
+    print(format_exception(e), file=file)
 
 
-def print_message(msg, file=sys.stdout):
+def print_message(msg, file=None):
+
+    if file is None:
+        file = settings['stdout']
+
     print(format_message(msg), file=file)
 
 
-def print_debug(msg, file=sys.stdout, debug_mode=None):
+def print_debug(msg, file=None, debug_mode=None):
+
+    if file is None:
+        file = settings['stdout']
 
     if debug_mode is None:
         debug_mode = settings['debug_mode']
 
     if debug_mode:
-        print_message(msg, file)
+        print_message(msg, file=file)
 
 
 
