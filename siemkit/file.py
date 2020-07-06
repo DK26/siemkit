@@ -12,6 +12,7 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
+import os
 from datetime import datetime
 
 builtin_open = open
@@ -389,6 +390,12 @@ def open(
         dt = datetime.utcnow()
     else:
         dt = datetime.now()
+
+    if 'w' in mode or 'a' in mode:
+        directory_name = os.path.dirname(file)
+        if directory_name:
+            if not os.path.exists(directory_name):
+                os.makedirs(directory_name)
 
     return builtin_open(
         dt.strftime(file),
