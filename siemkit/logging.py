@@ -17,6 +17,13 @@ from traceback import format_exc
 from datetime import datetime
 import sys
 
+settings = {
+    'stdout': sys.__stdout__,
+    'stderr': sys.__stderr__,
+    'stdin': sys.__stdin__,
+    'debug_mode': False
+}
+
 
 def format_exception(e):
     timestamp = datetime.now().isoformat()
@@ -36,6 +43,15 @@ def print_exception(e):
 
 def print_message(msg, file=sys.stdout):
     print(format_message(msg), file=file)
+
+
+def print_debug(msg, file=sys.stdout, debug_mode=None):
+
+    if debug_mode is None:
+        debug_mode = settings['debug_mode']
+
+    if debug_mode:
+        print_message(msg, file)
 
 
 
