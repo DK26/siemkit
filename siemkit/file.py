@@ -407,3 +407,7 @@ def open(
         closefd=closefd,
         opener=opener,
     )
+
+
+def rotate():
+    pass
