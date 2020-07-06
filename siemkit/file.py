@@ -392,13 +392,15 @@ def open(
         dt = datetime.now()
 
     if 'w' in mode or 'a' in mode:
-        directory_name = os.path.dirname(file)
-        if directory_name:
-            if not os.path.exists(directory_name):
-                os.makedirs(directory_name)
+        directory_path = os.path.dirname(file)
+        if directory_path:
+            if not os.path.exists(directory_path):
+                os.makedirs(directory_path)
+
+        file = dt.strftime(file)
 
     return builtin_open(
-        dt.strftime(file),
+        file,
         mode=mode,
         buffering=buffering,
         encoding=encoding,

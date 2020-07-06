@@ -73,6 +73,38 @@ def generator(amount=-1):
     pass
 
 
+class States:
+
+    def __init__(self, optimized_size=5):
+        self.__init_optimized_size = optimized_size
+        self.__optimized_size = optimized_size
+        self.__states = list((dict() for _ in range(optimized_size)))
+        self.__index = 0
+
+    def store(self, state):
+        if self.__index == self.__optimized_size:
+            self.__states.append(dict())
+            self.__optimized_size += 1
+
+        self.__states[self.__index].clear()
+        self.__states[self.__index].update(state)
+        self.__index += 1
+        return self
+
+    def restore(self):
+        if self.__index - 1 <= 0:  # Doesn't update the index, thus protecting the first state.
+            return self.__states[0]
+
+        result = self.__states[self.__index - 1]
+        self.__index -= 1
+        return result
+
+    def clear(self):
+        self.__optimized_size = self.__init_optimized_size
+        self.__index = 0
+        self.__states = list((dict() for _ in range(self.__optimized_size)))
+        return self
+
 class AbstractEventFormat(dict):
     __aliases = {}
 
@@ -219,7 +251,8 @@ class AbstractEventFormat(dict):
             tcp=None,
             udp=None,
             file=None,
-            size_limit=1024
+            size_limit=1024,
+            optimized_save_levels=5
     ):
 
         """
@@ -297,8 +330,10 @@ class AbstractEventFormat(dict):
         # self.__headers_set = set(headers)
 
         # After all values are set for the first time, use them as default for the `clear()` command.
-        self.__default_state = {}
-        self.__default_state.update(self)
+        self.__states = States(optimized_size=optimized_save_levels)
+        self.__states.store(self)
+        #self.__default_state = {}
+        #self.__default_state.update(self)
 
         self.__raw = raw
         self.__detected_changes = True
@@ -444,13 +479,13 @@ class AbstractEventFormat(dict):
 
     # Set current values as default
     def save(self):
-        self.__default_state.clear()
-        self.__default_state.update(self)
+        self.__states.store(self)
         return self
 
     def restore(self):
+        state = self.__states.restore()
         super().clear()
-        self.update(self.__default_state)
+        self.update(state)
         return self  # Return to default state
 
     # Done: Allow clearing all values, for parsing
@@ -758,8 +793,15 @@ def dev():
             event.destinationAddress = "192.168.0.1"
             event.sourceUserName = "Dave"
             event.message = 'CreateOffense'
-            print(event)
-            print(event.json(indent=4))
+
+            event.deviceCustomNumber1Label = 'Test Iteration'
+            with event:
+                # This creates a new sub-state while keeping previous values.
+                for number in range(10):
+                    event.deviceCustomNumber1 = number
+                    print(event)
+                    print(event.json(indent=4))
+                # ToDo: Solve: However, leaving inner context still sends an extra event by outter context
 
         with event:
             event.src = "192.168.0.1"
