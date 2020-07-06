@@ -72,7 +72,7 @@ def timedelta(time_delta_string: str) -> datetime.timedelta:
     :param time_delta_string:
     :return: timedelta object
     """
-    time_delta_string = time_delta_string.lower().replace("and", '')
+    time_delta_string = time_delta_string.lower().replace("and", '').replace('every', '')
     return datetime.timedelta(seconds=pytimeparse.parse(time_delta_string))
 
 
