@@ -13,14 +13,14 @@
 #   limitations under the License.
 
 
-from traceback import extract_tb
+from traceback import format_exc
 from datetime import datetime
 import sys
 
 
 def format_exception(e):
     timestamp = datetime.now().isoformat()
-    error_message = f"[{timestamp}] {type(e).__name__}: {e} \n{extract_tb(e)}"
+    error_message = f"[{timestamp}] Exception: {type(e).__name__} \n{format_exc()}"
     return error_message
 
 
