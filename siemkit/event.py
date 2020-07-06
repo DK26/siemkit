@@ -795,13 +795,13 @@ def dev():
             event.message = 'CreateOffense'
 
             event.deviceCustomNumber1Label = 'Test Iteration'
-            with event:
-                # This creates a new sub-state while keeping previous values.
-                for number in range(10):
+            # This creates a new sub-state while keeping previous values.
+            for number in range(10):
+                with event:
                     event.deviceCustomNumber1 = number
                     print(event)
                     print(event.json(indent=4))
-                # ToDo: Solve: However, leaving inner context still sends an extra event by outter context
+            # ToDo: Solve: However, leaving inner context still sends an extra event by outter context
 
         with event:
             event.src = "192.168.0.1"
