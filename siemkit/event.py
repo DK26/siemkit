@@ -803,6 +803,7 @@ def dev():
                     print(event.json(indent=4))
             # ToDo: Solve: However, leaving inner context still sends an extra event by outter context
             # ToDo: __enter__ -> flag to serialize, __exit__ check if flagged. If so, serialize, then turn off flag
+            # ToDo: But.. what If we do want that extra event?
 
         with event:
             event.src = "192.168.0.1"
