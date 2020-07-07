@@ -23,6 +23,7 @@ from math import floor
 from time import time
 from collections.abc import Iterable
 from collections import deque
+from enum import Enum
 
 
 # import dateparser  # This can't be good for performance. Need performance? know your formats!
@@ -36,6 +37,18 @@ from collections import deque
 
 # ToDo: Manual Time Format with Declared fields as time -> Directed for performance
 # ToDo: Automatic Time Format detection -> Comfortable but requires an external library + performance penalty.
+
+
+class CefSeverity(str, Enum):
+
+    UNKNOWN = 'Unknown',
+    LOW = 'Low',
+    MEDIUM = 'Medium',
+    HIGH = 'High',
+    VERY_HIGH = 'Very-High'
+
+    def __str__(self):
+        return self.value
 
 
 def filter_fields(events, allowed_fields):
@@ -105,6 +118,7 @@ class States:
         self.__states = list((dict() for _ in range(self.__optimized_size)))
         return self
 
+
 class AbstractEventFormat(dict):
     __aliases = {}
 
@@ -142,12 +156,12 @@ class AbstractEventFormat(dict):
             elif type(value) is str:
                 value = bytes(value, 'utf-8')"""
 
-            if not type(value) is str:
+            if not isinstance(value, str):
                 return bytes(str(value), 'utf-8')
             else:
                 value = bytes(value, 'utf-8')
 
-            # ToDo: Time it vs str.translate()
+            # Cancelled: Time it vs str.translate()
             # Although fast, this is not efficient. Looking for a better solution.
 
             value = value.replace(b'\\', rb'\\')  # According to documentations, this is the right behaviour.
@@ -201,7 +215,7 @@ class AbstractEventFormat(dict):
                 if value is str:
                     value = value.strip()
 
-                if value and (key not in headers):
+                if (value or value == 0) and (key not in headers):
                     key = key.strip()
                     value = escape(value, is_header=False)
                     yield b'%s=%s' % (bytes(key, 'utf-8'), value)
@@ -342,6 +356,8 @@ class AbstractEventFormat(dict):
         self.__to_timestamp = to_timestamp
         self.__from_timestamp = from_timestamp
 
+        self.__commit_context = False
+
         if output is not None and not any(
                 isinstance(output, type_) for type_
                 in (list, tuple, set, deque)
@@ -392,6 +408,7 @@ class AbstractEventFormat(dict):
             payload = bytes(self) + b'\r\n'
 
             for output in self.__output:
+                output.write(payload)
                 size += output.write(payload)
 
         return size
@@ -460,16 +477,22 @@ class AbstractEventFormat(dict):
         self.__delete(key)
 
     def __enter__(self):
+        self.__commit_context = True
+        self.save()
         return self
 
     def __exit__(self, type_, value, traceback):
-
         if traceback:
             raise
 
         # Done: Move this logic to write(self, object/collection of objects or self.__output)
-        if self.__output:
-            self.write()
+        if self.__commit_context:
+            if self.__output:
+                self.write()
+
+            # We make sure that only the most inner & recent context is committed
+            # to allow predicted behaviour
+            self.__commit_context = False
 
         # ToDo: If a parse() method was activated, use super.clear() instead?
         # ToDo: Or use a different writing style for parsing:
@@ -540,8 +563,9 @@ class Cef(AbstractEventFormat):
             'deviceProduct': 'SIEM Kit',
             'deviceVersion': '0',
             'deviceEventClassId': 100,
-            'name': 'https://github.com/DK26/cef-prototype',  # https://github.com/cybersiem/community
-            'deviceSeverity': 'Unknown'
+            # 'name': 'https://github.com/DK26/cef-prototype',  # https://github.com/cybersiem/community
+            'name': 'https://github.com/cybersiem/community',
+            'deviceSeverity': CefSeverity.UNKNOWN
         }
 
         cef_key_declaration.update(cef_json.keys())
@@ -779,7 +803,7 @@ def test():
     print(bytes(event))
 
 
-def dev():
+def dev_1():
     from telnetlib import Telnet
 
     with Telnet('172.16.106.3', 9514) as session:  # What if a session is loosing connection
@@ -872,9 +896,41 @@ def dev_2():
             # session.write(payload + b'\r\n')
 
 
+def dev_3():
+
+    class Printer:
+        @classmethod
+        def write(cls, bytes_):
+            print(str(bytes_, 'utf-8').rstrip())
+            return len(bytes_)
+
+    printer = Printer()
+
+    event = Cef(output=printer)
+
+    event.name = "DK26 test"
+    #event.save()
+
+    first_state = event
+    print(f"First: {first_state}")
+
+    with event:
+        event.deviceVendor = 'test'
+        event.deviceProduct = 'another'
+        event.deviceCustomNumber1Label = "Loop Iteration"
+
+        for i in range(10):
+            with event:
+                event.deviceCustomNumber1 = i
+
+    final_state = event
+    print(f"Final: {final_state}")
+    print(f"Restored Succesfully: {final_state == first_state}")
+
+
 if __name__ == "__main__":
     # test()
-    dev_2()
+    dev_3()
 
     # Test
 
