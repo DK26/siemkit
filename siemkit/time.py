@@ -120,13 +120,13 @@ class EpochMillisTimestamp(Timestamp):
         return datetime.fromtimestamp(int(timestamp) / cls.PRECISION).replace(tzinfo=tz)
 
 
-class LDAPTimestamp(Timestamp):
+class FiletimeTimestamp(Timestamp):
     """
     Converts a Microsoft Win32 FILETIME timestamp (aka LDAP / Active Directory timestamp)
      into & from a datetime object.
     """
 
-    LDAP_START_TIME = datetime(1601, 1, 1)
+    FILETIME_START_TIME = datetime(1601, 1, 1)
 
     EPOCH_START_TIME = 116_444_736_000_000_000
 
@@ -144,7 +144,7 @@ class LDAPTimestamp(Timestamp):
     @classmethod
     def to_datetime(cls, timestamp: int, tz: tzinfo = None) -> datetime:
 
-        epoch_datetime = cls.LDAP_START_TIME + timedelta(
+        epoch_datetime = cls.FILETIME_START_TIME + timedelta(
             seconds=(timestamp / cls.PRECISION)
         )
 
@@ -157,7 +157,8 @@ class TimeType(Enum):
 
     EPOCH = EpochTimestamp
     EPOCH_MILLIS = EpochMillisTimestamp
-    LDAP = LDAPTimestamp
+    FILETIME = FiletimeTimestamp
+    LDAP = FiletimeTimestamp
 
 
 default = {
@@ -238,19 +239,28 @@ def from_timestamp(timestamp: int, tz=None, type_: TimeType = None) -> datetime:
     return time_type(type_).to_datetime(timestamp, tz)
 
 
-def to_format(datetime_: datetime, format_: str = None) -> str:
+def to_format(datetime_: datetime = None, format_: str = None, tz: tzinfo = None) -> str:
     """
     Convert a datetime object to a default or given time format.
      A default time format can be assigned globally to `siemkit.time.default['format']`.
 
     :param datetime_:
     :param format_:
+    :param tz:
     :return:
     """
+    if datetime_ is None:
+        datetime_ = datetime.now()
+
     if not format_:
         format_ = default.get("format", "%b %d %Y %H:%M:%S")
 
-    return datetime_.strftime(format_)
+    if not tz:
+        tz = default.get("tz")
+
+    return (datetime_
+            .astimezone(tz=tz)
+            .strftime(format_))
 
 
 def from_format(date_string: str, format_: str = None) -> datetime:

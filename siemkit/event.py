@@ -261,7 +261,7 @@ class AbstractEventFormat(dict):
             to_timestamp=None,
             from_timestamp=None,
             allow_empty_keys=False,
-            output=None,
+            outputs=None,
             tcp=None,
             udp=None,
             file=None,
@@ -358,13 +358,18 @@ class AbstractEventFormat(dict):
 
         self.__commit_context = False
 
-        if output is not None and not any(
-                isinstance(output, type_) for type_
+        self.__output = None
+        self.output(outputs)
+
+    def output(self, outputs):
+
+        if outputs is not None and not any(
+                isinstance(outputs, type_) for type_
                 in (list, tuple, set, deque)
         ):
-            self.__output = (output,)
+            self.__output = (outputs,)
         else:
-            self.__output = output
+            self.__output = outputs
 
     def __build(self):
         return bytes(self.__format_version + self.__serializer(self.__headers_order, self))
@@ -408,7 +413,6 @@ class AbstractEventFormat(dict):
             payload = bytes(self) + b'\r\n'
 
             for output in self.__output:
-                output.write(payload)
                 size += output.write(payload)
 
         return size
@@ -550,7 +554,7 @@ class Cef(AbstractEventFormat):
             to_timestamp=None,
             from_timestamp=None,
             allow_empty_keys=False,
-            output=None,
+            outputs=None,
             tcp=None,
             udp=None,
             file=None
@@ -731,7 +735,7 @@ class Cef(AbstractEventFormat):
             to_timestamp=to_timestamp,
             from_timestamp=from_timestamp,
             allow_empty_keys=False,
-            output=output,  # DIY
+            outputs=outputs,  # DIY
             tcp=tcp,  # Batteries included
             udp=udp,  # Batteries included
             file=file  # Batteries included
@@ -809,7 +813,7 @@ def dev_1():
     with Telnet('172.16.106.3', 9514) as session:  # What if a session is loosing connection
         # for any reason? Add retries?
 
-        event = Cef(output=session)
+        event = Cef(outputs=session)
 
         with event:
             # event.name = "Development"
@@ -825,9 +829,9 @@ def dev_1():
                     event.deviceCustomNumber1 = number
                     print(event)
                     print(event.json(indent=4))
-            # ToDo: Solve: However, leaving inner context still sends an extra event by outter context
-            # ToDo: __enter__ -> flag to serialize, __exit__ check if flagged. If so, serialize, then turn off flag
-            # ToDo: But.. what If we do want that extra event? Then use a new inner context manager.
+            # Done: Solve: However, leaving inner context still sends an extra event by outter context
+            # Done: __enter__ -> flag to serialize, __exit__ check if flagged. If so, serialize, then turn off flag
+            # Done: But.. what If we do want that extra event? Then use a new inner context manager.
 
         with event:
             event.src = "192.168.0.1"
@@ -860,7 +864,7 @@ def dev_2():
     print(f"{ip}:{port}")
 
     with Telnet(ip, int(port)) as session:
-        event = Cef(output=session)
+        event = Cef(outputs=session)
 
         with event:
             # event.name = "Development"
@@ -906,7 +910,8 @@ def dev_3():
 
     printer = Printer()
 
-    event = Cef(output=printer)
+    event = Cef()
+    event.output(outputs=printer)
 
     event.name = "DK26 test"
     #event.save()
@@ -923,9 +928,14 @@ def dev_3():
             with event:
                 event.deviceCustomNumber1 = i
 
+    with event:
+        event.deviceVendor = 'someone-else'
+        event.deviceProduct = 'something-else'
+        # Notice we do not need to zero the 'deviceCustomString1Label'!
+
     final_state = event
     print(f"Final: {final_state}")
-    print(f"Restored Succesfully: {final_state == first_state}")
+    print(f"Restored Successfully: {final_state == first_state}")
 
 
 if __name__ == "__main__":

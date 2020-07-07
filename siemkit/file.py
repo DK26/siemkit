@@ -384,6 +384,7 @@ def open(
                          with a current time.
     """
 
+    # ToDo: Replace with time.to_format() -> add tz
     if isinstance(datetime_, datetime):
         dt = datetime_
     elif utc:

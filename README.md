@@ -1,8 +1,10 @@
 ## CyberSIEM Community Kit
 
-* The project is gaining rapid progress but is far from ready.. (coming soon!)
+* An open-source "Swiss Army Knife" for anything SIEM related!
 
-    - **WARNING!** _This is still experimental and we do not recommended it for production use. Do note that 
+* While this project is gaining rapid progress, it is far from ready..
+
+    - **WARNING!** _This toolkit is still experimental and we do not recommended it for production use. Do note that 
     at this stage we are not yet releasing stable versions as the API changes on daily basis!_
 
 ## Installation
