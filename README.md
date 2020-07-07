@@ -1,6 +1,11 @@
 ## CyberSIEM Community Kit
 
-* The project gains rapid progress.. coming soon!
+* An open-source "Swiss Army Knife" for anything SIEM related!
+
+* While this project is gaining rapid progress, it is far from ready..
+
+    - **WARNING!** _This toolkit is still experimental and we do not recommended it for production use. Do note that 
+    at this stage we are not yet releasing stable versions as the API changes on daily basis!_
 
 ## Installation
 
@@ -29,5 +34,9 @@ GitHub:
 - `siemkit.ldap`
 - `siemkit.parse`
 - `siemkit.time`
+- `siemkit.data`
+- `siemkit.logging`
+- `siemkit.receive`
+- `siemkit.send`
 
 _Work in progress . . ._

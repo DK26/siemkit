@@ -98,6 +98,9 @@ class CommonQueries(str, Enum):
     ALL_ORGANIZATIONAL_UNIT_OBJECTS     = '(objectCategory=organizationalUnit)'
     ALL_DOMAIN_OBJECTS                  = '(objectCategory=domain)'
 
+    def __str__(self):
+        return self.value
+
 
 def query_sam_account_type(sam_account_type: int) -> str:
     return f'(sAMAccountType={sam_account_type})'

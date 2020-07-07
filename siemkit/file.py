@@ -12,6 +12,7 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
+import os
 from datetime import datetime
 
 builtin_open = open
@@ -383,6 +384,7 @@ def open(
                          with a current time.
     """
 
+    # ToDo: Replace with time.to_format() -> add tz
     if isinstance(datetime_, datetime):
         dt = datetime_
     elif utc:
@@ -390,8 +392,16 @@ def open(
     else:
         dt = datetime.now()
 
+    if 'w' in mode or 'a' in mode:
+        directory_path = os.path.dirname(file)
+        if directory_path:
+            if not os.path.exists(directory_path):
+                os.makedirs(directory_path)
+
+        file = dt.strftime(file)
+
     return builtin_open(
-        dt.strftime(file),
+        file,
         mode=mode,
         buffering=buffering,
         encoding=encoding,
@@ -400,3 +410,7 @@ def open(
         closefd=closefd,
         opener=opener,
     )
+
+
+def rotate():
+    pass

@@ -23,6 +23,7 @@ from math import floor
 from time import time
 from collections.abc import Iterable
 from collections import deque
+from enum import Enum
 
 
 # import dateparser  # This can't be good for performance. Need performance? know your formats!
@@ -36,6 +37,18 @@ from collections import deque
 
 # ToDo: Manual Time Format with Declared fields as time -> Directed for performance
 # ToDo: Automatic Time Format detection -> Comfortable but requires an external library + performance penalty.
+
+
+class CefSeverity(str, Enum):
+
+    UNKNOWN = 'Unknown',
+    LOW = 'Low',
+    MEDIUM = 'Medium',
+    HIGH = 'High',
+    VERY_HIGH = 'Very-High'
+
+    def __str__(self):
+        return self.value
 
 
 def filter_fields(events, allowed_fields):
@@ -71,6 +84,39 @@ def entities(events, aggregation_base):
 def generator(amount=-1):
     # ToDo: yield random event data for simulations
     pass
+
+
+class States:
+
+    def __init__(self, optimized_size=5):
+        self.__init_optimized_size = optimized_size
+        self.__optimized_size = optimized_size
+        self.__states = list((dict() for _ in range(optimized_size)))
+        self.__index = 0
+
+    def store(self, state):
+        if self.__index == self.__optimized_size:
+            self.__states.append(dict())
+            self.__optimized_size += 1
+
+        self.__states[self.__index].clear()
+        self.__states[self.__index].update(state)
+        self.__index += 1
+        return self
+
+    def restore(self):
+        if self.__index - 1 <= 0:  # Doesn't update the index, thus protecting the first state.
+            return self.__states[0]
+
+        result = self.__states[self.__index - 1]
+        self.__index -= 1
+        return result
+
+    def clear(self):
+        self.__optimized_size = self.__init_optimized_size
+        self.__index = 0
+        self.__states = list((dict() for _ in range(self.__optimized_size)))
+        return self
 
 
 class AbstractEventFormat(dict):
@@ -110,12 +156,12 @@ class AbstractEventFormat(dict):
             elif type(value) is str:
                 value = bytes(value, 'utf-8')"""
 
-            if not type(value) is str:
+            if not isinstance(value, str):
                 return bytes(str(value), 'utf-8')
             else:
                 value = bytes(value, 'utf-8')
 
-            # ToDo: Time it vs str.translate()
+            # Cancelled: Time it vs str.translate()
             # Although fast, this is not efficient. Looking for a better solution.
 
             value = value.replace(b'\\', rb'\\')  # According to documentations, this is the right behaviour.
@@ -169,7 +215,7 @@ class AbstractEventFormat(dict):
                 if value is str:
                     value = value.strip()
 
-                if value and (key not in headers):
+                if (value or value == 0) and (key not in headers):
                     key = key.strip()
                     value = escape(value, is_header=False)
                     yield b'%s=%s' % (bytes(key, 'utf-8'), value)
@@ -194,6 +240,8 @@ class AbstractEventFormat(dict):
     def from_timestamp():
         pass
 
+    # ToDo: Allow later assignment of 'output'
+    # ToDo: save() & restore() using stack.
     def __init__(
             self,
             format_,
@@ -213,11 +261,12 @@ class AbstractEventFormat(dict):
             to_timestamp=None,
             from_timestamp=None,
             allow_empty_keys=False,
-            output=None,
+            outputs=None,
             tcp=None,
             udp=None,
             file=None,
-            size_limit=1024
+            size_limit=1024,
+            optimized_save_levels=5
     ):
 
         """
@@ -295,8 +344,10 @@ class AbstractEventFormat(dict):
         # self.__headers_set = set(headers)
 
         # After all values are set for the first time, use them as default for the `clear()` command.
-        self.__default_state = {}
-        self.__default_state.update(self)
+        self.__states = States(optimized_size=optimized_save_levels)
+        self.__states.store(self)
+        #self.__default_state = {}
+        #self.__default_state.update(self)
 
         self.__raw = raw
         self.__detected_changes = True
@@ -305,13 +356,20 @@ class AbstractEventFormat(dict):
         self.__to_timestamp = to_timestamp
         self.__from_timestamp = from_timestamp
 
-        if output is not None and not any(
-                isinstance(output, type_) for type_
+        self.__commit_context = False
+
+        self.__output = None
+        self.output(outputs)
+
+    def output(self, outputs):
+
+        if outputs is not None and not any(
+                isinstance(outputs, type_) for type_
                 in (list, tuple, set, deque)
         ):
-            self.__output = (output,)
+            self.__output = (outputs,)
         else:
-            self.__output = output
+            self.__output = outputs
 
     def __build(self):
         return bytes(self.__format_version + self.__serializer(self.__headers_order, self))
@@ -423,16 +481,22 @@ class AbstractEventFormat(dict):
         self.__delete(key)
 
     def __enter__(self):
+        self.__commit_context = True
+        self.save()
         return self
 
     def __exit__(self, type_, value, traceback):
-
         if traceback:
             raise
 
         # Done: Move this logic to write(self, object/collection of objects or self.__output)
-        if self.__output:
-            self.write()
+        if self.__commit_context:
+            if self.__output:
+                self.write()
+
+            # We make sure that only the most inner & recent context is committed
+            # to allow predicted behaviour
+            self.__commit_context = False
 
         # ToDo: If a parse() method was activated, use super.clear() instead?
         # ToDo: Or use a different writing style for parsing:
@@ -442,13 +506,13 @@ class AbstractEventFormat(dict):
 
     # Set current values as default
     def save(self):
-        self.__default_state.clear()
-        self.__default_state.update(self)
+        self.__states.store(self)
         return self
 
     def restore(self):
+        state = self.__states.restore()
         super().clear()
-        self.update(self.__default_state)
+        self.update(state)
         return self  # Return to default state
 
     # Done: Allow clearing all values, for parsing
@@ -490,7 +554,7 @@ class Cef(AbstractEventFormat):
             to_timestamp=None,
             from_timestamp=None,
             allow_empty_keys=False,
-            output=None,
+            outputs=None,
             tcp=None,
             udp=None,
             file=None
@@ -503,8 +567,9 @@ class Cef(AbstractEventFormat):
             'deviceProduct': 'SIEM Kit',
             'deviceVersion': '0',
             'deviceEventClassId': 100,
-            'name': 'https://github.com/DK26/cef-prototype',  # https://github.com/cybersiem/community
-            'deviceSeverity': 'Unknown'
+            # 'name': 'https://github.com/DK26/cef-prototype',  # https://github.com/cybersiem/community
+            'name': 'https://github.com/cybersiem/community',
+            'deviceSeverity': CefSeverity.UNKNOWN
         }
 
         cef_key_declaration.update(cef_json.keys())
@@ -670,7 +735,7 @@ class Cef(AbstractEventFormat):
             to_timestamp=to_timestamp,
             from_timestamp=from_timestamp,
             allow_empty_keys=False,
-            output=output,  # DIY
+            outputs=outputs,  # DIY
             tcp=tcp,  # Batteries included
             udp=udp,  # Batteries included
             file=file  # Batteries included
@@ -742,13 +807,13 @@ def test():
     print(bytes(event))
 
 
-def dev():
+def dev_1():
     from telnetlib import Telnet
 
     with Telnet('172.16.106.3', 9514) as session:  # What if a session is loosing connection
         # for any reason? Add retries?
 
-        event = Cef(output=session)
+        event = Cef(outputs=session)
 
         with event:
             # event.name = "Development"
@@ -756,8 +821,17 @@ def dev():
             event.destinationAddress = "192.168.0.1"
             event.sourceUserName = "Dave"
             event.message = 'CreateOffense'
-            print(event)
-            print(event.json(indent=4))
+
+            event.deviceCustomNumber1Label = 'Test Iteration'
+            # This creates a new sub-state while keeping previous values.
+            for number in range(10):
+                with event:
+                    event.deviceCustomNumber1 = number
+                    print(event)
+                    print(event.json(indent=4))
+            # Done: Solve: However, leaving inner context still sends an extra event by outter context
+            # Done: __enter__ -> flag to serialize, __exit__ check if flagged. If so, serialize, then turn off flag
+            # Done: But.. what If we do want that extra event? Then use a new inner context manager.
 
         with event:
             event.src = "192.168.0.1"
@@ -790,7 +864,7 @@ def dev_2():
     print(f"{ip}:{port}")
 
     with Telnet(ip, int(port)) as session:
-        event = Cef(output=session)
+        event = Cef(outputs=session)
 
         with event:
             # event.name = "Development"
@@ -826,9 +900,47 @@ def dev_2():
             # session.write(payload + b'\r\n')
 
 
+def dev_3():
+
+    class Printer:
+        @classmethod
+        def write(cls, bytes_):
+            print(str(bytes_, 'utf-8').rstrip())
+            return len(bytes_)
+
+    printer = Printer()
+
+    event = Cef()
+    event.output(outputs=printer)
+
+    event.name = "DK26 test"
+    #event.save()
+
+    first_state = event
+    print(f"First: {first_state}")
+
+    with event:
+        event.deviceVendor = 'test'
+        event.deviceProduct = 'another'
+        event.deviceCustomNumber1Label = "Loop Iteration"
+
+        for i in range(10):
+            with event:
+                event.deviceCustomNumber1 = i
+
+    with event:
+        event.deviceVendor = 'someone-else'
+        event.deviceProduct = 'something-else'
+        # Notice we do not need to zero the 'deviceCustomString1Label'!
+
+    final_state = event
+    print(f"Final: {final_state}")
+    print(f"Restored Successfully: {final_state == first_state}")
+
+
 if __name__ == "__main__":
     # test()
-    dev_2()
+    dev_3()
 
     # Test
 
