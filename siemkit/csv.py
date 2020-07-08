@@ -195,13 +195,17 @@ class CSVConf:
 
                         # Check default value for field
                         elif k in self._default_values.keys():
-                            if str(dict_row[k]).strip() == '':
-                                if isinstance(self._default_values[k], str):
-                                    dict_row[k] = self._default_values[k]
-                                    update_[0] = True
-                                elif callable(self._default_values[k]):
-                                    dict_row[k] = self._default_values[k]()
-                                    update_[0] = True
+
+                            default_value, default_condition = self._default_values[k]
+
+                            if default_condition(dict_row[k]):
+
+                                if callable(default_value):
+                                    dict_row[k] = default_value()
+                                else:
+                                    dict_row[k] = str(default_value)
+
+                                update_[0] = True
 
                     self._indexed_field_map[dict_row[self._indexed_field]] = dict_row
 
