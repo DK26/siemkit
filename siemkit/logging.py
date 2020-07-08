@@ -50,7 +50,7 @@ def format_message(msg):
 
 def print_exception(e):
     file = settings['stderr']
-    print(format_exception(e), file=file)
+    builtin_print(format_exception(e), file=file)
 
 
 def print_message(msg, file=None):
@@ -58,7 +58,7 @@ def print_message(msg, file=None):
     if file is None:
         file = settings['stdout']
 
-    print(format_message(msg), file=file)
+    builtin_print(format_message(msg), file=file)
 
 
 def print_debug(msg, file=None, debug_mode=None):
@@ -92,4 +92,3 @@ def dump_debug(msg, payload, file=None, dump_file_name=None, debug_mode=None):
             print_message(f"DEBUG | DUMP | {msg}: '{dump_file_name}'", file=file)
             with open(dump_file_name, 'w', encoding='utf-8', errors='ignore') as fs:
                 fs.write(format_message(f"DEBUG | DUMP | {msg}: \n{payload}"))
-
