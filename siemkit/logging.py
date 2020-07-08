@@ -28,6 +28,13 @@ settings = {
     'dump_file_name': 'dump_%d%m%Y-%H%M%S.log'
 }
 
+builtin_print = print
+
+
+def print(*args, **kwargs):
+    timestamp = datetime.now().isoformat()
+    builtin_print(f'[{timestamp}] ', *args, **kwargs)
+
 
 def format_exception(e):
     timestamp = datetime.now().isoformat()
