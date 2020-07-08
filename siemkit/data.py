@@ -37,10 +37,10 @@ class IDTracker:
 
     def exist(self, key, item):
         result = self.__data.get(key)
-        return result and item in result
+        return result is not None and item in result
 
     def remember(self, key, value):
-        if key in self.__data:
+        if key in self.__data.keys():
             self.__data[key].add(value)
         else:
             self.__data[key] = {value}
@@ -49,14 +49,69 @@ class IDTracker:
     def save(self):
         if self.__update:
             with open(self.__file_name, 'wb') as fs:
+
                 pickle.dump(self.__data, fs)
             self.__update = False
 
     def load(self):
         with open(self.__file_name, 'rb') as fs:
             self.__data = pickle.load(fs)
+
         self.__update = False
 
     def __contains__(self, item):
         key, value = item
         return self.exist(key, value)
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        if exc_tb:
+            raise
+
+        self.save()
+
+    def __str__(self):
+        return str(self.__data)
+
+
+def test_id_tracker():
+
+    import os
+
+    user_id = 'User2'
+
+    fake_data1 = {
+        'stuff': [
+            {'id': 123},
+            {'id': 564},
+            {'id': 111}
+        ]
+    }
+    fake_data2 = {
+        'stuff': [
+            {'id': 121},
+            {'id': 564},
+            {'id': 111}
+        ]
+    }
+
+    tracker_file = 'test.id.tracker'
+    print(f"Tracker Exists?: {os.path.exists(tracker_file)}")
+
+    data_tracker = IDTracker(tracker_file)
+
+    for stuff in fake_data2['stuff']:
+        if (user_id, stuff['id']) not in data_tracker:
+            print(f"New stuff! {user_id}:{stuff['id']}")
+            data_tracker.remember(user_id, stuff['id'])
+        else:
+            print(f"Stuff already there... {user_id}:{stuff['id']}")
+
+    data_tracker.save()
+
+    print(data_tracker)
+
+    os.remove(tracker_file)
+
+
+if __name__ == '__main__':
+    test_id_tracker()

@@ -26,7 +26,8 @@ class CSVConf:
             encoding='utf-8',
             errors='ignore',
             store_secret=None,
-            get_secret=None
+            get_secret=None,
+            default_values=None
     ):
         """
 
@@ -51,6 +52,8 @@ class CSVConf:
                     username - A key under the service
                 Returns:
                     An exposed secret value as a UTF-8 string.
+
+        :param default_values: A dictionary of default values in case if empty values.
         """
 
         if indexed_field in secret_fields:
@@ -64,6 +67,7 @@ class CSVConf:
         self._errors = errors
         self._store_secret = store_secret
         self._get_secret = get_secret
+        self._default_values = default_values
 
         self._entries = None
         self._indexed_field_map = {}
@@ -92,6 +96,12 @@ class CSVConf:
         :return: Entry dictionary
         """
         return self._indexed_field_map[index]
+
+    def set_entry(self, index, dict_values):
+        self._indexed_field_map[index] = dict_values
+
+    def update_entry(self, index, dict_values):
+        self._indexed_field_map[index].update(dict_values)
 
     def exposed_entries(self):
         """
@@ -170,10 +180,27 @@ class CSVConf:
                     dict_row['_line'] = i + 1
 
                     for k in dict_row.keys():
+
+                        # Check secret field
                         if k in self._secret_fields:
                             if str(dict_row[k]).lower().strip() != 'stored':
                                 if callable(self._store_secret):
                                     self.store_secret(dict_row, k)
+
+                                    # Mark for update.
+                                    # The list approach is a hack to manage reference,
+                                    #  as the generator is unable to reach the outer 'update' variable,
+                                    #  not even with `global update`.
+                                    update_[0] = True
+
+                        # Check default value for field
+                        elif k in self._default_values.keys():
+                            if str(dict_row[k]).strip() == '':
+                                if isinstance(self._default_values[k], str):
+                                    dict_row[k] = self._default_values[k]
+                                    update_[0] = True
+                                elif callable(self._default_values[k]):
+                                    dict_row[k] = self._default_values[k]()
                                     update_[0] = True
 
                     self._indexed_field_map[dict_row[self._indexed_field]] = dict_row
@@ -183,6 +210,24 @@ class CSVConf:
         self._entries = tuple(load_entries(update))
 
         if update[0]:
+            self.save()
+
+        return self
+
+    def apply_default_values(self):
+
+        update = False
+
+        for entry in self._indexed_field_map.values():
+            for default_k, default_v in self._default_values.items():
+                if entry[default_k].strip() == '':
+                    update = True
+                    if isinstance(default_v, str):
+                        entry[default_k] = default_v
+                    elif callable(default_v):
+                        entry[default_k] = default_v()
+
+        if update:
             self.save()
 
         return self
@@ -208,7 +253,7 @@ def demo():
         indexed_field='username',
         secret_fields=('api-key', 'secret'),
         store_secret=store_secret,
-        get_secret=get_secret
+        get_secret=get_secret,
     )
     print(clients_csv.get_entry('nice'))  # Extracted from indexed field. In this case, 'username'
 
