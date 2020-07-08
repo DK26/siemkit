@@ -88,7 +88,6 @@ def dump_debug(msg, payload, file=None, dump_file_name=None, debug_mode=None):
             dump_file_name = settings['dump_file_name']
 
         dump_file_name = to_format(format_=dump_file_name)
-        with file:
-            print_message(f"DEBUG | DUMP | {msg}: '{dump_file_name}'", file=file)
-            with open(dump_file_name, 'w', encoding='utf-8', errors='ignore') as fs:
-                fs.write(format_message(f"DEBUG | DUMP | {msg}: \n{payload}"))
+        print_message(f"DEBUG | DUMP | {msg}: '{dump_file_name}'", file=file)
+        with open(dump_file_name, 'w', encoding='utf-8', errors='ignore') as fs:
+            fs.write(format_message(f"DEBUG | DUMP | {msg}: \n{payload}"))
