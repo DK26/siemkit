@@ -46,9 +46,10 @@ def word():
     pass
 
 
-def ip(amount=1):
-    return choice(tuple(compose_ip(amount)))
-
+#def ip(amount=1):
+#    return choice(tuple(compose_ip(amount)))
+def ip():
+    return next(compose_ip())
 
 #def email():
 #    return choice((,))
