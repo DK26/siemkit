@@ -4,7 +4,7 @@
 
 * While this project is gaining rapid progress, it is far from ready..
 
-    - **WARNING!** _This toolkit is still experimental and we do not recommended it for production use. Do note that 
+    - **WARNING!** _This toolkit is still experimental and we do not recommended it for use in production. Do note that 
     at this stage we are not yet releasing stable versions as the API changes on daily basis!_
 
 ## Installation

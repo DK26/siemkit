@@ -28,6 +28,13 @@ settings = {
     'dump_file_name': 'dump_%d%m%Y-%H%M%S.log'
 }
 
+builtin_print = print
+
+
+def print(*args, **kwargs):
+    timestamp = datetime.now().isoformat()
+    builtin_print(f'[{timestamp}] ', *args, **kwargs)
+
 
 def format_exception(e):
     timestamp = datetime.now().isoformat()
@@ -43,7 +50,7 @@ def format_message(msg):
 
 def print_exception(e):
     file = settings['stderr']
-    print(format_exception(e), file=file)
+    builtin_print(format_exception(e), file=file)
 
 
 def print_message(msg, file=None):
@@ -51,7 +58,7 @@ def print_message(msg, file=None):
     if file is None:
         file = settings['stdout']
 
-    print(format_message(msg), file=file)
+    builtin_print(format_message(msg), file=file)
 
 
 def print_debug(msg, file=None, debug_mode=None):
@@ -81,8 +88,6 @@ def dump_debug(msg, payload, file=None, dump_file_name=None, debug_mode=None):
             dump_file_name = settings['dump_file_name']
 
         dump_file_name = to_format(format_=dump_file_name)
-        with file:
-            print_message(f"DEBUG | DUMP | {msg}: '{dump_file_name}'", file=file)
-            with open(dump_file_name, 'w', encoding='utf-8', errors='ignore') as fs:
-                fs.write(format_message(f"DUMP: \n{payload}\n"))
-
+        print_message(f"DEBUG | DUMP | {msg}: '{dump_file_name}'", file=file)
+        with open(dump_file_name, 'w', encoding='utf-8', errors='ignore') as fs:
+            fs.write(format_message(f"DEBUG | DUMP | {msg}: \n{payload}"))
