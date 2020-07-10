@@ -13,7 +13,11 @@
 #   limitations under the License.
 
 from random import randint
+from random import getrandbits
 from random import choice
+from .const import TOP_LEVEL_DOMAIN
+from .const import DOMAINS
+from .const import NAMES
 
 
 def byte():
@@ -25,31 +29,69 @@ def compose_ip(amount=1):
         yield f"{byte()}.{byte()}.{byte()}.{byte()}"
 
 
-def compose_domain():
-    pass
+def compose_domain(amount=1):
+    for _ in range(amount):
+        yield choice(DOMAINS)
 
 
-def compose_url():
-    pass
+def compose_url(amount=1):
+
+    PROTOCOLS = (
+        'http',
+        'https'
+    )
+
+    for _ in range(amount):
+        yield (f"{choice(PROTOCOLS)}://{choice(DOMAINS)}/"
+               f"{choice(NAMES).lower()}/{randint(0, 1000)}/"
+               f"{choice(NAMES).lower()}?{choice(NAMES).lower()}={randint(0, 1000)}"
+               f"&{choice(NAMES).lower()}={randint(0, 1000)}")
 
 
-def compose_email(words):
-    pass
+def compose_email(amount=1):
+    for _ in range(amount):
+        yield f"{choice(NAMES).lower()}{randint(10, 80)}@{choice(DOMAINS)}"
 
 
-def compose_user(words):
-    pass
+def compose_user(amount=1):
+    for _ in range(amount):
+        yield f"{choice(NAMES)}{choice(NAMES)}{randint(10, 80)}"
 
 
-def word():
-    #return choice(WORDS)
-    pass
+def compose_md5(amount=1):
+    for _ in range(amount):  # MD5 hex hash size: 32 chars
+        yield hex(getrandbits(128))[2:]
 
 
-#def ip(amount=1):
-#    return choice(tuple(compose_ip(amount)))
+def compose_sha1(amount=1):
+    for _ in range(amount):  # MD5 hex hash size: 32 chars
+        yield hex(getrandbits(160))[2:]
+
+
 def ip():
     return next(compose_ip())
 
-#def email():
-#    return choice((,))
+
+def md5():
+    return next(compose_md5())
+
+
+def sha1():
+    return next(compose_sha1())
+
+
+def email():
+    return next(compose_email())
+
+
+def url():
+    return next(compose_url())
+
+
+def user():
+    return next(compose_user())
+
+
+def domain():
+    return next(compose_domain())
+
