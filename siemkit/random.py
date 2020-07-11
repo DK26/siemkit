@@ -38,7 +38,7 @@ def compose_domain(amount=1):
 def compose_url(amount=1):
 
     for _ in range(amount):
-        yield (f"{choice(web.Protocol)}://{choice(DOMAINS)}/"
+        yield (f"{enum_value(web.Protocol)}://{choice(DOMAINS)}/"
                f"{choice(NAMES).lower()}/{randint(0, 1000)}/"
                f"{choice(NAMES).lower()}?{choice(NAMES).lower()}={randint(0, 1000)}"
                f"&{choice(NAMES).lower()}={randint(0, 1000)}")
@@ -154,7 +154,7 @@ def http_information_code():
 
 
 def http_success_code():
-    return next(compose_http_code())
+    return next(compose_http_success_code())
 
 
 def http_error_code():
