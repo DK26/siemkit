@@ -13,7 +13,7 @@
 #   limitations under the License.
 
 import socket
-import struct
+
 from telnetlib import Telnet
 from typing import Union
 from ipaddress import ip_address
