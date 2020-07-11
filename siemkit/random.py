@@ -18,6 +18,7 @@ from random import choice
 from .const import TOP_LEVEL_DOMAIN
 from .const import DOMAINS
 from .const import NAMES
+from . import web
 
 
 def byte():
@@ -36,13 +37,8 @@ def compose_domain(amount=1):
 
 def compose_url(amount=1):
 
-    PROTOCOLS = (
-        'http',
-        'https'
-    )
-
     for _ in range(amount):
-        yield (f"{choice(PROTOCOLS)}://{choice(DOMAINS)}/"
+        yield (f"{choice(web.Protocol)}://{choice(DOMAINS)}/"
                f"{choice(NAMES).lower()}/{randint(0, 1000)}/"
                f"{choice(NAMES).lower()}?{choice(NAMES).lower()}={randint(0, 1000)}"
                f"&{choice(NAMES).lower()}={randint(0, 1000)}")
@@ -59,13 +55,66 @@ def compose_user(amount=1):
 
 
 def compose_md5(amount=1):
-    for _ in range(amount):  # MD5 hex hash size: 32 chars
+    for _ in range(amount):
         yield hex(getrandbits(128))[2:]
 
 
 def compose_sha1(amount=1):
-    for _ in range(amount):  # MD5 hex hash size: 32 chars
+    for _ in range(amount):
         yield hex(getrandbits(160))[2:]
+
+
+def compose_enum(*enums, amount=1):
+    for _ in range(amount):
+        yield choice(tuple(choice(enums))).value
+
+
+def compose_http_code(amount=1):
+    for _ in range(amount):
+        yield enum_value(
+            web.HttpInformationalCode,
+            web.HttpSuccessCode,
+            web.HttpRedirectionCode,
+            web.HttpClientErrorCode,
+            web.HttpServerErrorCode
+        )
+
+
+def compose_http_information_code(amount=1):
+    for _ in range(amount):
+        yield enum_value(web.HttpInformationalCode)
+
+
+def compose_http_success_code(amount=1):
+    for _ in range(amount):
+        yield enum_value(web.HttpSuccessCode)
+
+
+def compose_http_redirection_code(amount=1):
+    for _ in range(amount):
+        yield enum_value(web.HttpRedirectionCode)
+
+
+def compose_http_error_code(amount=1):
+    for _ in range(amount):
+        yield enum_value(
+            web.HttpClientErrorCode,
+            web.HttpServerErrorCode
+        )
+
+
+def compose_http_client_error_code(amount=1):
+    for _ in range(amount):
+        yield enum_value(web.HttpClientErrorCode)
+
+
+def compose_http_server_error_code(amount=1):
+    for _ in range(amount):
+        yield enum_value(web.HttpServerErrorCode)
+
+
+def enum_value(*enums):
+    return next(compose_enum(*enums, amount=1))
 
 
 def ip():
@@ -94,4 +143,32 @@ def user():
 
 def domain():
     return next(compose_domain())
+
+
+def http_code():
+    return next(compose_http_code())
+
+
+def http_information_code():
+    return next(compose_http_information_code())
+
+
+def http_success_code():
+    return next(compose_http_code())
+
+
+def http_error_code():
+    return next(compose_http_error_code())
+
+
+def http_client_error_code():
+    return next(compose_http_client_error_code())
+
+
+def http_redirection_code():
+    return next(compose_http_redirection_code())
+
+
+def http_server_error_code():
+    return next(compose_http_server_error_code())
 

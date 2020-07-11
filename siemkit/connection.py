@@ -13,9 +13,19 @@
 #   limitations under the License.
 
 
-def tcp(host, port, payload):
+from telnetlib import Telnet
+from ipaddress import ip_address
+
+
+def tcp(host, port=514):
+    host = ip_address(host)
+    return Telnet(host, port)
+
+
+def udp(host, port=514):
+    host = ip_address(host)
     pass
 
 
-def udp(host, port, payload):
-    pass
+
+
