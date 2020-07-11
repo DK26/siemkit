@@ -34,7 +34,7 @@ builtin_print = print
 
 def print(*args, **kwargs):
     timestamp = datetime.now().isoformat()
-    builtin_print(f'[{timestamp}] ', *args, **kwargs)
+    builtin_print(f'[{timestamp}]', *args, **kwargs)
 
 
 def format_exception(e):
