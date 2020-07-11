@@ -19,10 +19,12 @@ from random import choice
 from ipaddress import IPv4Address
 from typing import Generator
 from enum import EnumMeta
+from enum import IntFlag
 
 from .const import DOMAINS
 from .const import NAMES
 from . import web
+from . import flag
 
 
 def byte() -> int:
@@ -68,7 +70,7 @@ def compose_sha1(amount: int = 1) -> Generator[str, None, None]:
         yield hex(getrandbits(160))[2:]
 
 
-def compose_enum(*enums: EnumMeta, amount: int = 1) -> Generator[object, None, None]:
+def compose_enum_value(*enums: EnumMeta, amount: int = 1) -> Generator[object, None, None]:
     for _ in range(amount):
         yield choice(tuple(choice(enums))).value
 
@@ -117,8 +119,23 @@ def compose_http_server_error_code(amount: int = 1) -> Generator[int, None, None
         yield enum_value(web.HttpServerErrorCode)
 
 
+def compose_flag_value(*enums: EnumMeta, amount: int = 1, flags: int = 1) -> Generator[int, None, None]:
+    for _ in range(amount):
+
+        random_flag = 0
+
+        for _ in range(flags):
+            random_flag = flag.set_on(random_flag, choice(tuple(choice(enums))))
+
+        yield random_flag
+
+
 def enum_value(*enums: EnumMeta) -> object:
-    return next(compose_enum(*enums, amount=1))
+    return next(compose_enum_value(*enums, amount=1))
+
+
+def flag_value(*enums: EnumMeta, flags=1) -> int:
+    return next(compose_flag_value(*enums, flags=flags))
 
 
 def ip() -> IPv4Address:
