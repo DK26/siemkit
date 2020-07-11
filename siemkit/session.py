@@ -14,18 +14,8 @@
 
 
 from telnetlib import Telnet
-from ipaddress import ip_address
 
 
-def tcp(host, port=514):
-    host = ip_address(host)
+def tcp(host: str, port: int = 514) -> Telnet:
     return Telnet(host, port)
-
-
-def udp(host, port=514):
-    host = ip_address(host)
-    pass
-
-
-
 

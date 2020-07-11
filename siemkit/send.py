@@ -12,10 +12,45 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
+import socket
+import struct
+from telnetlib import Telnet
 
-def tcp(host, port, payload):
-    pass
+
+def tcp(host: str, port: int, payload: bytes) -> int:
+
+    if isinstance(payload, str):
+        payload = bytes(payload, 'utf-8')
+
+    with Telnet(host, port) as session:
+        session.write(payload)
+
+    return len(payload)
 
 
-def udp(host, port, payload):
-    pass
+def udp(host: str, port: int, payload: bytes) -> int:
+
+    if isinstance(payload, str):
+        payload = bytes(payload, 'utf-8')
+
+    address = host, port
+    udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    udp_socket.sendto(payload, address)
+
+    return len(payload)
+
+
+def multicast(group: str, port: int, payload: bytes) -> int:
+
+    if isinstance(payload, str):
+        payload = bytes(payload, 'utf-8')
+
+    return len(payload)
+
+
+def broadcast(port: int, payload: bytes) -> int:
+
+    if isinstance(payload, str):
+        payload = bytes(payload, 'utf-8')
+
+    return len(payload)
