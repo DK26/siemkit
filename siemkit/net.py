@@ -36,13 +36,13 @@ def tcp(host: str, port: int = 514, timeout: int = 3) -> Telnet:
     return Telnet(host, port, timeout=timeout)
 
 
-def udp(host: str, port: int = 514, ttl=32) -> WriteableConnectionless:
+def udp(host: str, port: int = 514, ttl: int = 32) -> WriteableConnectionless:
     return WriteableConnectionless(send.udp, host=host, port=port, ttl=ttl)
 
 
-def multicast(group: str, port: int = 514, ttl=2) -> WriteableConnectionless:
+def multicast(group: str, port: int = 514, ttl: int = 2) -> WriteableConnectionless:
     return WriteableConnectionless(send.multicast, group=group, port=port, ttl=ttl)
 
 
-def broadcast(port: int = 514, ttl=2) -> WriteableConnectionless:
+def broadcast(port: int = 514, ttl: int = 2) -> WriteableConnectionless:
     return WriteableConnectionless(send.broadcast, port=port, ttl=ttl)
