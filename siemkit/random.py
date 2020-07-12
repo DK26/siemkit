@@ -19,7 +19,6 @@ from random import choice
 from ipaddress import IPv4Address
 from typing import Generator
 from enum import EnumMeta
-from enum import IntFlag
 
 from .const import DOMAINS
 from .const import NAMES

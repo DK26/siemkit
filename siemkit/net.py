@@ -12,7 +12,7 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-
+from typing import Union
 from telnetlib import Telnet
 from . import send
 
@@ -25,7 +25,7 @@ class WriteableConnectionless:
         self.args = args
         self.kwargs = kwargs
 
-    def write(self, payload: bytes) -> int:
+    def write(self, payload: Union[bytes, str]) -> int:
         return self.send_function(*self.args, **self.kwargs, payload=payload)
 
     def close(self):
