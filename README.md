@@ -1,4 +1,4 @@
-## CyberSIEM ® Community Kit
+## [CyberSIEM ®](https://www.cybersiem.com/) Community Kit
 
 * An open-source "Swiss Army Knife" for anything SIEM related!
 
