@@ -15,7 +15,7 @@
 import csv
 
 
-class CSVConf:
+class CSVManager:
 
     def __init__(
             self,
@@ -252,7 +252,7 @@ def demo():
     def get_secret(key):
         return rskeyring.get_password("test", key)
 
-    clients_csv = CSVConf(
+    clients_csv = CSVManager(
         sys.argv[1],
         indexed_field='username',
         secret_fields=('api-key', 'secret'),

@@ -20,12 +20,13 @@ from .time import to_format
 import sys
 
 settings = {
-    'stdout': sys.__stdout__,
-    'stderr': sys.__stderr__,
-    'stdin': sys.__stdin__,
-    'stddebug': sys.__stdout__,
+    'stdout': sys.stdout,
+    'stderr': sys.stderr,
+    'stdin': sys.stdin,
+    'stddebug': sys.stdout,
     'debug_mode': False,
-    'dump_file_name': 'dump_%d%m%Y-%H%M%S.log'
+    'dump_file_name': 'dump_%d%m%Y-%H%M%S.log',
+    'debug_dump_file_name': 'debug_dump_%d%m%Y-%H%M%S.log'
 }
 
 builtin_print = print
@@ -33,7 +34,7 @@ builtin_print = print
 
 def print(*args, **kwargs):
     timestamp = datetime.now().isoformat()
-    builtin_print(f'[{timestamp}] ', *args, **kwargs)
+    builtin_print(f'[{timestamp}]', *args, **kwargs)
 
 
 def format_exception(e):
@@ -85,9 +86,23 @@ def dump_debug(msg, payload, file=None, dump_file_name=None, debug_mode=None):
             file = settings['stdout']
 
         if dump_file_name is None:
-            dump_file_name = settings['dump_file_name']
+            dump_file_name = settings['debug_dump_file_name']
 
         dump_file_name = to_format(format_=dump_file_name)
         print_message(f"DEBUG | DUMP | {msg}: '{dump_file_name}'", file=file)
         with open(dump_file_name, 'w', encoding='utf-8', errors='ignore') as fs:
             fs.write(format_message(f"DEBUG | DUMP | {msg}: \n{payload}"))
+
+
+def dump(msg, payload, file=None, dump_file_name=None):
+
+    if file is None:
+        file = settings['stdout']
+
+    if dump_file_name is None:
+        dump_file_name = settings['dump_file_name']
+
+    dump_file_name = to_format(format_=dump_file_name)
+    print_message(f"DUMP | {msg}: '{dump_file_name}'", file=file)
+    with open(dump_file_name, 'w', encoding='utf-8', errors='ignore') as fs:
+        fs.write(format_message(f"DUMP | {msg}: \n{payload}"))

@@ -94,3 +94,6 @@ def size(size_string: str) -> int:
     return hfilesize.FileSize(size_string)
 
 
+def boolean(bool_string: str) -> bool:
+    bool_string = bool_string.lower()
+    return bool_string in ('t', 'true', 'yes', 'ok', 'on', '1', 'some')
