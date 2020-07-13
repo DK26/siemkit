@@ -32,9 +32,13 @@ settings = {
 builtin_print = print
 
 
-def print(*args, **kwargs):
+def print(*args, sep=' ', end='\n', file=None):
+
+    if file is None:
+        file = settings['stdout']
+
     timestamp = datetime.now().isoformat()
-    builtin_print(f'[{timestamp}]', *args, **kwargs)
+    builtin_print(f'[{timestamp}]', *args, sep=sep, end=end, file=file)
 
 
 def format_exception(e):
