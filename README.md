@@ -30,6 +30,7 @@ GitHub:
 * Work in progress
 
     - `siemkit.api.arcsight`
+    - `siemkit.win32.registry`
     - `siemkit.cfg`
     - `siemkit.const`
     - `siemkit.data`
