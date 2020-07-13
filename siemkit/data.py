@@ -16,6 +16,7 @@ import os
 import pickle
 
 
+# ToDo: Replace pickle with JSON dump. REF: https://pycharm-security.readthedocs.io/en/latest/checks/PIC100.html
 class IDTracker:
 
     def __init__(self, file_name):
