@@ -15,7 +15,6 @@
 import re
 import winreg
 from enum import IntEnum
-from enum import EnumMeta
 from typing import Tuple
 from collections import deque
 
