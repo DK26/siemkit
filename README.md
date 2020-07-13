@@ -27,16 +27,31 @@ GitHub:
 
 ## Libraries
 
-- `siemkit.csv`
-- `siemkit.event`
-- `siemkit.file`
-- `siemkit.flag`
-- `siemkit.ldap`
-- `siemkit.parse`
-- `siemkit.time`
-- `siemkit.data`
-- `siemkit.logging`
-- `siemkit.receive`
-- `siemkit.send`
+* Work in progress
+
+    - `siemkit.api.arcsight`
+    - `siemkit.cfg`
+    - `siemkit.const`
+    - `siemkit.data`
+    - `siemkit.event`
+    - `siemkit.file`
+    - `siemkit.flag`
+    - `siemkit.ldap`
+    - `siemkit.listen`
+    - `siemkit.logging`
+    - `siemkit.net`
+    - `siemkit.parse`
+    - `siemkit.random`
+    - `siemkit.send`
+    - `siemkit.time`
+    - `siemkit.web`
+
+## Why Contribute
+
+* [Why Contribute to Open-Source](https://opensource.guide/how-to-contribute/#why-contribute-to-open-source)
 
 _Work in progress . . ._
+
+## Authors
+
+- [@DK26](https://github.com/dk26) - _David Krasnitsky_
