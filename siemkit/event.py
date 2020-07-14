@@ -533,14 +533,6 @@ class AbstractEventFormat(dict):
         self.__states.save(self)
         return self
 
-    def store(self):
-        """
-        Store current state.
-        :return:
-        """
-        self.__states.store(self)
-        return self
-
     def reset(self):
         """
         Reset to root state.
@@ -550,6 +542,14 @@ class AbstractEventFormat(dict):
         super().clear()
         self.update(state)
         return self  # Return to root state
+
+    def store(self):
+        """
+        Store current state.
+        :return:
+        """
+        self.__states.store(self)
+        return self
 
     def restore(self):
         """
