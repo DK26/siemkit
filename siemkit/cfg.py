@@ -13,6 +13,7 @@
 #   limitations under the License.
 
 import csv
+import shutil
 
 
 class CSVManager:
@@ -146,13 +147,20 @@ class CSVManager:
         :return: self
         """
 
-        with open(self._csv_file, 'w', encoding=self._encoding, errors=self._errors, newline=self._newline) as fs:
-            fs.seek(0)
+        csv_file = self._csv_file
+        csv_tmp_file = self._csv_file + '.tmp'
+
+        with open(csv_tmp_file, 'w', encoding=self._encoding, errors=self._errors, newline=self._newline) as fs:
+            # fs.seek(0)
             writer = csv.DictWriter(fs, fieldnames=self._titles)
             writer.writeheader()
             for entry in self._entries:
                 del entry['_line']
                 writer.writerow(entry)
+
+        # If we reach this point, then no exception occurred.
+        # Otherwise, we are left a '.tmp' file to debug.
+        shutil.move(csv_tmp_file, csv_file)
 
         return self
 
@@ -166,11 +174,11 @@ class CSVManager:
 
         def load_entries(update_):
 
-            with open(self._csv_file, newline=self._newline, encoding=self._encoding, errors=self._errors) as fs:
+            with open(self._csv_file, 'r', newline=self._newline, encoding=self._encoding, errors=self._errors) as fs:
 
                 self._titles = tuple(next(csv.reader(fs)))
 
-                fs.seek(0)
+                # fs.seek(0)
 
                 csv_dict_ = csv.DictReader(fs)
 
