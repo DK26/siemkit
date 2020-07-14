@@ -35,7 +35,7 @@ builtin_print = print
 def print(*args, sep=' ', end='\n', file=None):
 
     if file is None:
-        #file = settings['stdout']
+        # file = settings['stdout']
         file = sys.stdout  # This behaviour is more expected from a `print()` function.
 
     timestamp = datetime.now().isoformat()
