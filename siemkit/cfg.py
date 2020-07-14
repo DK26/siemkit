@@ -14,6 +14,7 @@
 
 import csv
 import shutil
+import json
 
 from typing import Tuple
 
@@ -168,6 +169,13 @@ class CSVManager:
         shutil.move(csv_tmp_file, csv_file)
 
         return self
+
+    def json_string(self, key=None, indent=4):
+        if key is None:
+            result = json.dumps(self._indexed_field_map, indent=indent)
+        else:
+            result = json.dumps(self._indexed_field_map[key], indent=indent)
+        return result
 
     def load(self):
         """
