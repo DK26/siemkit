@@ -71,6 +71,8 @@ class CSVManager:
         self._errors = errors
         self._store_secret = store_secret
         self._get_secret = get_secret
+        if default_values is None:
+            default_values = {}
         self._default_values = default_values
 
         self._entries = None
@@ -122,10 +124,8 @@ class CSVManager:
             yield exposed_entry
 
     def get_entries(self) -> Tuple[dict]:
-        # Return a tuple copy of self._entries.
-        # That way, if it is decided to switch the `self._entries` collection type to something else
-        # we still make sure we give away a safe, immutable copy of self._entries.
-        return tuple(self._entries)
+        # return tuple(self._entries)
+        return self._entries  # Already a tuple
 
     def store_secret(self, entry, secret_key):
 
@@ -157,7 +157,7 @@ class CSVManager:
         csv_tmp_file = self._csv_file + '.tmp'
 
         with open(csv_tmp_file, 'w', encoding=self._encoding, errors=self._errors, newline=self._newline) as fs:
-            # fs.seek(0)
+            fs.seek(0)
             writer = csv.DictWriter(fs, fieldnames=self._titles)
             writer.writeheader()
             for entry in self._entries:
@@ -191,7 +191,7 @@ class CSVManager:
 
                 self._titles = tuple(next(csv.reader(fs)))
 
-                # fs.seek(0)
+                fs.seek(0)
 
                 csv_dict_ = csv.DictReader(fs)
 
