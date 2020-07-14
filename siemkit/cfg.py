@@ -15,6 +15,8 @@
 import csv
 import shutil
 
+from typing import Tuple
+
 
 class CSVManager:
 
@@ -118,7 +120,10 @@ class CSVManager:
 
             yield exposed_entry
 
-    def get_entries(self):
+    def get_entries(self) -> Tuple[dict]:
+        # Return a tuple copy of self._entries.
+        # That way, if it is decided to switch the `self._entries` collection type to something else
+        # we still make sure we give away a safe, immutable copy of self._entries.
         return tuple(self._entries)
 
     def store_secret(self, entry, secret_key):
@@ -215,6 +220,7 @@ class CSVManager:
 
                                 update_[0] = True
 
+                    # Map the entry (dict_row) by the indexed field
                     self._indexed_field_map[dict_row[self._indexed_field]] = dict_row
 
                     yield dict_row
