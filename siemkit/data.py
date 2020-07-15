@@ -114,5 +114,24 @@ def test_id_tracker():
     os.remove(tracker_file)
 
 
+def get_multi_keys(dictionary, keys):
+
+    values = []
+    for key in keys:
+        values.append(dictionary[key])
+
+    return values
+
+
+def map_multi_keys(dictionary, keys):
+    return tuple(get_multi_keys(dictionary, keys)), dictionary
+
+
+def multi_keys_dict(dict_collection, keys):
+    for dict_item in dict_collection:
+        k, v = map_multi_keys(dict_item, keys)
+        yield {k: v}
+
+
 if __name__ == '__main__':
     test_id_tracker()
