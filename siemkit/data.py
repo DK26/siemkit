@@ -14,6 +14,8 @@
 
 import os
 import pickle
+from typing import Generator
+from typing import Tuple
 
 
 # ToDo: Replace pickle with JSON dump. REF: https://pycharm-security.readthedocs.io/en/latest/checks/PIC100.html
@@ -139,6 +141,25 @@ def assure_tuple(value):
     else:
         value = tuple(value)
     return value
+
+
+def swapped_dict(dictionary: dict) -> dict:
+    """
+    Created a new dictionary with swapped keys & values of a given dictionary argument.
+    :param dictionary:
+    :return:
+    """
+    return {v: k for k, v in dictionary.items()}
+
+
+def swap_dict(dictionary: dict) -> Generator[Tuple[object, object], None, None]:
+    """
+    Iterate over a dictionary & generate swapped key, value tuple.
+    :param dictionary:
+    :return:
+    """
+    for k, v in dictionary.items():
+        yield v, k
 
 
 if __name__ == '__main__':
