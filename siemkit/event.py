@@ -94,6 +94,25 @@ class States:
         self.__states = list((dict() for _ in range(optimized_size)))
         self.__index = 0
 
+    def save(self, state):
+        """
+        Update initial root state.
+            This state is restored either by the `reset(self)` method or by one or more calls from the `restore(self)`.
+        :param state: A dictionary
+        :return:
+        """
+        self.__states[0].clear()
+        self.__states[0].update(state)
+
+    def reset(self):
+        """
+        Reset to initial root state
+        :return:
+        """
+        state_zero = self.__states[0]
+        self.clear()
+        return state_zero
+
     def store(self, state):
         if self.__index == self.__optimized_size:
             self.__states.append(dict())
@@ -240,8 +259,9 @@ class AbstractEventFormat(dict):
     def from_timestamp():
         pass
 
-    # ToDo: Allow later assignment of 'output'
-    # ToDo: save() & restore() using stack.
+    # Done: Allow later assignment of 'output'
+    # Done: save() & restore() using stack.
+    # Done: Allow momentary cancellation of output (for cases such as error or exceptions, when we wish to __exit__ without write())
     def __init__(
             self,
             format_,
@@ -482,7 +502,8 @@ class AbstractEventFormat(dict):
 
     def __enter__(self):
         self.__commit_context = True
-        self.save()
+        #self.save()
+        self.store()
         return self
 
     def __exit__(self, type_, value, traceback):
@@ -504,16 +525,51 @@ class AbstractEventFormat(dict):
         self.restore()
         return self
 
+    def abort(self):
+        """
+        Works only within most inner `with` statement (context manager).
+         Aborts output on exit for assigned outputs.
+        :return:
+        """
+        self.__commit_context = False
+        return self
+
     # Set current values as default
     def save(self):
+        """
+        Set root state.
+        :return:
+        """
+        self.__states.save(self)
+        return self
+
+    def reset(self):
+        """
+        Reset to root state.
+        :return:
+        """
+        state = self.__states.reset()
+        super().clear()
+        self.update(state)
+        return self  # Return to root state
+
+    def store(self):
+        """
+        Store current state.
+        :return:
+        """
         self.__states.store(self)
         return self
 
     def restore(self):
+        """
+        Restore previous state.
+        :return:
+        """
         state = self.__states.restore()
         super().clear()
         self.update(state)
-        return self  # Return to default state
+        return self  # Return to previous state
 
     # Done: Allow clearing all values, for parsing
     # Done: Or/And provide an automatic way for "clearing" when using the 'with' statement and receiving data
@@ -783,7 +839,7 @@ def test():
     event.hello = 'world'
 
     print(event.json())
-    event.save()
+    event.store()
 
     event.hello = 'nice!'
     event.src = "127.0.0.1"

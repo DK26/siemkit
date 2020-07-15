@@ -1,4 +1,4 @@
-#   Copyright (C) 2020 CyberSIEM (R)
+#   Copyright (C) 2020 CyberSIEM(R)
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -13,6 +13,11 @@
 #   limitations under the License.
 
 import csv
+import shutil
+import json
+from . import data
+
+from typing import Tuple
 
 
 class CSVManager:
@@ -20,7 +25,7 @@ class CSVManager:
     def __init__(
             self,
             csv_file,
-            indexed_field,
+            key_fields,
             secret_fields,
             newline='',
             encoding='utf-8',
@@ -32,7 +37,7 @@ class CSVManager:
         """
 
         :param csv_file: A path to the configurations CSV file
-        :param indexed_field: An indexed field to group data by. e.g. username, id, email, etc.
+        :param key_fields: An indexed field to group data by. e.g. username, id, email, etc.
         :param secret_fields: A collection of string field names to store their values in a vault.
         :param newline: Passed to the underlying FileStream handler of the CSV
         :param encoding: Passed to the underlying FileStream handler of the CSV
@@ -56,17 +61,26 @@ class CSVManager:
         :param default_values: A dictionary of default values in case if empty values.
         """
 
-        if indexed_field in secret_fields:
-            raise Exception(f"Secret field '{indexed_field}' cannot be indexed field.")
+        key_fields = data.assure_tuple(key_fields)
+        """if isinstance(key_fields, str):
+            key_fields = (key_fields,)
+        else:
+            key_fields = tuple(key_fields)"""
+
+        for field in key_fields:
+            if field in secret_fields:
+                raise Exception(f"Secret field '{field}' cannot be part of a key field.")
 
         self._csv_file = csv_file
-        self._indexed_field = indexed_field
+        self._key_fields = key_fields
         self._secret_fields = secret_fields
         self._newline = newline
         self._encoding = encoding
         self._errors = errors
         self._store_secret = store_secret
         self._get_secret = get_secret
+        if default_values is None:
+            default_values = {}
         self._default_values = default_values
 
         self._entries = None
@@ -95,12 +109,22 @@ class CSVManager:
         :param index: A key index to access the indexed field.
         :return: Entry dictionary
         """
+        index = data.assure_tuple(index)
+        """if isinstance(index, str):
+            index = (index,)
+        else:
+            index = tuple(index)"""
+
+        #print(index)
+        #print(self._indexed_field_map)
         return self._indexed_field_map[index]
 
     def set_entry(self, index, dict_values):
+        index = data.assure_tuple(index)
         self._indexed_field_map[index] = dict_values
 
     def update_entry(self, index, dict_values):
+        index = data.assure_tuple(index)
         self._indexed_field_map[index].update(dict_values)
 
     def exposed_entries(self):
@@ -113,17 +137,31 @@ class CSVManager:
             exposed_entry = dict(entry)
 
             for secret_field in self._secret_fields:
-                exposed_entry[secret_field] = self.get_secret(entry[self._indexed_field], secret_field)
+                #print(self.construct_key(entry))
+                exposed_entry[secret_field] = self.get_secret(self.construct_key(entry), secret_field)
 
             yield exposed_entry
 
-    def get_entries(self):
-        return tuple(self._entries)
+    def get_entries(self) -> Tuple[dict]:
+        # return tuple(self._entries)
+        return self._entries  # Already a tuple
+
+    def construct_key(self, entry):
+        new_key = []
+        for key in self._key_fields:
+            new_key.append(entry[key])
+
+        return tuple(new_key)
 
     def store_secret(self, entry, secret_key):
 
         if callable(self._store_secret):
-            key = f"{entry[self._indexed_field]}.{secret_key}"
+            # Done: Access each indexed value and retrieve data
+            #key = f"{'.'.join(entry[self._indexed_field])}.{secret_key}"
+            #key = f"{'.'.join(new_index)}.{secret_key}"
+            key = f"{'.'.join(self.construct_key(entry))}.{secret_key}"
+            #print(key)
+
             if self._store_secret(key, entry[secret_key]):
                 entry[secret_key] = 'stored'
 
@@ -131,11 +169,18 @@ class CSVManager:
 
     def get_secret(self, entry_index, secret_key):
         if callable(self._get_secret):
-            key = f"{entry_index}.{secret_key}"
+            """if isinstance(entry_index, str):
+                entry_index = (entry_index,)
+            else:
+                entry_index = tuple(entry_index)
+            """
+            entry_index = data.assure_tuple(entry_index)
+            key = f"{'.'.join(entry_index)}.{secret_key}"
+
             return self._get_secret(key)
 
-    def get_indexed_field(self):
-        return self._indexed_field
+    def get_key_fields(self):
+        return self._key_fields
 
     def get_secret_fields(self):
         return self._secret_fields
@@ -146,7 +191,10 @@ class CSVManager:
         :return: self
         """
 
-        with open(self._csv_file, 'w', encoding=self._encoding, errors=self._errors, newline=self._newline) as fs:
+        csv_file = self._csv_file
+        csv_tmp_file = self._csv_file + '.tmp'
+
+        with open(csv_tmp_file, 'w', encoding=self._encoding, errors=self._errors, newline=self._newline) as fs:
             fs.seek(0)
             writer = csv.DictWriter(fs, fieldnames=self._titles)
             writer.writeheader()
@@ -154,7 +202,28 @@ class CSVManager:
                 del entry['_line']
                 writer.writerow(entry)
 
+        # If we reach this point, then no exception occurred.
+        # Otherwise, we are left a '.tmp' file to debug.
+        shutil.move(csv_tmp_file, csv_file)
+
         return self
+
+    def json_string(self, key=None, indent=4):
+
+        json_copy = {}
+        for k, v in self._indexed_field_map.items():
+            json_copy['.'.join(k)] = v
+
+        if key is None:
+            #print(json_copy)
+            return json.dumps(json_copy, indent=indent)
+        # elif isinstance(key, str):
+        #    key = (key,)
+        else:
+            # key = tuple(key)
+            key = data.assure_tuple(key)
+
+        return json.dumps(json_copy['.'.join(key)], indent=indent)
 
     def load(self):
         """
@@ -166,7 +235,7 @@ class CSVManager:
 
         def load_entries(update_):
 
-            with open(self._csv_file, newline=self._newline, encoding=self._encoding, errors=self._errors) as fs:
+            with open(self._csv_file, 'r', newline=self._newline, encoding=self._encoding, errors=self._errors) as fs:
 
                 self._titles = tuple(next(csv.reader(fs)))
 
@@ -207,7 +276,15 @@ class CSVManager:
 
                                 update_[0] = True
 
-                    self._indexed_field_map[dict_row[self._indexed_field]] = dict_row
+                    # Map the entry (dict_row) by the indexed field
+                    #new_index = []
+                    #for index in self._indexed_field:
+                    #    new_index.append(dict_row[index])
+
+                    new_index = self.construct_key(dict_row)
+
+                    #self._indexed_field_map[dict_row[self._indexed_field]] = dict_row
+                    self._indexed_field_map[new_index] = dict_row
 
                     yield dict_row
 
@@ -240,10 +317,11 @@ class CSVManager:
         return str(self._entries)
 
 
-def demo():
+def multi_key_demo():
     import rskeyring
     import sys
     import json
+    import os
 
     def store_secret(key, secret):
         rskeyring.set_password("test", key, secret)
@@ -252,18 +330,28 @@ def demo():
     def get_secret(key):
         return rskeyring.get_password("test", key)
 
+    with open(sys.argv[1], 'w') as fs:
+        fs.write('username,company,api-key,secret,comments\n')
+        fs.write('test_user,Kola,aabbcc,paswd, A test thingy\n')
+        fs.write('test_user2,Kola,12345,zzzzz, A test thingy2\n')
+        fs.write('test_user,RED HAT,qwe,ghhh, A test thingy3\n')
+
     clients_csv = CSVManager(
         sys.argv[1],
-        indexed_field='username',
+        key_fields=('username', 'company'),
         secret_fields=('api-key', 'secret'),
         store_secret=store_secret,
         get_secret=get_secret,
     )
-    print(clients_csv.get_entry('nice'))  # Extracted from indexed field. In this case, 'username'
+
+    print(clients_csv.json_string())
+    print(clients_csv.json_string(('test_user', 'RED HAT')))
 
     print(clients_csv.get_titles())
 
-    print(clients_csv.get_secret('nice', 'api-key'))
+    print(clients_csv.get_entry(('test_user2', 'Kola')))  # Extracted from indexed field. In this case, 'username'
+
+    print(clients_csv.get_secret(('test_user', 'RED HAT'), 'api-key'))
 
     for entry in clients_csv.get_entries():
         entry_json = json.dumps(entry, indent=4)
@@ -273,6 +361,56 @@ def demo():
         exposed_entry_json = json.dumps(exposed_entry, indent=4)
         print(exposed_entry_json)
 
+    os.remove(sys.argv[1])
+
+
+def single_key_demo():
+    import rskeyring
+    import sys
+    import json
+    import os
+
+    def store_secret(key, secret):
+        rskeyring.set_password("test", key, secret)
+        return True
+
+    def get_secret(key):
+        return rskeyring.get_password("test", key)
+
+    with open(sys.argv[1], 'w') as fs:
+        fs.write('username,company,api-key,secret,comments\n')
+        fs.write('test_user,Kola,aabbcc,paswd, A test thingy\n')
+        fs.write('test_user2,Kola,12345,zzzzz, A test thingy2\n')
+        fs.write('test_user3,RED HAT,qwe,ghhh, A test thingy3\n')
+
+    clients_csv = CSVManager(
+        sys.argv[1],
+        key_fields='username',
+        secret_fields=('api-key', 'secret'),
+        store_secret=store_secret,
+        get_secret=get_secret,
+    )
+
+    print(clients_csv.json_string())
+    print(clients_csv.json_string('test_user'))
+
+    print(clients_csv.get_titles())
+
+    print(clients_csv.get_entry('test_user2'))  # Extracted from indexed field. In this case, 'username'
+
+    print(clients_csv.get_secret('test_user', 'api-key'))
+
+    for entry in clients_csv.get_entries():
+        entry_json = json.dumps(entry, indent=4)
+        print(entry_json)
+
+    for exposed_entry in clients_csv.exposed_entries():
+        exposed_entry_json = json.dumps(exposed_entry, indent=4)
+        print(exposed_entry_json)
+
+    os.remove(sys.argv[1])
+
 
 if __name__ == '__main__':
-    demo()
+    multi_key_demo()
+    # single_key_demo()

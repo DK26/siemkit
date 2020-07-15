@@ -1,4 +1,4 @@
-#   Copyright (C) 2020 CyberSIEM (R)
+#   Copyright (C) 2020 CyberSIEM(R)
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -14,6 +14,8 @@
 
 import os
 import pickle
+from typing import Generator
+from typing import Tuple
 
 
 # ToDo: Replace pickle with JSON dump. REF: https://pycharm-security.readthedocs.io/en/latest/checks/PIC100.html
@@ -112,6 +114,52 @@ def test_id_tracker():
     print(data_tracker)
 
     os.remove(tracker_file)
+
+
+def get_multi_keys(dictionary, keys):
+
+    values = []
+    for key in keys:
+        values.append(dictionary[key])
+
+    return values
+
+
+def map_multi_keys(dictionary, keys):
+    return tuple(get_multi_keys(dictionary, keys)), dictionary
+
+
+def multi_keys_dict(dict_collection, keys):
+    for dict_item in dict_collection:
+        k, v = map_multi_keys(dict_item, keys)
+        yield {k: v}
+
+
+def assure_tuple(value):
+    if isinstance(value, str):
+        value = (value,)
+    else:
+        value = tuple(value)
+    return value
+
+
+def swapped_dict(dictionary: dict) -> dict:
+    """
+    Created a new dictionary with swapped keys & values of a given dictionary argument.
+    :param dictionary:
+    :return:
+    """
+    return {v: k for k, v in dictionary.items()}
+
+
+def swap_dict(dictionary: dict) -> Generator[Tuple[object, object], None, None]:
+    """
+    Iterate over a dictionary & generate swapped key, value tuple.
+    :param dictionary:
+    :return:
+    """
+    for k, v in dictionary.items():
+        yield v, k
 
 
 if __name__ == '__main__':
