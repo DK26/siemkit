@@ -259,8 +259,9 @@ class AbstractEventFormat(dict):
     def from_timestamp():
         pass
 
-    # ToDo: Allow later assignment of 'output'
-    # ToDo: save() & restore() using stack.
+    # Done: Allow later assignment of 'output'
+    # Done: save() & restore() using stack.
+    # ToDo: Allow momentary cancellation of output (for cases such as error or exceptions, when we wish to __exit__ without write())
     def __init__(
             self,
             format_,
