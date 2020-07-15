@@ -96,4 +96,4 @@ def set_key(root: int, path: str, key: str, value: str):
 
     reg_key = winreg.CreateKey(root, path)
     with winreg.OpenKey(root, path, 0, winreg.KEY_WRITE) as registry_key:
-        winreg.SetValueEx(registry_key, key, 0, winreg.REG_SZ, value)
+        winreg.SetValueEx(registry_key, key, 0, winreg.REG_EXPAND_SZ, value)
