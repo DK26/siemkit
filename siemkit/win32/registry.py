@@ -94,6 +94,6 @@ def set_key(root: int, path: str, key: str, value: str):
 
     # REF: https://stackoverflow.com/questions/15128225/python-script-to-read-and-write-a-path-to-registry
 
-    reg_key = winreg.CreateKey(root, path)
+    winreg.CreateKey(root, path)
     with winreg.OpenKey(root, path, 0, winreg.KEY_WRITE) as registry_key:
         winreg.SetValueEx(registry_key, key, 0, winreg.REG_EXPAND_SZ, value)
