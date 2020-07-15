@@ -95,5 +95,5 @@ def size(size_string: str) -> int:
 
 
 def boolean(bool_string: str) -> bool:
-    bool_string = bool_string.lower()
+    bool_string = bool_string.strip().lower()
     return bool_string in ('t', 'true', 'yes', 'ok', 'on', '1', 'some')
