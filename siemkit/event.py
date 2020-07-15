@@ -261,7 +261,7 @@ class AbstractEventFormat(dict):
 
     # Done: Allow later assignment of 'output'
     # Done: save() & restore() using stack.
-    # ToDo: Allow momentary cancellation of output (for cases such as error or exceptions, when we wish to __exit__ without write())
+    # Done: Allow momentary cancellation of output (for cases such as error or exceptions, when we wish to __exit__ without write())
     def __init__(
             self,
             format_,
@@ -523,6 +523,15 @@ class AbstractEventFormat(dict):
         # ToDo: Or use a different writing style for parsing:
 
         self.restore()
+        return self
+
+    def abort(self):
+        """
+        Works only within most inner `with` statement (context manager).
+         Aborts output on exit for assigned outputs.
+        :return:
+        """
+        self.__commit_context = False
         return self
 
     # Set current values as default
