@@ -133,5 +133,13 @@ def multi_keys_dict(dict_collection, keys):
         yield {k: v}
 
 
+def assure_tuple(value):
+    if isinstance(value, str):
+        value = (value,)
+    else:
+        value = tuple(value)
+    return value
+
+
 if __name__ == '__main__':
     test_id_tracker()

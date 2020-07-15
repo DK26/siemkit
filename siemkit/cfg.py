@@ -15,6 +15,7 @@
 import csv
 import shutil
 import json
+from . import data
 
 from typing import Tuple
 
@@ -60,10 +61,11 @@ class CSVManager:
         :param default_values: A dictionary of default values in case if empty values.
         """
 
-        if isinstance(key_fields, str):
+        key_fields = data.assure_tuple(key_fields)
+        """if isinstance(key_fields, str):
             key_fields = (key_fields,)
         else:
-            key_fields = tuple(key_fields)
+            key_fields = tuple(key_fields)"""
 
         for field in key_fields:
             if field in secret_fields:
@@ -107,18 +109,22 @@ class CSVManager:
         :param index: A key index to access the indexed field.
         :return: Entry dictionary
         """
-        if isinstance(index, str):
+        index = data.assure_tuple(index)
+        """if isinstance(index, str):
             index = (index,)
         else:
-            index = tuple(index)
+            index = tuple(index)"""
+
         #print(index)
         #print(self._indexed_field_map)
         return self._indexed_field_map[index]
 
     def set_entry(self, index, dict_values):
+        index = data.assure_tuple(index)
         self._indexed_field_map[index] = dict_values
 
     def update_entry(self, index, dict_values):
+        index = data.assure_tuple(index)
         self._indexed_field_map[index].update(dict_values)
 
     def exposed_entries(self):
@@ -163,10 +169,12 @@ class CSVManager:
 
     def get_secret(self, entry_index, secret_key):
         if callable(self._get_secret):
-            if isinstance(entry_index, str):
+            """if isinstance(entry_index, str):
                 entry_index = (entry_index,)
             else:
                 entry_index = tuple(entry_index)
+            """
+            entry_index = data.assure_tuple(entry_index)
             key = f"{'.'.join(entry_index)}.{secret_key}"
 
             return self._get_secret(key)
@@ -209,10 +217,11 @@ class CSVManager:
         if key is None:
             #print(json_copy)
             return json.dumps(json_copy, indent=indent)
-        elif isinstance(key, str):
-            key = (key,)
+        # elif isinstance(key, str):
+        #    key = (key,)
         else:
-            key = tuple(key)
+            # key = tuple(key)
+            key = data.assure_tuple(key)
 
         return json.dumps(json_copy['.'.join(key)], indent=indent)
 
