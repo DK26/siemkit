@@ -62,6 +62,8 @@ class CSVManager:
 
         if isinstance(key_fields, str):
             key_fields = (key_fields,)
+        else:
+            key_fields = tuple(key_fields)
 
         for field in key_fields:
             if field in secret_fields:
@@ -163,6 +165,8 @@ class CSVManager:
         if callable(self._get_secret):
             if isinstance(entry_index, str):
                 entry_index = (entry_index,)
+            else:
+                entry_index = tuple(entry_index)
             key = f"{'.'.join(entry_index)}.{secret_key}"
 
             return self._get_secret(key)
@@ -207,6 +211,8 @@ class CSVManager:
             return json.dumps(json_copy, indent=indent)
         elif isinstance(key, str):
             key = (key,)
+        else:
+            key = tuple(key)
 
         return json.dumps(json_copy['.'.join(key)], indent=indent)
 
