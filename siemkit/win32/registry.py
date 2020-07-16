@@ -57,7 +57,7 @@ def get_key_parse(path: str) -> Tuple[str, int]:
     return get_key(hkey_dictionary[root], '\\'.join(path_parts_deque), key)
 
 
-def set_key_parse(path: str, value):
+def set_key_parse(path: str, value, key_type=winreg.REG_EXPAND_SZ):
     root = ''
 
     path_parts = path.split('\\')
@@ -74,7 +74,7 @@ def set_key_parse(path: str, value):
         else:
             path_parts_deque.popleft()
 
-    set_key(hkey_dictionary[root], '\\'.join(path_parts_deque), key, value)
+    set_key(hkey_dictionary[root], '\\'.join(path_parts_deque), key, value, key_type)
 
 
 def get_key(root: int, path: str, key: str) -> Tuple[str, int]:
@@ -90,10 +90,10 @@ def get_key(root: int, path: str, key: str) -> Tuple[str, int]:
     return value, type_
 
 
-def set_key(root: int, path: str, key: str, value: str):
+def set_key(root: int, path: str, key: str, value: str, key_type=winreg.REG_EXPAND_SZ):
 
     # REF: https://stackoverflow.com/questions/15128225/python-script-to-read-and-write-a-path-to-registry
 
     winreg.CreateKey(root, path)
     with winreg.OpenKey(root, path, 0, winreg.KEY_WRITE) as registry_key:
-        winreg.SetValueEx(registry_key, key, 0, winreg.REG_EXPAND_SZ, value)
+        winreg.SetValueEx(registry_key, key, 0, key_type, value)
