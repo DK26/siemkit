@@ -16,6 +16,8 @@ import os
 import pickle
 from typing import Generator
 from typing import Tuple
+from typing import Set
+from collections.abc import Iterable
 
 
 # ToDo: Replace pickle with JSON dump. REF: https://pycharm-security.readthedocs.io/en/latest/checks/PIC100.html
@@ -160,6 +162,34 @@ def swap_dict(dictionary: dict) -> Generator[Tuple[object, object], None, None]:
     """
     for k, v in dictionary.items():
         yield v, k
+
+
+def extract_words(item, global_set: Set):
+    """
+    Deep scan for strings, returning a searchable set for unique values.
+    :param item:
+    :param global_set:
+    :return:
+    """
+
+    if isinstance(item, dict):
+        for k, v in item.items():
+            extract_words(k, global_set)
+            extract_words(v, global_set)
+    elif isinstance(item, str):
+        global_set.add(item)
+    elif isinstance(item, Iterable):
+        for i in item:
+            extract_words(i, global_set)
+
+
+def words_set(item) -> Set:
+
+    options = set()
+
+    extract_words(item, options)
+
+    return options
 
 
 if __name__ == '__main__':

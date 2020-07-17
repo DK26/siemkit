@@ -18,12 +18,10 @@ import re
 import timeit
 
 import json
-from math import floor
 
-from time import time
-from collections.abc import Iterable
 from collections import deque
 from enum import Enum
+from . import data as siemkit_data
 
 
 # import dateparser  # This can't be good for performance. Need performance? know your formats!
@@ -259,35 +257,10 @@ class AbstractEventFormat(dict):
     def from_timestamp():
         pass
 
-    # Done: Allow later assignment of 'output'
-    # Done: save() & restore() using stack.
-    # Done: Allow momentary cancellation of output (for cases such as error or exceptions, when we wish to __exit__ without write())
-    def __init__(
-            self,
-            format_,
-            version,
-            headers,
-            data={},
-            raw=b'',
-            aliases={},
-            key_declaration=set(),
-            warnings=False,
-            key_assertion=None,
-            value_assertaion=None,
-            deserializer=None,
-            serializer=None,
-            syslog_header=None,
-            timestamp_fields=set(),
-            to_timestamp=None,
-            from_timestamp=None,
-            allow_empty_keys=False,
-            outputs=None,
-            tcp=None,
-            udp=None,
-            file=None,
-            size_limit=1024,
-            optimized_save_levels=5
-    ):
+    def __init__(self, format_, version, headers, data=None, raw=b'', aliases=None, fields=None, warnings=False,
+                 key_assertion=None, value_assertion=None, deserializer=None, serializer=None, syslog_header=None,
+                 timestamp_fields=None, to_timestamp=None, from_timestamp=None, allow_empty_keys=False, outputs=None,
+                 tcp=None, udp=None, file=None, size_limit=1024, optimized_state_levels=5):
 
         """
             format_             - Format name, as will be presented in serialized form (CEF, LEEF, etc.)
@@ -296,8 +269,10 @@ class AbstractEventFormat(dict):
             data                - Assign values using dictionary object
             raw                 - Unparsed raw event
             aliases             - Aliases dictionary for key access
-            key_declaration     - If declared, only these keys will be allowed.
-                                    Exceptions message will tip for close matches
+            fields     - Declare field names for optional enforcement, spelling tests, correctness & other
+                                    possible assistance.
+                                    [Move to flag -> If declared, only these keys will be allowed.
+                                    Exceptions message will tip for close matches]
             warnings            - Warn about bad usage / practices
             key_assertion       - Assertion function to test the key's creation / access correctness
             value_assertion     - Assertion function to test the value's assignment correctness
@@ -315,6 +290,13 @@ class AbstractEventFormat(dict):
             size_limit          - The event size limit. In order to avoid potential size exploits.
         """
 
+        super().__init__()
+        if timestamp_fields is None:
+            timestamp_fields = set()
+
+        if data is None:
+            data = {}
+
         if key_assertion is None:
             key_assertion = AbstractEventFormat.key_assertion
         self.__key_assertion = key_assertion
@@ -330,6 +312,12 @@ class AbstractEventFormat(dict):
         if syslog_header is None:
             syslog_header = AbstractEventFormat.syslog_header
         self.__syslog_header = syslog_header
+
+        if aliases is None:
+            aliases = {}
+
+        if fields is None:
+            fields = set()
 
         # Keep the dictionary outside of the object's scope in order to avoid paradox when setting/getting data.
         AbstractEventFormat.__aliases[id(self)] = aliases
@@ -361,10 +349,13 @@ class AbstractEventFormat(dict):
         self.__headers_order = headers  # Important to know the order
         self.__headers_hash_set = set(headers)  # Much faster to test against.
         self.__aliases = aliases
+        self.__fields = fields
+        self.__fields.update(siemkit_data.words_set(aliases))
+
         # self.__headers_set = set(headers)
 
         # After all values are set for the first time, use them as default for the `clear()` command.
-        self.__states = States(optimized_size=optimized_save_levels)
+        self.__states = States(optimized_size=optimized_state_levels)
         self.__states.store(self)
         #self.__default_state = {}
         #self.__default_state.update(self)
@@ -502,7 +493,6 @@ class AbstractEventFormat(dict):
 
     def __enter__(self):
         self.__commit_context = True
-        #self.save()
         self.store()
         return self
 
@@ -510,7 +500,6 @@ class AbstractEventFormat(dict):
         if traceback:
             raise
 
-        # Done: Move this logic to write(self, object/collection of objects or self.__output)
         if self.__commit_context:
             if self.__output:
                 self.write()
@@ -528,7 +517,7 @@ class AbstractEventFormat(dict):
     def abort(self):
         """
         Works only within most inner `with` statement (context manager).
-         Aborts output on exit for assigned outputs.
+         Aborts output on exit for assigned values.
         :return:
         """
         self.__commit_context = False
@@ -537,7 +526,7 @@ class AbstractEventFormat(dict):
     # Set current values as default
     def save(self):
         """
-        Set root state.
+        Set the current state as root state.
         :return:
         """
         self.__states.save(self)
@@ -545,7 +534,7 @@ class AbstractEventFormat(dict):
 
     def reset(self):
         """
-        Reset to root state.
+        Reset current state to the saved root state.
         :return:
         """
         state = self.__states.reset()
@@ -593,20 +582,25 @@ class AbstractEventFormat(dict):
     def close(self):  # Close all used resources -> Files, Sockets, etc.
         pass
 
+    def available_keys(self):
+
+        self.__fields.update(self.keys())
+        return set(self.__fields)
+
 
 class Cef(AbstractEventFormat):
 
     def __init__(
             self,
             version=0,
-            data={},
+            data=None,
             raw=b'',
-            aliases={},
-            key_declartion=set(),
+            aliases=None,
+            fields=None,
             key_assertion=None,
             deserializer=None,
             serializer=None,
-            timestamp_fields=set(),
+            timestamp_fields=None,
             to_timestamp=None,
             from_timestamp=None,
             allow_empty_keys=False,
@@ -615,6 +609,18 @@ class Cef(AbstractEventFormat):
             udp=None,
             file=None
     ):
+
+        if fields is None:
+            fields = set()
+
+        if data is None:
+            data = {}
+
+        if aliases is None:
+            aliases = {}
+
+        if timestamp_fields is None:
+            timestamp_fields = set()
 
         cef_key_declaration = set()
 
@@ -629,6 +635,7 @@ class Cef(AbstractEventFormat):
         }
 
         cef_key_declaration.update(cef_json.keys())
+        cef_key_declaration.update(fields)
 
         cef_json.update(data)
 
@@ -729,9 +736,10 @@ class Cef(AbstractEventFormat):
             'sourceGeoLongitude': 'slong',
         }
 
-        for k, v in cef_aliases.items():
-            cef_key_declaration.add(k)
-            cef_key_declaration.add(v)
+        cef_key_declaration.update(siemkit_data.words_set(cef_aliases))
+        #for k, v in cef_aliases.items():
+        #    cef_key_declaration.add(k)
+        #    cef_key_declaration.add(v)
 
         # Done: Enable self (double) aliases
         for k, v in aliases.items():
@@ -783,7 +791,7 @@ class Cef(AbstractEventFormat):
             data=cef_json,
             raw=raw,
             aliases=cef_aliases,
-            key_declaration=cef_key_declaration,
+            fields=cef_key_declaration,
             key_assertion=key_assertion,
             deserializer=deserializer,
             serializer=serializer,
