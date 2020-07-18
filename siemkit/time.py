@@ -12,6 +12,9 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
+# ToDo: 1. Timeformats -> Have the time.py to either specify a format to parse, turn into a timestamp,
+#  or have the 'auto' string for using the timeparse library.
+
 from datetime import datetime
 from datetime import timedelta
 from datetime import timezone

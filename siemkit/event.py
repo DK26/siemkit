@@ -23,6 +23,14 @@ from collections import deque
 from enum import Enum
 from . import data as siemkit_data
 
+# ToDo: 1. Timeformats -> Have the time.py to either specify a format to parse, turn into a timestamp,
+#  or have the 'auto' string for using the timeparse library.
+# ToDo: 2. On the first with() statement where the Event() contains any outputs, start the sessions of all outputs
+#  by accessing their __enter__. On the most outter (or same level of initial outputs?),
+#  perform the __exit__ on all outputs.
+#   -Treat as sessions, thinking about writing to files or having a managed TCP connection.
+#   -Connectionless just don't manage anything, they just write on command.
+# ToDo: 3. Create a customizable output option. Make CSV files using those customized file types.
 
 # import dateparser  # This can't be good for performance. Need performance? know your formats!
 
