@@ -14,6 +14,7 @@
 
 # ToDo: 1. Timeformats -> Have the time.py to either specify a format to parse, turn into a timestamp,
 #  or have the 'auto' string for using the timeparse library.
+# ToDo: 2. Add a string enum for known & common timeformats.
 
 from datetime import datetime
 from datetime import timedelta
