@@ -147,14 +147,15 @@ class States:
 
 class AbstractEventFormat(dict):
 
+    __aliases = {}
+
     __default_aliases = {}
 
-    __default_keys = None
+    __default_keys = set()
 
     @classmethod
     def default_keys(cls):
-        if cls.__default_keys is not None:
-            return set(cls.__default_keys)
+        return set(cls.__default_keys)
 
     @classmethod
     def default_aliases(cls):
@@ -616,7 +617,7 @@ class Cef(AbstractEventFormat):
     # To manually tie attacker and source fields together, assign aliases when creating an event object.
     # e.g.  Cef(aliases={ "attackerAddress": "src" }) will tie attackerAddress to sourceAddress.
     #  Cef(aliases={ "attackerAddress": "src" }) == Cef(aliases={ "attackerAddress": "sourceAddress"})
-    __aliases = {
+    __default_aliases = {
         'deviceAction': 'act',
         'applicationProtocol': 'app',
         'baseEventCount': 'cnt',
@@ -708,7 +709,7 @@ class Cef(AbstractEventFormat):
         'sourceGeoLongitude': 'slong',
     }
 
-    __default_keys = siemkit_data.words_set(__aliases)
+    __default_keys = siemkit_data.words_set(__default_aliases)
 
     __default_keys.update({
             'attackerAddress',
@@ -736,6 +737,14 @@ class Cef(AbstractEventFormat):
             'targetGeoLatitude',
             'targetGeoLongitude',
         })
+
+    @classmethod
+    def default_keys(cls):
+        return set(cls.__default_keys)
+
+    @classmethod
+    def default_aliases(cls):
+        return dict(cls.__default_aliases)
 
     def __init__(
             self,
