@@ -498,7 +498,7 @@ class EventFormat(dict):
     def __setattr__(self, name, value):
 
         # Don't update private variables in the dictionary.
-        if name.startswith("_AbstractEventFormat_"):
+        if name.startswith("_EventFormat_"):
             return super().__setattr__(name, value)
 
         # If attribute has double underscores, treat as a single space.
