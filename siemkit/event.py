@@ -145,7 +145,7 @@ class States:
         return self
 
 
-class AbstractEventFormat(dict):
+class EventFormat(dict):
 
     __aliases = {}
 
@@ -320,19 +320,19 @@ class AbstractEventFormat(dict):
             data = {}
 
         if key_assertion is None:
-            key_assertion = AbstractEventFormat.key_assertion
+            key_assertion = EventFormat.key_assertion
         self.__key_assertion = key_assertion
 
         if deserializer is None:
-            deserializer = AbstractEventFormat.deserializer
+            deserializer = EventFormat.deserializer
         self.__deserializer = deserializer
 
         if serializer is None:
-            serializer = AbstractEventFormat.serializer
+            serializer = EventFormat.serializer
         self.__serializer = serializer
 
         if syslog_header is None:
-            syslog_header = AbstractEventFormat.syslog_header
+            syslog_header = EventFormat.syslog_header
         self.__syslog_header = syslog_header
 
         if aliases is None:
@@ -342,7 +342,7 @@ class AbstractEventFormat(dict):
             fields = set()
 
         # Keep the dictionary outside of the object's scope in order to avoid paradox when setting/getting data.
-        AbstractEventFormat.__aliases[id(self)] = aliases
+        EventFormat.__aliases[id(self)] = aliases
 
         # ToDo: If 'restrict_keys', allow /assert only access to the given keys. -> replaced with 'assert_key' function
         # If given a wrong one, throw missing key/attribute exception.
@@ -393,6 +393,14 @@ class AbstractEventFormat(dict):
 
         self.__output = None
         self.output(outputs)
+
+    def update_aliases(self, aliases):
+        EventFormat.__aliases[id(self)].update(aliases)
+        return self
+
+    def assign_aliases(self, aliases):
+        EventFormat.__aliases[id(self)] = aliases
+        return self
 
     def output(self, outputs):
 
@@ -458,8 +466,8 @@ class AbstractEventFormat(dict):
         if '__' in key:
             key = key.replace('__', ' ')
 
-        if key in AbstractEventFormat.__aliases[self_id]:
-            key = AbstractEventFormat.__aliases[self_id][key]
+        if key in EventFormat.__aliases[self_id]:
+            key = EventFormat.__aliases[self_id][key]
 
         if ignore_exception:
             return super().get(key, None)
@@ -482,8 +490,8 @@ class AbstractEventFormat(dict):
         # Do not set attribute, that way we enforce the calling of __getattr__
         self.__detected_changes = True
         self_id = id(self)
-        if key in AbstractEventFormat.__aliases[self_id]:
-            key = AbstractEventFormat.__aliases[self_id][key]
+        if key in EventFormat.__aliases[self_id]:
+            key = EventFormat.__aliases[self_id][key]
         super().__setitem__(key, value)
         return self
 
@@ -610,7 +618,7 @@ class AbstractEventFormat(dict):
         return set(self.__fields)
 
 
-class Cef(AbstractEventFormat):
+class Cef(EventFormat):
 
     # REF: About Source/Attacker Destination/Target
     # https://community.microfocus.com/t5/ArcSight-User-Discussions/Attacker-Address-versus-Source-Address/td-p/1582901
@@ -855,7 +863,7 @@ class Cef(AbstractEventFormat):
         )
 
 
-class Leef(AbstractEventFormat):
+class Leef(EventFormat):
     pass
 
 
