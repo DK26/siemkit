@@ -712,31 +712,37 @@ class Cef(AbstractEventFormat):
     __default_keys = siemkit_data.words_set(__default_aliases)
 
     __default_keys.update({
-            'attackerAddress',
-            'attackerHostName',
-            'attackerMacAddress',
-            'attackerPort',
-            'attackerUserPrivileges',
-            'attackerUserId',
-            'attackerUserName',
-            'attackerNtDomain',
-            'attackerProcessId',
-            'attackerProcessName',
-            'attackerGeoLatitude',
-            'attackerGeoLongitude'
-            'targetHostName',
-            'targetAddress',
-            'targetMacAddress',
-            'targetNtDomain',
-            'targetPort',
-            'targetProcessName',
-            'targetProcessId',
-            'targetUserId',
-            'targetUserPrivileges',
-            'targetUserName',
-            'targetGeoLatitude',
-            'targetGeoLongitude',
-        })
+        'attackerAddress',
+        'attackerHostName',
+        'attackerMacAddress',
+        'attackerPort',
+        'attackerUserPrivileges',
+        'attackerUserId',
+        'attackerUserName',
+        'attackerNtDomain',
+        'attackerProcessId',
+        'attackerProcessName',
+        'attackerGeoLatitude',
+        'attackerGeoLongitude'
+        'targetHostName',
+        'targetAddress',
+        'targetMacAddress',
+        'targetNtDomain',
+        'targetPort',
+        'targetProcessName',
+        'targetProcessId',
+        'targetUserId',
+        'targetUserPrivileges',
+        'targetUserName',
+        'targetGeoLatitude',
+        'targetGeoLongitude',
+        'deviceVendor',
+        'deviceProduct',
+        'deviceVersion',
+        'deviceEventClassId',
+        'name',
+        'deviceSeverity'
+    })
 
     @classmethod
     def default_keys(cls):
