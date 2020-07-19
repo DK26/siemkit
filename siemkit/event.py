@@ -22,6 +22,7 @@ import json
 from collections import deque
 from enum import Enum
 from . import data as siemkit_data
+from collections import ChainMap
 
 # ToDo: 1. Timeformats -> Have the time.py to either specify a format to parse, turn into a timestamp,
 #  or have the 'auto' string for using the timeparse library.
@@ -145,7 +146,19 @@ class States:
 
 
 class AbstractEventFormat(dict):
-    __aliases = {}
+
+    __default_aliases = {}
+
+    __default_keys = None
+
+    @classmethod
+    def default_keys(cls):
+        if cls.__default_keys is not None:
+            return set(cls.__default_keys)
+
+    @classmethod
+    def default_aliases(cls):
+        return dict(cls.__default_keys)
 
     @staticmethod
     def key_assertion(key):
@@ -598,6 +611,132 @@ class AbstractEventFormat(dict):
 
 class Cef(AbstractEventFormat):
 
+    # REF: About Source/Attacker Destination/Target
+    # https://community.microfocus.com/t5/ArcSight-User-Discussions/Attacker-Address-versus-Source-Address/td-p/1582901
+    # To manually tie attacker and source fields together, assign aliases when creating an event object.
+    # e.g.  Cef(aliases={ "attackerAddress": "src" }) will tie attackerAddress to sourceAddress.
+    #  Cef(aliases={ "attackerAddress": "src" }) == Cef(aliases={ "attackerAddress": "sourceAddress"})
+    __aliases = {
+        'deviceAction': 'act',
+        'applicationProtocol': 'app',
+        'baseEventCount': 'cnt',
+        'eventOutcome': 'outcome',
+        'deviceAddress': 'dvc',
+        'deviceHostName': 'dvchost',
+        'deviceMacAddress': 'dvcmac',
+        'deviceProcessId': 'dvcpid',
+        'destinationAddress': 'dst',
+        'deviceTimeZone': 'dtz',
+        'destinationHostName': 'dhost',
+        'destinationMacAddress': 'dmac',
+        'destinationNtDomain': 'dntdom',
+        'destinationPort': 'dpt',
+        'destinationProcessName': 'dproc',
+        'destinationProcessId': 'dpid',
+        'destinationUserId': 'duid',
+        'destinationUserPrivileges': 'dpriv',
+        'destinationUserName': 'duser',
+        'endTime': 'end',
+        'fileName': 'fname',
+        'fileSize': 'fsize',
+        'bytesIn': 'in',
+        'message': 'msg',
+        'bytesOut': 'out',
+        'transportProtocol': 'proto',
+        'receiptTime': 'rt',
+        'deviceReceiptTime': 'rt',
+        'managerReceiptTime': 'mrt',
+        'requestUrl': 'request',
+        'requestURL': 'request',
+        'sourceAddress': 'src',
+        'sourceHostName': 'shost',
+        'sourceMacAddress': 'smac',
+        'sourcePort': 'spt',
+        'sourceUserPrivileges': 'spriv',
+        'sourceUserId': 'suid',
+        'sourceUserName': 'suser',
+        'sourceNtDomain': 'sntdom',
+        'sourceProcessId': 'spid',
+        'sourceProcessName': 'sproc',
+        'startTime': 'start',
+        'deviceEventCategory': 'cat',
+        'deviceCustomString1Label': 'cs1Label',
+        'deviceCustomString2Label': 'cs2Label',
+        'deviceCustomString3Label': 'cs3Label',
+        'deviceCustomString4Label': 'cs4Label',
+        'deviceCustomString5Label': 'cs5Label',
+        'deviceCustomString6Label': 'cs6Label',
+        'deviceCustomNumber1Label': 'cn1Label',
+        'deviceCustomNumber2Label': 'cn2Label',
+        'deviceCustomNumber3Label': 'cn3Label',
+        'deviceCustomString1': 'cs1',
+        'deviceCustomString2': 'cs2',
+        'deviceCustomString3': 'cs3',
+        'deviceCustomString4': 'cs4',
+        'deviceCustomString5': 'cs5',
+        'deviceCustomString6': 'cs6',
+        'deviceCustomNumber1': 'cn1',
+        'deviceCustomNumber2': 'cn2',
+        'deviceCustomNumber3': 'cn3',
+        'deviceCustomIPv6Address1': 'c6a1',
+        'deviceCustomIPv6Address1Label': 'c6a1Label',
+        'deviceCustomIPv6Address2': 'c6a2',
+        'deviceCustomIPv6Address2Label': 'c6a2Label',
+        'deviceCustomIPv6Address3': 'c6a3',
+        'deviceCustomIPv6Address3Label': 'c6a3Label',
+        'deviceCustomIPv6Address4': 'c6a4',
+        'deviceCustomIPv6Address4Label': 'c6a4Label',
+        'deviceCustomFloatingPoint1': 'cfp1',
+        'deviceCustomFloatingPoint1Label': 'cfp1Label',
+        'deviceCustomFloatingPoint2': 'cfp2',
+        'deviceCustomFloatingPoint2Label': 'cfp2Label',
+        'deviceCustomFloatingPoint3': 'cfp3',
+        'deviceCustomFloatingPoint3Label': 'cfp3Label',
+        'deviceCustomFloatingPoint4': 'cfp4',
+        'deviceCustomFloatingPoint4Label': 'cfp4Label',
+        'agentAddress': 'agt',
+        'agentHostName': 'ahost',
+        'agentId': 'aid',
+        'agentMacAddress': 'amac',
+        'agentReceiptTime': 'art',
+        'agentType': 'at',
+        'agentTimeZone': 'atz',
+        'agentVersion': 'av',
+        'destinationGeoLatitude': 'dlat',
+        'destinationGeoLongitude': 'dlong',
+        'sourceGeoLatitude': 'slat',
+        'sourceGeoLongitude': 'slong',
+    }
+
+    __default_keys = siemkit_data.words_set(__aliases)
+
+    __default_keys.update({
+            'attackerAddress',
+            'attackerHostName',
+            'attackerMacAddress',
+            'attackerPort',
+            'attackerUserPrivileges',
+            'attackerUserId',
+            'attackerUserName',
+            'attackerNtDomain',
+            'attackerProcessId',
+            'attackerProcessName',
+            'attackerGeoLatitude',
+            'attackerGeoLongitude'
+            'targetHostName',
+            'targetAddress',
+            'targetMacAddress',
+            'targetNtDomain',
+            'targetPort',
+            'targetProcessName',
+            'targetProcessId',
+            'targetUserId',
+            'targetUserPrivileges',
+            'targetUserName',
+            'targetGeoLatitude',
+            'targetGeoLongitude',
+        })
+
     def __init__(
             self,
             version=0,
@@ -633,7 +772,7 @@ class Cef(AbstractEventFormat):
         cef_key_declaration = set()
 
         cef_json = {
-            'deviceVendor': 'CyberSIEM Community',
+            'deviceVendor': 'CyberSIEM(R) Community',
             'deviceProduct': 'SIEM Kit',
             'deviceVersion': '0',
             'deviceEventClassId': 100,
@@ -642,148 +781,35 @@ class Cef(AbstractEventFormat):
             'deviceSeverity': CefSeverity.UNKNOWN
         }
 
-        cef_key_declaration.update(cef_json.keys())
-        cef_key_declaration.update(fields)
-
         cef_json.update(data)
 
-        # REF: About Source/Attacker Destination/Target
-        # https://community.microfocus.com/t5/ArcSight-User-Discussions/Attacker-Address-versus-Source-Address/td-p/1582901
-        # To manually tie attacker and source fields together, assign aliases when creating an event object.
-        # e.g.  Cef(aliases={ "attackerAddress": "src" }) will tie attackerAddress to sourceAddress
+        default_aliases = Cef.default_aliases()
+        cef_key_declaration.update(siemkit_data.words_set(aliases))
 
-        cef_aliases = {
-            'deviceAction': 'act',
-            'applicationProtocol': 'app',
-            'baseEventCount': 'cnt',
-            'eventOutcome': 'outcome',
-            'deviceAddress': 'dvc',
-            'deviceHostName': 'dvchost',
-            'deviceMacAddress': 'dvcmac',
-            'deviceProcessId': 'dvcpid',
-            'destinationAddress': 'dst',
-            'deviceTimeZone': 'dtz',
-            'destinationHostName': 'dhost',
-            'destinationMacAddress': 'dmac',
-            'destinationNtDomain': 'dntdom',
-            'destinationPort': 'dpt',
-            'destinationProcessName': 'dproc',
-            'destinationProcessId': 'dpid',
-            'destinationUserId': 'duid',
-            'destinationUserPrivileges': 'dpriv',
-            'destinationUserName': 'duser',
-            'endTime': 'end',
-            'fileName': 'fname',
-            'fileSize': 'fsize',
-            'bytesIn': 'in',
-            'message': 'msg',
-            'bytesOut': 'out',
-            'transportProtocol': 'proto',
-            'receiptTime': 'rt',
-            'deviceReceiptTime': 'rt',
-            'managerReceiptTime': 'mrt',
-            'requestUrl': 'request',
-            'requestURL': 'request',
-            'sourceAddress': 'src',
-            'sourceHostName': 'shost',
-            'sourceMacAddress': 'smac',
-            'sourcePort': 'spt',
-            'sourceUserPrivileges': 'spriv',
-            'sourceUserId': 'suid',
-            'sourceUserName': 'suser',
-            'sourceNtDomain': 'sntdom',
-            'sourceProcessId': 'spid',
-            'sourceProcessName': 'sproc',
-            'startTime': 'start',
-            'deviceEventCategory': 'cat',
-            'deviceCustomString1Label': 'cs1Label',
-            'deviceCustomString2Label': 'cs2Label',
-            'deviceCustomString3Label': 'cs3Label',
-            'deviceCustomString4Label': 'cs4Label',
-            'deviceCustomString5Label': 'cs5Label',
-            'deviceCustomString6Label': 'cs6Label',
-            'deviceCustomNumber1Label': 'cn1Label',
-            'deviceCustomNumber2Label': 'cn2Label',
-            'deviceCustomNumber3Label': 'cn3Label',
-            'deviceCustomString1': 'cs1',
-            'deviceCustomString2': 'cs2',
-            'deviceCustomString3': 'cs3',
-            'deviceCustomString4': 'cs4',
-            'deviceCustomString5': 'cs5',
-            'deviceCustomString6': 'cs6',
-            'deviceCustomNumber1': 'cn1',
-            'deviceCustomNumber2': 'cn2',
-            'deviceCustomNumber3': 'cn3',
-            'deviceCustomIPv6Address1': 'c6a1',
-            'deviceCustomIPv6Address1Label': 'c6a1Label',
-            'deviceCustomIPv6Address2': 'c6a2',
-            'deviceCustomIPv6Address2Label': 'c6a2Label',
-            'deviceCustomIPv6Address3': 'c6a3',
-            'deviceCustomIPv6Address3Label': 'c6a3Label',
-            'deviceCustomIPv6Address4': 'c6a4',
-            'deviceCustomIPv6Address4Label': 'c6a4Label',
-            'deviceCustomFloatingPoint1': 'cfp1',
-            'deviceCustomFloatingPoint1Label': 'cfp1Label',
-            'deviceCustomFloatingPoint2': 'cfp2',
-            'deviceCustomFloatingPoint2Label': 'cfp2Label',
-            'deviceCustomFloatingPoint3': 'cfp3',
-            'deviceCustomFloatingPoint3Label': 'cfp3Label',
-            'deviceCustomFloatingPoint4': 'cfp4',
-            'deviceCustomFloatingPoint4Label': 'cfp4Label',
-            'agentAddress': 'agt',
-            'agentHostName': 'ahost',
-            'agentId': 'aid',
-            'agentMacAddress': 'amac',
-            'agentReceiptTime': 'art',
-            'agentType': 'at',
-            'agentTimeZone': 'atz',
-            'agentVersion': 'av',
-            'destinationGeoLatitude': 'dlat',
-            'destinationGeoLongitude': 'dlong',
-            'sourceGeoLatitude': 'slat',
-            'sourceGeoLongitude': 'slong',
-        }
+        aliases.update(default_aliases)
 
-        cef_key_declaration.update(siemkit_data.words_set(cef_aliases))
+
         #for k, v in cef_aliases.items():
         #    cef_key_declaration.add(k)
         #    cef_key_declaration.add(v)
 
         # Done: Enable self (double) aliases
         for k, v in aliases.items():
-            if v in cef_aliases.keys():
-                cef_aliases[k] = cef_aliases[v]
+            if v in aliases.keys():
+                aliases[k] = aliases[v]
             else:
-                cef_aliases[k] = v
+                aliases[k] = v
         # cef_aliases.update(aliases)
 
         # Other Key Declaration
-        cef_key_declaration.update({
-            'attackerAddress',
-            'attackerHostName',
-            'attackerMacAddress',
-            'attackerPort',
-            'attackerUserPrivileges',
-            'attackerUserId',
-            'attackerUserName',
-            'attackerNtDomain',
-            'attackerProcessId',
-            'attackerProcessName',
-            'attackerGeoLatitude',
-            'attackerGeoLongitude'
-            'targetHostName',
-            'targetAddress',
-            'targetMacAddress',
-            'targetNtDomain',
-            'targetPort',
-            'targetProcessName',
-            'targetProcessId',
-            'targetUserId',
-            'targetUserPrivileges',
-            'targetUserName',
-            'targetGeoLatitude',
-            'targetGeoLongitude',
-        })
+        # cef_key_declaration.update()
+
+        # if default_aliases is None:
+        #    default_aliases = set(cef_key_declaration)
+
+        # Update potential custom key declarations
+        cef_key_declaration.update(cef_json.keys())
+        cef_key_declaration.update(fields)
 
         super().__init__(
             format_='CEF',
@@ -798,7 +824,7 @@ class Cef(AbstractEventFormat):
             ),
             data=cef_json,
             raw=raw,
-            aliases=cef_aliases,
+            aliases=aliases,
             fields=cef_key_declaration,
             key_assertion=key_assertion,
             deserializer=deserializer,
