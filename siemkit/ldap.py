@@ -104,6 +104,14 @@ class CommonQueries(str, Enum):
         return self.value
 
 
+def query_since(query: str, time_field: str, time: str) -> str:
+
+    if query.startswith('(&'):
+        return query.replace('(&', f'(&({time_field}>{time})')
+    else:
+        return f'(&({time_field}>{time}){query})'
+
+
 def query_sam_account_type(sam_account_type: int) -> str:
     return f'(sAMAccountType={sam_account_type})'
 
