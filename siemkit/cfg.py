@@ -26,7 +26,7 @@ class CSVManager:
             self,
             csv_file,
             key_fields,
-            secret_fields,
+            secret_fields=None,
             newline='',
             encoding='utf-8',
             errors='ignore',
@@ -66,6 +66,9 @@ class CSVManager:
             key_fields = (key_fields,)
         else:
             key_fields = tuple(key_fields)"""
+
+        if secret_fields is None:
+            secret_fields = set()
 
         for field in key_fields:
             if field in secret_fields:
