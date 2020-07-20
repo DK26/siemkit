@@ -16,6 +16,8 @@ from enum import IntFlag
 from enum import Enum
 from typing import Generator
 
+import json
+
 
 class UserAccountControlAttributes(IntFlag):
 
@@ -116,8 +118,43 @@ def query_group_type(group_type: int) -> str:
 
 def dc_parts(domain: str) -> Generator[str, None, None]:
     for part in domain.split('.'):
-        yield f'dc={part}'
+        yield f'DC={part}'
 
 
 def dc(domain: str) -> str:
     return ','.join(dc_parts(domain))
+
+
+def forest(forest_name: str) -> str:
+    return f"CN=Partitions,CN=Configuration,{','.join(dc_parts(forest_name))}"
+
+
+def ldap3_forest_domains(ldap3_connection, forest_name: str) -> Generator[str, None, None]:
+    """
+    A helper function for the `ldap3` library.
+     Generates domain names.
+    """
+
+    # REF: https://stackoverflow.com/questions/43903677/how-to-list-all-domains-in-forest
+
+    ldap3_connection.search(
+        search_base=forest(forest_name),
+        search_filter='(nETBIOSName=*)',
+        search_scope='SUBTREE',
+        attributes='*'
+    )
+
+    for entry in ldap3_connection.entries:
+        json_entry = json.loads(entry.entry_to_json())
+        yield json_entry['attributes']['nCName'][0]
+
+
+def python_ldap_forest_domains() -> Generator[str, None, None]:
+    """
+    A helper function for the `python-ldap` library.
+     Generates domain names.
+    """
+
+    # REF: https://stackoverflow.com/questions/43903677/how-to-list-all-domains-in-forest
+
+    yield ''
