@@ -17,6 +17,8 @@ import pickle
 from typing import Generator
 from typing import Tuple
 from typing import Set
+from typing import Dict
+from typing import Collection
 from collections.abc import Iterable
 
 
@@ -190,6 +192,81 @@ def words_set(item) -> Set:
     extract_words(item, options)
 
     return options
+
+
+def key_map(data_: Collection) -> dict:
+    """
+    Map all keys in a given data collection to their respective values.
+
+    e.g.
+
+    For the next data collection:
+
+        data = [
+            {
+                'name': 'foo',
+                'age': 31,
+                'country': 'UK'
+            },
+            {
+                'name': 'bar',
+                'age': 31,
+                'country': 'US'
+            },
+            {
+                'name': 'Mr. X',
+                'age': 29,
+                'country': 'UK'
+            }
+        ]
+
+    mapped_data = key_mep(data)
+
+    mapped_data['age'][31]
+        will return:
+            [
+                {
+                    'name': 'foo',
+                    'age': 31,
+                    'country': 'UK'
+                },
+                {
+                    'name': 'bar',
+                    'age': 31,
+                    'country': 'US'
+                }
+            ]
+
+    mapped_data['country']['UK']
+        will return:
+            [
+                {
+                    'name': 'foo',
+                    'age': 31,
+                    'country': 'UK'
+                },
+                {
+                    'name': 'Mr. X',
+                    'age': 29,
+                    'country': 'UK'
+                }
+            ]
+
+    :param data_:
+    :return:
+    """
+
+    mapped_data = {}
+
+    for item in data_:
+        for k, v in item.items():
+            if k not in mapped_data:
+                mapped_data[k] = {}
+            if v not in mapped_data[k]:
+                mapped_data[k][v] = []
+            mapped_data[k][v].append(item)
+
+    return mapped_data
 
 
 if __name__ == '__main__':
