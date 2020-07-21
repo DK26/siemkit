@@ -107,7 +107,7 @@ class CommonQueries(str, Enum):
 def query_since(query: str, time_field: str, time: str) -> str:
 
     if query.startswith('(&'):
-        return query.replace('(&', f'(&({time_field}>{time})')
+        return query.replace('(&', f'(&({time_field}>={time})')
     else:
         return f'(&({time_field}>{time}){query})'
 
@@ -166,3 +166,5 @@ def python_ldap_forest_domains() -> Generator[str, None, None]:
     # REF: https://stackoverflow.com/questions/43903677/how-to-list-all-domains-in-forest
 
     yield ''
+
+

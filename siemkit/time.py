@@ -307,3 +307,15 @@ def current_timestamp(type_: TimeType = None, tz: tzinfo = None) -> int:
     :return: Timestamp
     """
     return time_type(type_).from_datetime(datetime.now().astimezone(tz=tz))
+
+
+def to_ymd_ldap(datetime_: datetime) -> str:
+
+    zulu_time_zone = '.0Z'
+
+    return (
+            datetime_
+            .replace(tzinfo=None)
+            .astimezone(tz=timezone.utc)
+            .strftime("%Y%m%d%H%M%S") + zulu_time_zone
+    )
