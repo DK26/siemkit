@@ -20,6 +20,7 @@ from typing import Set
 from typing import Dict
 from typing import Collection
 from collections.abc import Iterable
+from siemkit.file import open
 
 
 class IDTracker:
