@@ -18,6 +18,8 @@ from typing import Generator
 
 import json
 
+from siemkit.logging import dump_debug
+
 
 class UserAccountControlAttributes(IntFlag):
 
@@ -137,7 +139,7 @@ def forest(forest_name: str) -> str:
     return f"CN=Partitions,CN=Configuration,{','.join(dc_parts(forest_name))}"
 
 
-def ldap3_forest_domains(ldap3_connection, forest_name: str) -> Generator[str, None, None]:
+def ldap3_forest_domains(ldap3_connection, forest_name: str, debug_mode=False) -> Generator[str, None, None]:
     """
     A helper function for the `ldap3` library.
      Generates domain names.
@@ -154,6 +156,13 @@ def ldap3_forest_domains(ldap3_connection, forest_name: str) -> Generator[str, N
 
     for entry in ldap3_connection.entries:
         json_entry = json.loads(entry.entry_to_json())
+
+        dump_debug(f"Domain in Forest "
+                   f"| search_base = {forest(forest_name)} "
+                   f"| search_filter = (nETBIOSName=*) "
+                   f"| search_scope = SUBTREE "
+                   f"| attributes = ALL", json_entry, debug_mode=debug_mode)
+
         yield json_entry['attributes']['nCName'][0]
 
 
