@@ -13,7 +13,7 @@
 #   limitations under the License.
 
 import os
-import pickle
+import json
 from typing import Generator
 from typing import Tuple
 from typing import Set
@@ -22,7 +22,6 @@ from typing import Collection
 from collections.abc import Iterable
 
 
-# ToDo: Replace pickle with JSON dump. REF: https://pycharm-security.readthedocs.io/en/latest/checks/PIC100.html
 class IDTracker:
 
     def __init__(self, file_name):
@@ -57,12 +56,12 @@ class IDTracker:
         if self.__update:
             with open(self.__file_name, 'wb') as fs:
 
-                pickle.dump(self.__data, fs)
+                json.dump(self.__data, fs)
             self.__update = False
 
     def load(self):
         with open(self.__file_name, 'rb') as fs:
-            self.__data = pickle.load(fs)
+            self.__data = json.load(fs)
 
         self.__update = False
 
@@ -78,6 +77,35 @@ class IDTracker:
 
     def __str__(self):
         return str(self.__data)
+
+
+class JSONFile(dict):
+
+    def __init__(self, file_name, *args, auto_commit=False, **kwargs):
+
+        self.__file_name = file_name
+        self.__auto_commit = auto_commit
+
+        if os.path.exists(file_name):
+            self.load()
+
+        # Assign other values.
+        super().__init__(*args, **kwargs)
+
+    def __setitem__(self, key, value):
+        super().__setitem__(key, value)
+        if self.__auto_commit:
+            self.commit()
+
+    def commit(self):
+        with open(self.__file_name, 'w', encoding='utf-8', errors='ignore') as fs:
+            json.dump(self, fs, indent=4)
+
+    def load(self):
+        with open(self.__file_name, 'r', encoding='utf-8', errors='ignore') as fs:
+            self.clear()
+            self.update(json.load(fs))
+        return self
 
 
 def test_id_tracker():
