@@ -157,11 +157,15 @@ def ldap3_forest_domains(ldap3_connection, forest_name: str, debug_mode=False) -
     for entry in ldap3_connection.entries:
         json_entry = json.loads(entry.entry_to_json())
 
-        dump_debug(f"Domain in Forest "
-                   f"| search_base = {forest(forest_name)} "
-                   f"| search_filter = (nETBIOSName=*) "
-                   f"| search_scope = SUBTREE "
-                   f"| attributes = ALL", json_entry, debug_mode=debug_mode)
+        dump_debug(
+            f"Domain in Forest "
+            f"| search_base = {forest(forest_name)} "
+            f"| search_filter = (nETBIOSName=*) "
+            f"| search_scope = SUBTREE "
+            f"| attributes = ALL",
+            json.dumps(json_entry, indent=4),
+            debug_mode=debug_mode
+        )
 
         yield json_entry['attributes']['nCName'][0]
 
