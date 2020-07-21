@@ -25,8 +25,8 @@ settings = {
     'stdin': sys.stdin,
     'stddebug': sys.stdout,
     'debug_mode': False,
-    'dump_file_name': 'dump_%d%m%Y-%H%M%S.log',
-    'debug_dump_file_name': 'debug_dump_%d%m%Y-%H%M%S.log'
+    'dump_file_name': 'dump_%d%m%Y-%H%M%S-%f.log',
+    'debug_dump_file_name': 'debug_dump_%d%m%Y-%H%M%S-%f.log'
 }
 
 builtin_print = print
@@ -95,7 +95,7 @@ def dump_debug(msg, payload, file=None, dump_file_name=None, debug_mode=None):
 
         dump_file_name = to_format(format_=dump_file_name)
         print_message(f"DEBUG | DUMP | {msg}: '{dump_file_name}'", file=file)
-        with open(dump_file_name, 'w', encoding='utf-8', errors='ignore') as fs:
+        with open(dump_file_name, 'a', encoding='utf-8', errors='ignore') as fs:
             fs.write(format_message(f"DEBUG | DUMP | {msg}: \n{payload}"))
 
 
@@ -109,5 +109,5 @@ def dump(msg, payload, file=None, dump_file_name=None):
 
     dump_file_name = to_format(format_=dump_file_name)
     print_message(f"DUMP | {msg}: '{dump_file_name}'", file=file)
-    with open(dump_file_name, 'w', encoding='utf-8', errors='ignore') as fs:
+    with open(dump_file_name, 'a', encoding='utf-8', errors='ignore') as fs:
         fs.write(format_message(f"DUMP | {msg}: \n{payload}"))

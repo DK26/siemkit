@@ -99,6 +99,12 @@ class JSONFile(dict):
         if self.__auto_commit:
             self.commit()
 
+    def __str__(self):
+        return json.dumps(self, indent=self.__indent)
+
+    def indent(self, spaces=4):
+        self.__indent = spaces
+
     def commit(self):
         with open(self.__file_name, 'w', encoding='utf-8', errors='ignore') as fs:
             json.dump(self, fs, indent=self.__indent)
