@@ -82,10 +82,11 @@ class IDTracker:
 
 class JSONFile(dict):
 
-    def __init__(self, file_name, *args, auto_commit=False, **kwargs):
+    def __init__(self, file_name, *args, auto_commit=False, indent=4, **kwargs):
 
         self.__file_name = file_name
         self.__auto_commit = auto_commit
+        self.__indent = indent
 
         if os.path.exists(file_name):
             self.load()
@@ -100,7 +101,7 @@ class JSONFile(dict):
 
     def commit(self):
         with open(self.__file_name, 'w', encoding='utf-8', errors='ignore') as fs:
-            json.dump(self, fs, indent=4)
+            json.dump(self, fs, indent=self.__indent)
 
     def load(self):
         with open(self.__file_name, 'r', encoding='utf-8', errors='ignore') as fs:
