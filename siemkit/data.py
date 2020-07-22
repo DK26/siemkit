@@ -17,10 +17,10 @@ import json
 from typing import Generator
 from typing import Tuple
 from typing import Set
-from typing import Dict
 from typing import Collection
 from collections.abc import Iterable
 from siemkit.file import open
+from siemkit import adaptors
 
 
 class IDTracker:
@@ -113,6 +113,27 @@ class JSONFile(dict):
         with open(self.__file_name, 'r', encoding='utf-8', errors='ignore') as fs:
             self.clear()
             self.update(json.load(fs))
+        return self
+
+
+class Vault:
+
+    def __init__(self, name, keyring_lib: adaptors.Keyring):
+        self.__name = name
+        self.__keyring_lib = keyring_lib
+
+    def name(self):
+        return self.__name
+
+    def store_secret(self, key, secret):
+        self.__keyring_lib.set_password(self.__name, key, secret)
+        return self
+
+    def get_secret(self, key):
+        return self.__keyring_lib.get_password(self.__name, key)
+
+    def delete_secret(self, key):
+        self.__keyring_lib.delete_password(self.__name, key)
         return self
 
 
