@@ -15,18 +15,106 @@
 import csv
 import shutil
 import json
+import os
+from . import adaptors
 from . import data
 
 from typing import Tuple
 
 
-class CSVManager:
+class YamlManager(dict):
+
+    def __init__(
+            self,
+            yaml_adaptor: adaptors.Yaml,
+            file_path: str,
+            auto_commit: bool = False,
+            root_manager: 'YamlManager' = None,
+            *args, **kwargs
+    ):
+        super().__init__(*args, **kwargs)
+        self.__yaml_adaptor = yaml_adaptor
+        self.__file = file_path
+        self.__auto_commit = auto_commit
+
+        if root_manager is None:
+            self.__root_manager = self
+            self.reload()
+        else:
+            self.__root_manager = root_manager
+
+    def __setitem__(self, key, value):
+
+        super().__setitem__(key, value)
+
+        if self.__auto_commit:
+            self.__root_manager.commit()
+
+        self.ready = True
+
+    def __delitem__(self, key):
+
+        super().__delitem__(key)
+
+        if self.__auto_commit:
+            self.__root_manager.commit()
+
+    def commit(self):
+
+        def reverse(d):
+
+            if isinstance(d, YamlManager):
+
+                result = {}
+                for k, v in d.items():
+                    if isinstance(v, YamlManager):
+                        result[k] = reverse(v)
+                    else:
+                        result[k] = v
+
+                return result
+            else:
+                return d
+
+        with open(self.__file, 'w', encoding='utf-8', errors='ignore') as fs_:
+            self.__yaml_adaptor.dump(reverse(self), fs_)
+
+        return self
+
+    def reload(self):
+
+        def convert(d):
+
+            if isinstance(d, dict):
+
+                result = {}
+                for k, v in d.items():
+                    if isinstance(v, dict):
+                        result[k] = convert(v)
+                    else:
+                        result[k] = v
+
+                return YamlManager(self.__yaml_adaptor, self.__file, self.__auto_commit, self.__root_manager, result)
+            else:
+                return d
+
+        if os.path.exists(self.__file):
+            with open(self.__file, 'r', encoding='utf-8', errors='ignore') as fs_:
+                self.clear()
+                yaml_data = convert(self.__yaml_adaptor.load(fs_))
+                if isinstance(yaml_data, dict):
+                    self.update(yaml_data)
+
+        return self
+
+
+class CsvManager:
 
     def __init__(
             self,
             csv_file,
             key_fields,
-            secret_fields,
+            secret_fields=None,
             newline='',
             encoding='utf-8',
             errors='ignore',
@@ -62,10 +150,9 @@ class CSVManager:
         """
 
         key_fields = data.assure_tuple(key_fields)
-        """if isinstance(key_fields, str):
-            key_fields = (key_fields,)
-        else:
-            key_fields = tuple(key_fields)"""
+
+        if secret_fields is None:
+            secret_fields = set()
 
         for field in key_fields:
             if field in secret_fields:
@@ -110,13 +197,7 @@ class CSVManager:
         :return: Entry dictionary
         """
         index = data.assure_tuple(index)
-        """if isinstance(index, str):
-            index = (index,)
-        else:
-            index = tuple(index)"""
 
-        #print(index)
-        #print(self._indexed_field_map)
         return self._indexed_field_map[index]
 
     def set_entry(self, index, dict_values):
@@ -137,13 +218,11 @@ class CSVManager:
             exposed_entry = dict(entry)
 
             for secret_field in self._secret_fields:
-                #print(self.construct_key(entry))
                 exposed_entry[secret_field] = self.get_secret(self.construct_key(entry), secret_field)
 
             yield exposed_entry
 
     def get_entries(self) -> Tuple[dict]:
-        # return tuple(self._entries)
         return self._entries  # Already a tuple
 
     def construct_key(self, entry):
@@ -156,11 +235,7 @@ class CSVManager:
     def store_secret(self, entry, secret_key):
 
         if callable(self._store_secret):
-            # Done: Access each indexed value and retrieve data
-            #key = f"{'.'.join(entry[self._indexed_field])}.{secret_key}"
-            #key = f"{'.'.join(new_index)}.{secret_key}"
             key = f"{'.'.join(self.construct_key(entry))}.{secret_key}"
-            #print(key)
 
             if self._store_secret(key, entry[secret_key]):
                 entry[secret_key] = 'stored'
@@ -215,12 +290,8 @@ class CSVManager:
             json_copy['.'.join(k)] = v
 
         if key is None:
-            #print(json_copy)
             return json.dumps(json_copy, indent=indent)
-        # elif isinstance(key, str):
-        #    key = (key,)
         else:
-            # key = tuple(key)
             key = data.assure_tuple(key)
 
         return json.dumps(json_copy['.'.join(key)], indent=indent)
@@ -277,13 +348,8 @@ class CSVManager:
                                 update_[0] = True
 
                     # Map the entry (dict_row) by the indexed field
-                    #new_index = []
-                    #for index in self._indexed_field:
-                    #    new_index.append(dict_row[index])
-
                     new_index = self.construct_key(dict_row)
 
-                    #self._indexed_field_map[dict_row[self._indexed_field]] = dict_row
                     self._indexed_field_map[new_index] = dict_row
 
                     yield dict_row
@@ -336,7 +402,7 @@ def multi_key_demo():
         fs.write('test_user2,Kola,12345,zzzzz, A test thingy2\n')
         fs.write('test_user,RED HAT,qwe,ghhh, A test thingy3\n')
 
-    clients_csv = CSVManager(
+    clients_csv = CsvManager(
         sys.argv[1],
         key_fields=('username', 'company'),
         secret_fields=('api-key', 'secret'),
@@ -383,7 +449,7 @@ def single_key_demo():
         fs.write('test_user2,Kola,12345,zzzzz, A test thingy2\n')
         fs.write('test_user3,RED HAT,qwe,ghhh, A test thingy3\n')
 
-    clients_csv = CSVManager(
+    clients_csv = CsvManager(
         sys.argv[1],
         key_fields='username',
         secret_fields=('api-key', 'secret'),
