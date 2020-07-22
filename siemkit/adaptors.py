@@ -35,6 +35,35 @@ class Keyring(ABC):
         pass
 
 
+class CommonKeyring(Keyring):
+    """
+    CommonKeyring gets one of the commonly keyring libraries which already implement:
+        `set_password()`, `get_password()` & `delete_password()` exactly by these names.
+
+        e.g. `pip install keyring`, `pip install rskeyring` or other.
+
+        import keyring
+        adapter = CommonKeyring(keyring)
+
+        could also be:
+
+        import rskeyring
+        adapter = CommonKeyring(rskeyring)
+    """
+
+    def __init__(self, module):
+        self.__module = module
+
+    def set_password(self, service: str, key: str, value: str):
+        self.__module.set_password(service, key, value)
+
+    def get_password(self, service: str, key: str) -> str:
+        return self.__module.get_password(service, key)
+
+    def delete_password(self, service: str, key: str):
+        self.__module.delete_password(service, key)
+
+
 class Yaml(ABC):
 
     @abstractmethod
