@@ -17,6 +17,7 @@ from enum import Enum
 from typing import Generator
 
 import json
+import re
 
 from siemkit.logging import dump_debug
 
@@ -133,6 +134,11 @@ def dc_parts(domain: str) -> Generator[str, None, None]:
 
 def dc(domain: str) -> str:
     return ','.join(dc_parts(domain))
+
+
+def from_dc(domain: str) -> str:
+    dc_parts_ = re.findall(r'DC=([\w\s]*)', domain, flags=re.IGNORECASE)
+    return '.'.join(dc_parts_)
 
 
 def forest(forest_name: str) -> str:
