@@ -12,9 +12,12 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-
 from abc import ABC
 from abc import abstractmethod
+from typing import Any
+from typing import Union
+from typing import Generator
+import json
 
 
 class Keyring(ABC):
@@ -32,16 +35,147 @@ class Keyring(ABC):
         pass
 
 
+class Yaml(ABC):
+
+    @abstractmethod
+    def load(self, stream: Any) -> Union[list, dict]:
+        pass
+
+    @abstractmethod
+    def dump(self, data: Any, stream: Any) -> Any:
+        pass
+
+
+class PyYamlModule(Yaml):
+
+    # pip install PyYAML
+    def __init__(self, module):
+        if module.__name__ != 'yaml':
+            raise Exception("Expected `yaml` module.")
+
+        self.__module = module
+
+    def load(self, stream: Any) -> Union[list, dict]:
+        return self.__module.safe_load(stream)
+
+    def dump(self, data: Any, stream: Any) -> Any:
+        return self.__module.safe_dump(data, stream, default_flow_style=False)
+
+
 class Ldap(ABC):
 
-    def connect(self):
+    # Assure usability with `with` context manager
+    def __enter__(self):
         pass
 
-    def disconnect(self):
+    # Assure usability with `with` context manager
+    def __exit__(self, exc_type, exc_val, exc_tb):
         pass
 
-    def search(self):
+    @abstractmethod
+    def connect(self,
+                server,
+                authentication,
+                enable_tls,
+                tls_validate,
+                tls_version,
+                user,
+                password,
+                get_info,
+                auto_bind
+                ):
         pass
 
-    def entries(self):
+    @abstractmethod
+    def get_connection(self):
         pass
+
+    @abstractmethod
+    def bind(self):
+        pass
+
+    @abstractmethod
+    def unbind(self):
+        pass
+
+    @abstractmethod
+    def search(self, search_base, search_filter, search_scope, attributes):
+        pass
+
+    @abstractmethod
+    def entries(self) -> Generator[dict, None, None]:
+        pass
+
+
+class Ldap3Module(Ldap):
+
+    # `pip install ldap3`
+
+    def __init__(self, module):
+
+        if module.__name__ != 'ldap3':
+            raise Exception("Expected `ldap3` module.")
+
+        self.__module = module
+
+        self.__connection = None
+
+    def connect(self,
+                server,
+                authentication,
+                enable_tls,
+                tls_validate,
+                tls_version,
+                user,
+                password,
+                get_info,
+                auto_bind
+                ):
+
+        ldap3_module = self.__module
+
+        tls = None
+        if tls_validate and tls_version:
+            tls = ldap3_module.Tls(
+                validate=tls_validate,
+                version=tls_version
+            )
+
+        server_info = ldap3_module.Server(
+            server,
+            get_info=get_info,
+            use_ssl=enable_tls,
+            tls=tls
+        )
+
+        self.__connection = ldap3_module.Connection(
+            server_info,
+            user=user,
+            password=password,
+            authentication=authentication,
+            auto_bind=auto_bind
+        )
+
+        return self.__connection
+    
+    def get_connection(self):
+        return self.__connection
+
+    def bind(self):
+        self.__connection.bind()
+
+    def unbind(self):
+        self.__connection.unbind()
+
+    def search(self, search_base, search_filter, search_scope, attributes):
+        self.__connection.search(
+            search_base=search_base,
+            search_filter=search_filter,
+            search_scope=search_scope,
+            attributes=attributes
+        )
+
+    def entries(self) -> Generator[dict, None, None]:
+        for entry in self.__connection.entries:
+            yield json.loads(entry.entry_to_json())
+

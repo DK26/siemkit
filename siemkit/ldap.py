@@ -22,6 +22,7 @@ import json
 import re
 
 from siemkit.logging import dump_debug
+from . import adaptors
 
 
 class UserAccountControlAttributes(IntFlag):
@@ -109,6 +110,37 @@ class CommonQueries(str, Enum):
         return self.value
 
 
+class Authentication(str, Enum):
+
+    NTLM = 'NTLM'
+    SASL = 'SASL'
+    SIMPLE = 'SIMPLE'
+    ANONYMOUS = 'ANONYMOUS'
+
+    def __str__(self):
+        return self.value
+
+
+class Attributes(str, Enum):
+
+    ALL = '*'
+    NONE = '1.1'
+    OPERATIONAL = '+'
+
+    def __str__(self):
+        return self.value
+
+
+class SearchScope(str, Enum):
+
+    SUBTREE = 'SUBTREE'
+    LEVEL = 'LEVEL'
+    BASE = 'BASE'
+
+    def __str__(self):
+        return self.value
+
+
 def query_since(query: str, time_field: str, time: str) -> str:
 
     if query.startswith('(&'):
@@ -147,45 +179,32 @@ def forest(forest_name: str) -> str:
     return f"CN=Partitions,CN=Configuration,{','.join(dc_parts(forest_name))}"
 
 
-def ldap3_forest_domains(ldap3_connection, forest_name: str, debug_mode=False) -> Generator[str, None, None]:
+def forest_domains(ldap_adaptor: adaptors.Ldap, forest_name: str, debug_mode=False) -> Generator[str, None, None]:
     """
-    A helper function for the `ldap3` library.
      Generates domain names.
     """
 
     # REF: https://stackoverflow.com/questions/43903677/how-to-list-all-domains-in-forest
 
-    ldap3_connection.search(
+    ldap_adaptor.search(
         search_base=forest(forest_name),
         search_filter='(nETBIOSName=*)',
         search_scope='SUBTREE',
         attributes='*'
     )
 
-    for entry in ldap3_connection.entries:
-        json_entry = json.loads(entry.entry_to_json())
+    for entry in ldap_adaptor.entries():
 
         dump_debug(
             f"Domain in Forest "
             f"| search_base = {forest(forest_name)} "
             f"| search_filter = (nETBIOSName=*) "
             f"| search_scope = SUBTREE "
-            f"| attributes = ALL",
-            json.dumps(json_entry, indent=4),
+            f"| attributes = *",
+            json.dumps(entry, indent=4),
             debug_mode=debug_mode
         )
 
-        yield json_entry['attributes']['nCName'][0]
-
-
-def python_ldap_forest_domains() -> Generator[str, None, None]:
-    """
-    A helper function for the `python-ldap` library.
-     Generates domain names.
-    """
-
-    # REF: https://stackoverflow.com/questions/43903677/how-to-list-all-domains-in-forest
-
-    yield ''
+        yield entry['attributes']['nCName'][0]
 
 

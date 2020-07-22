@@ -80,7 +80,7 @@ class IDTracker:
         return str(self.__data)
 
 
-class JSONFile(dict):
+class JsonFile(dict):
 
     def __init__(self, file_name, *args, auto_commit=False, indent=4, **kwargs):
 
@@ -118,22 +118,22 @@ class JSONFile(dict):
 
 class Vault:
 
-    def __init__(self, name, keyring_lib: adaptors.Keyring):
+    def __init__(self, name, keyring_adaptor: adaptors.Keyring):
         self.__name = name
-        self.__keyring_lib = keyring_lib
+        self.__keyring_module = keyring_adaptor
 
     def name(self):
         return self.__name
 
     def store_secret(self, key, secret):
-        self.__keyring_lib.set_password(self.__name, key, secret)
+        self.__keyring_module.set_password(self.__name, key, secret)
         return self
 
     def get_secret(self, key):
-        return self.__keyring_lib.get_password(self.__name, key)
+        return self.__keyring_module.get_password(self.__name, key)
 
     def delete_secret(self, key):
-        self.__keyring_lib.delete_password(self.__name, key)
+        self.__keyring_module.delete_password(self.__name, key)
         return self
 
 

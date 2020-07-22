@@ -31,6 +31,7 @@ GitHub:
 
     - `siemkit.api.arcsight`
     - `siemkit.win32.registry`
+    - `siemkit.adaptors`
     - `siemkit.cfg`
     - `siemkit.const`
     - `siemkit.data`
