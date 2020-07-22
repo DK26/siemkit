@@ -6,7 +6,7 @@ with open("README.md", "r") as fh:
 
 setup(
     name='siemkit',
-    version='0.0.14',
+    version='0.0.15a1.dev1',
     packages=['siemkit', 'hfilesize'] + find_packages(),
     include_package_data=True,
     url='https://github.com/cybersiem',
@@ -28,7 +28,8 @@ setup(
         "Operating System :: OS Independent",
         "Topic :: System :: Monitoring",
         "Topic :: System :: Logging",
-        "Topic :: Software Development :: Libraries"
+        "Topic :: Software Development :: Libraries",
+        "Development Status :: 1 - Planning"
     ],
     keywords=[
         'SIEM',
