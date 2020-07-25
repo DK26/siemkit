@@ -1,4 +1,4 @@
-#   Copyright (C) 2020 CyberSIEM (R)
+#   Copyright (C) 2020 CyberSIEM(R)
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -12,6 +12,10 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
+# ToDo: 1. Timeformats -> Have the time.py to either specify a format to parse, turn into a timestamp,
+#  or have the 'auto' string for using the timeparse library.
+# ToDo: 2. Add a string enum for known & common timeformats.
+
 from datetime import datetime
 from datetime import timedelta
 from datetime import timezone
@@ -21,6 +25,7 @@ from enum import Enum
 from abc import ABC
 from abc import abstractmethod
 from inspect import isclass
+from typing import Union
 import time
 
 UTC = timezone.utc
@@ -52,7 +57,7 @@ class Timestamp(ABC):
 
     @classmethod
     @abstractmethod
-    def from_datetime(cls, datetime_: datetime, tz: tzinfo = None) -> int:
+    def from_datetime(cls, datetime_: datetime, tz: tzinfo = None) -> Union[int, str]:
         """
         A static method to convert a datetime into a timestamp of this time type.
         :param datetime_:
@@ -63,7 +68,7 @@ class Timestamp(ABC):
 
     @classmethod
     @abstractmethod
-    def to_datetime(cls, timestamp: int, tz: tzinfo = None) -> datetime:
+    def to_datetime(cls, timestamp: Union[int, str], tz: tzinfo = None) -> datetime:
         """
         A static method to convert a timestamp of this time type into a datetime.
         :param timestamp:
@@ -153,12 +158,39 @@ class FiletimeTimestamp(Timestamp):
         return epoch_datetime.replace(tzinfo=tz)
 
 
+class LdapTimestamp(Timestamp):
+
+    @classmethod
+    def from_datetime(cls, datetime_: datetime, tz: tzinfo = None) -> str:
+
+        zulu_time_zone = '.0Z'
+
+        return (
+                datetime_
+                    .replace(tzinfo=tz)
+                    .astimezone(tz=timezone.utc)
+                    .strftime("%Y%m%d%H%M%S") + zulu_time_zone
+        )
+
+    @classmethod
+    def to_datetime(cls, timestamp: str, tz: tzinfo = None) -> datetime:
+
+        zulu_time_zone = '.0Z'
+
+        return (
+            datetime
+                .strptime(timestamp, "%Y%m%d%H%M%S" + zulu_time_zone)
+                .replace(tzinfo=timezone.utc)
+                .astimezone(tz=tz)
+        )
+
+
 class TimeType(Enum):
 
     EPOCH = EpochTimestamp
     EPOCH_MILLIS = EpochMillisTimestamp
     FILETIME = FiletimeTimestamp
-    LDAP = FiletimeTimestamp
+    LDAP = LdapTimestamp
 
 
 default = {
@@ -303,3 +335,4 @@ def current_timestamp(type_: TimeType = None, tz: tzinfo = None) -> int:
     :return: Timestamp
     """
     return time_type(type_).from_datetime(datetime.now().astimezone(tz=tz))
+

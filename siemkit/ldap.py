@@ -1,4 +1,4 @@
-#   Copyright (C) 2020 CyberSIEM (R)
+#   Copyright (C) 2020 CyberSIEM(R)
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -12,9 +12,17 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
+# ToDo: Create cross library adaptors for LDAP.
+
 from enum import IntFlag
 from enum import Enum
 from typing import Generator
+
+import json
+import re
+
+from siemkit.logging import dump_debug
+from . import adaptors
 
 
 class UserAccountControlAttributes(IntFlag):
@@ -102,6 +110,45 @@ class CommonQueries(str, Enum):
         return self.value
 
 
+class Authentication(str, Enum):
+
+    NTLM = 'NTLM'
+    SASL = 'SASL'
+    SIMPLE = 'SIMPLE'
+    ANONYMOUS = 'ANONYMOUS'
+
+    def __str__(self):
+        return self.value
+
+
+class Attributes(str, Enum):
+
+    ALL = '*'
+    NONE = '1.1'
+    OPERATIONAL = '+'
+
+    def __str__(self):
+        return self.value
+
+
+class SearchScope(str, Enum):
+
+    SUBTREE = 'SUBTREE'
+    LEVEL = 'LEVEL'
+    BASE = 'BASE'
+
+    def __str__(self):
+        return self.value
+
+
+def query_since(query: str, time_field: str, time: str) -> str:
+
+    if query.startswith('(&'):
+        return query.replace('(&', f'(&({time_field}>={time})')
+    else:
+        return f'(&({time_field}>={time}){query})'
+
+
 def query_sam_account_type(sam_account_type: int) -> str:
     return f'(sAMAccountType={sam_account_type})'
 
@@ -116,8 +163,48 @@ def query_group_type(group_type: int) -> str:
 
 def dc_parts(domain: str) -> Generator[str, None, None]:
     for part in domain.split('.'):
-        yield f'dc={part}'
+        yield f'DC={part}'
 
 
 def dc(domain: str) -> str:
     return ','.join(dc_parts(domain))
+
+
+def from_dc(domain: str) -> str:
+    dc_parts_ = re.findall(r'DC=([\w\s]*)', domain, flags=re.IGNORECASE)
+    return '.'.join(dc_parts_)
+
+
+def forest(forest_name: str) -> str:
+    return f"CN=Partitions,CN=Configuration,{','.join(dc_parts(forest_name))}"
+
+
+def forest_domains(ldap_adaptor: adaptors.Ldap, forest_name: str, debug_mode=False) -> Generator[str, None, None]:
+    """
+     Generates domain names.
+    """
+
+    # REF: https://stackoverflow.com/questions/43903677/how-to-list-all-domains-in-forest
+
+    ldap_adaptor.search(
+        search_base=forest(forest_name),
+        search_filter='(nETBIOSName=*)',
+        search_scope='SUBTREE',
+        attributes='*'
+    )
+
+    for entry in ldap_adaptor.entries():
+
+        dump_debug(
+            f"Domain in Forest "
+            f"| search_base = {forest(forest_name)} "
+            f"| search_filter = (nETBIOSName=*) "
+            f"| search_scope = SUBTREE "
+            f"| attributes = *",
+            json.dumps(entry, indent=4),
+            debug_mode=debug_mode
+        )
+
+        yield entry['attributes']['nCName'][0]
+
+

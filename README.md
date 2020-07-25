@@ -1,4 +1,4 @@
-## [CyberSIEM ®](https://www.cybersiem.com/) Community Kit
+## [CyberSIEM<sup>(R)</sup>](https://www.cybersiem.com/) Community Kit
 
 * An open-source "Swiss Army Knife" for anything SIEM related!
 
@@ -30,6 +30,8 @@ GitHub:
 * Work in progress
 
     - `siemkit.api.arcsight`
+    - `siemkit.win32.registry`
+    - `siemkit.adaptors`
     - `siemkit.cfg`
     - `siemkit.const`
     - `siemkit.data`

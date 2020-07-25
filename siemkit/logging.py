@@ -1,4 +1,4 @@
-#   Copyright (C) 2020 CyberSIEM (R)
+#   Copyright (C) 2020 CyberSIEM(R)
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -25,16 +25,21 @@ settings = {
     'stdin': sys.stdin,
     'stddebug': sys.stdout,
     'debug_mode': False,
-    'dump_file_name': 'dump_%d%m%Y-%H%M%S.log',
-    'debug_dump_file_name': 'debug_dump_%d%m%Y-%H%M%S.log'
+    'dump_file_name': 'dump_%d%m%Y-%H%M%S-%f.log',
+    'debug_dump_file_name': 'debug_dump_%d%m%Y-%H%M%S-%f.log'
 }
 
 builtin_print = print
 
 
-def print(*args, **kwargs):
+def print(*args, sep=' ', end='\n', file=None):
+
+    if file is None:
+        # file = settings['stdout']
+        file = sys.stdout  # This behaviour is more expected from a `print()` function.
+
     timestamp = datetime.now().isoformat()
-    builtin_print(f'[{timestamp}]', *args, **kwargs)
+    builtin_print(f'[{timestamp}]', *args, sep=sep, end=end, file=file)
 
 
 def format_exception(e):
@@ -90,8 +95,8 @@ def dump_debug(msg, payload, file=None, dump_file_name=None, debug_mode=None):
 
         dump_file_name = to_format(format_=dump_file_name)
         print_message(f"DEBUG | DUMP | {msg}: '{dump_file_name}'", file=file)
-        with open(dump_file_name, 'w', encoding='utf-8', errors='ignore') as fs:
-            fs.write(format_message(f"DEBUG | DUMP | {msg}: \n{payload}"))
+        with open(dump_file_name, 'a', encoding='utf-8', errors='ignore') as fs:
+            fs.write(format_message(f"DEBUG | DUMP | {msg}: \n{payload}\n"))
 
 
 def dump(msg, payload, file=None, dump_file_name=None):
@@ -104,5 +109,5 @@ def dump(msg, payload, file=None, dump_file_name=None):
 
     dump_file_name = to_format(format_=dump_file_name)
     print_message(f"DUMP | {msg}: '{dump_file_name}'", file=file)
-    with open(dump_file_name, 'w', encoding='utf-8', errors='ignore') as fs:
-        fs.write(format_message(f"DUMP | {msg}: \n{payload}"))
+    with open(dump_file_name, 'a', encoding='utf-8', errors='ignore') as fs:
+        fs.write(format_message(f"DUMP | {msg}: \n{payload}\n"))

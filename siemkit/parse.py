@@ -1,4 +1,4 @@
-#   Copyright (C) 2020 CyberSIEM (R)
+#   Copyright (C) 2020 CyberSIEM(R)
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -95,5 +95,5 @@ def size(size_string: str) -> int:
 
 
 def boolean(bool_string: str) -> bool:
-    bool_string = bool_string.lower()
+    bool_string = bool_string.strip().lower()
     return bool_string in ('t', 'true', 'yes', 'ok', 'on', '1', 'some')
