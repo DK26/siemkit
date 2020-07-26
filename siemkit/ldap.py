@@ -12,8 +12,6 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-# ToDo: Create cross library adaptors for LDAP.
-
 from enum import IntFlag
 from enum import Enum
 from typing import Generator

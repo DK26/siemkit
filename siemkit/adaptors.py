@@ -186,7 +186,7 @@ class Ldap3Module(Ldap):
         )
 
         return self.__connection
-    
+
     def get_connection(self):
         return self.__connection
 
@@ -207,4 +207,52 @@ class Ldap3Module(Ldap):
     def entries(self) -> Generator[dict, None, None]:
         for entry in self.__connection.entries:
             yield json.loads(entry.entry_to_json())
+
+
+class HttpRequest(ABC):
+
+    @abstractmethod
+    def request(self, method, url, tls=None, verify=None, cert=None, proxies=None):
+        pass
+
+
+class RequestsModule(HttpRequest):
+
+    def __init__(self, module):
+        if module.__name__ != 'requests':
+            raise Exception("Expected `requests` module.")
+
+        self.__module = module
+
+    def request(self, method, url, tls=None, verify=True, cert=None, proxies=None):
+        requests = self.__module
+        requests.request(method, url, verify=verify, cert=cert, proxies=proxies)
+
+
+class ArcSightEsm(ABC):
+
+    def __init__(
+            self,
+            http_request_adapter: HttpRequest,
+            server: str,
+            port: int,
+            username: str,
+            password: str,
+            verify=True,
+            cert=None,
+            proxies: dict = None
+    ):
+        pass
+
+    @abstractmethod
+    def refresh_token(self, username, password):
+        pass
+
+    @abstractmethod
+    def request(self, method, uri, headers, payload):
+        pass
+
+    @abstractmethod
+    def logout(self):
+        pass
 

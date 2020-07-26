@@ -26,6 +26,7 @@ setup(
         "Intended Audience :: Education",
         "License :: OSI Approved :: Apache Software License",
         "Operating System :: OS Independent",
+        "Topic :: System :: Networking",
         "Topic :: System :: Monitoring",
         "Topic :: System :: Logging",
         "Topic :: Software Development :: Libraries",
