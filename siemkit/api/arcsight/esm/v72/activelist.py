@@ -14,7 +14,7 @@
 
 from typing import Tuple
 
-from siemkit.api.arcsight_esm import ArcSightUri
+from siemkit.api.arcsight.esm import ArcSightUri
 
 
 class AddEntries(ArcSightUri):
