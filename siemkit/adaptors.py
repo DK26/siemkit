@@ -265,7 +265,7 @@ class RequestsModule(HttpRequest):
             json=None
     ):
         requests = self.__module
-        return requests.request(
+        return requests.args(
             method,
             url,
             params=params,

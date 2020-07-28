@@ -20,42 +20,70 @@ from typing import Tuple
 
 class ArcSightUri(ABC):
 
-    def __init__(self, variables):
-        self.__method = None
-        self.__request = None
-
     @abstractmethod
-    def request(self) -> Tuple[str, dict]:
-        return self.__method, self.__request
+    def args(self, variables) -> Tuple[str, dict]:
+        pass
 
 
-class ArcSightLogin(ArcSightUri):
+class ArcSightLogOut(ArcSightUri):
+
+    def args(self, variables, **kwargs) -> Tuple[str, dict]:
+        return (
+            '/www/core-service/rest/LoginService/logout',
+            {
+                'headers': {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                'method': 'POST',
+                'json': {
+                    "log.logout": {
+                        "log.authToken": variables.get('token', '')
+                    }
+                }
+            }
+        )
+
+
+
+class Uri(str, Enum):
+    pass
+
+
+
+class ArcSightLoginOld(ArcSightUri):
 
     def __init__(self, variables):
         super().__init__(variables)
         self.variables = variables
-        self.__method = 'POST'
+
+        server = variables.args('server', '127.0.0.1')
+        port = variables.args('port', 8443)
+        verify = variables.args('verify', True)
+        cert = variables.args('cert')
+        proxies = variables.args('proxies')
+
         self.__request = {
             'headers': {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json'
             },
             'method': 'POST',
-            'uri': '/www/core-service/rest/LoginService/login',
-            'payload': {
+            'url': f'https://{server}:{port}/www/core-service/rest/LoginService/login',
+            'json': {
                 'log.login': {
-                    'log.login': variables.get('username', ''),
-                    'log.password': variables.get('password', '')
+                    'log.login': variables.args('username', ''),
+                    'log.password': variables.args('password', '')
                 }
-            }
+            },
+            'verify': verify,
+            'cert': cert,
+            'proxies': proxies
+
         }
 
-    def request(self) -> Tuple[str, dict]:
-        return self.__method, self.__request
-
-
-class Uri(str, Enum):
-    pass
+    def args(self) -> dict:
+        return self.__request
 
 
 class ArcSightEsm:
