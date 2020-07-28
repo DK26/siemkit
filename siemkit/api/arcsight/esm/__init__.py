@@ -45,10 +45,8 @@ class ArcSightLogOut(ArcSightUri):
         )
 
 
-
 class Uri(str, Enum):
     pass
-
 
 
 class ArcSightLoginOld(ArcSightUri):

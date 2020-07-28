@@ -169,3 +169,25 @@ class GetEntries(ArcSightUri):
                 }
             }
         )
+
+
+class FindAllIds(ArcSightUri):
+
+    def args(self, variables) -> Tuple[str, dict]:
+        return (
+            '/www/manager-service/rest/ActiveListService/findAllIds',
+            {
+                'headers': {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                'method': 'POST',
+                'json': {
+                    {
+                        "act.findAllIds": {
+                            "act.authToken": variables.get('token', '')
+                        }
+                    }
+                }
+            }
+        )
