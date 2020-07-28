@@ -209,9 +209,35 @@ class Ldap3Module(Ldap):
             yield json.loads(entry.entry_to_json())
 
 
+class HttpResponse(ABC):
+    """
+    A response container / wrapper to allow safe usage of the HTTP Request adapter.
+    """
+
+    @abstractmethod
+    def json(self) -> dict:
+        pass
+
+    @abstractmethod
+    def status_code(self) -> int:
+        pass
+
+    @abstractmethod
+    def text(self) -> str:
+        pass
+
+    @abstractmethod
+    def headers(self) -> dict:
+        pass
+
+    @abstractmethod
+    def cookies(self) -> dict:
+        pass
+
+
 class HttpRequest(ABC):
     """
-    Use the `request` function from the `requests` library as basis for the HTTP Request adaptor.
+    Uses the `request` function signature from the `requests` library as basis for the HTTP Request adaptor.
     """
 
     @abstractmethod
@@ -233,8 +259,29 @@ class HttpRequest(ABC):
             verify=None,
             cert=None,
             json=None
-    ):
+    ) -> HttpResponse:
         pass
+
+
+class RequestsModuleResponse(HttpResponse):
+
+    def __init__(self, response):
+        self.__response = response
+
+    def status_code(self) -> int:
+        return self.__response.status_code
+
+    def text(self) -> str:
+        return self.__response.text
+
+    def headers(self) -> dict:
+        return self.__response.headers
+
+    def cookies(self) -> dict:
+        return self.__response.cookies
+
+    def json(self) -> dict:
+        return self.__response.json()
 
 
 class RequestsModule(HttpRequest):
@@ -263,9 +310,9 @@ class RequestsModule(HttpRequest):
             verify=None,
             cert=None,
             json=None
-    ):
+    ) -> HttpResponse:
         requests = self.__module
-        return requests.args(
+        response = requests.args(
             method,
             url,
             params=params,
@@ -283,6 +330,7 @@ class RequestsModule(HttpRequest):
             cert=cert,
             json=json
         )
+        return RequestsModuleResponse(response)
 
 
 class ArcSightEsm(ABC):

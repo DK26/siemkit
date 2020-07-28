@@ -25,30 +25,6 @@ class ArcSightUri(ABC):
         pass
 
 
-class ArcSightLogOut(ArcSightUri):
-
-    def args(self, variables, **kwargs) -> Tuple[str, dict]:
-        return (
-            '/www/core-service/rest/LoginService/logout',
-            {
-                'headers': {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json'
-                },
-                'method': 'POST',
-                'json': {
-                    "log.logout": {
-                        "log.authToken": variables.get('token', '')
-                    }
-                }
-            }
-        )
-
-
-class Uri(str, Enum):
-    pass
-
-
 class ArcSightLoginOld(ArcSightUri):
 
     def __init__(self, variables):
@@ -77,41 +53,9 @@ class ArcSightLoginOld(ArcSightUri):
             'verify': verify,
             'cert': cert,
             'proxies': proxies
-
         }
 
     def args(self) -> dict:
         return self.__request
 
-
-class ArcSightEsm:
-
-    def __init__(
-            self,
-            server: str,
-            port: int,
-            username: str,
-            password: str,
-            verify=True,
-            cert=None,
-            proxies: dict = None
-    ):
-
-        self.__base_uri = f"https://{server}:{port}"
-        self.verify = verify
-        self.cert = cert
-        self.proxies = proxies
-
-        self.__api_token = ''
-        self.refresh_token(username, password)
-
-    def refresh_token(self, username, password):
-
-        uri = f'{self.__base_uri}/www/core-service/rest/LoginService/login'
-
-    def query(self, query):
-        pass
-
-    def logout(self):
-        pass
 
