@@ -210,9 +210,30 @@ class Ldap3Module(Ldap):
 
 
 class HttpRequest(ABC):
+    """
+    Use the `request` function from the `requests` library as basis for the HTTP Request adaptor.
+    """
 
     @abstractmethod
-    def request(self, method, url, tls=None, verify=None, cert=None, proxies=None):
+    def request(
+            self,
+            method,
+            url,
+            params=None,
+            data=None,
+            headers=None,
+            cookies=None,
+            files=None,
+            auth=None,
+            timeout=None,
+            allow_redirects=True,
+            proxies=None,
+            hooks=None,
+            stream=None,
+            verify=None,
+            cert=None,
+            json=None
+    ):
         pass
 
 
@@ -224,9 +245,44 @@ class RequestsModule(HttpRequest):
 
         self.__module = module
 
-    def request(self, method, url, tls=None, verify=True, cert=None, proxies=None):
+    def request(
+            self,
+            method,
+            url,
+            params=None,
+            data=None,
+            headers=None,
+            cookies=None,
+            files=None,
+            auth=None,
+            timeout=None,
+            allow_redirects=True,
+            proxies=None,
+            hooks=None,
+            stream=None,
+            verify=None,
+            cert=None,
+            json=None
+    ):
         requests = self.__module
-        requests.request(method, url, verify=verify, cert=cert, proxies=proxies)
+        return requests.request(
+            method,
+            url,
+            params=params,
+            data=data,
+            headers=headers,
+            cookies=cookies,
+            files=files,
+            auth=auth,
+            timeout=timeout,
+            allow_redirects=allow_redirects,
+            proxies=proxies,
+            hooks=hooks,
+            stream=stream,
+            verify=verify,
+            cert=cert,
+            json=json
+        )
 
 
 class ArcSightEsm(ABC):

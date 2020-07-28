@@ -14,35 +14,44 @@
 
 from enum import Enum
 from abc import ABC
+from abc import abstractmethod
+from typing import Tuple
 
 
-class ArcSightUri:
+class ArcSightUri(ABC):
 
-    def __init__(self, method, uri, headers, payload):
-        self.method = method
-        self.uri = uri
-        self.headers = headers
-        self.payload = payload
+    def __init__(self, variables):
+        self.__method = None
+        self.__request = None
+
+    @abstractmethod
+    def request(self) -> Tuple[str, dict]:
+        return self.__method, self.__request
 
 
 class ArcSightLogin(ArcSightUri):
-    pass
 
-
-arcsight_login = {
-    'headers': {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-    },
-    'method': 'POST',
-    'uri': '/www/core-service/rest/LoginService/login',
-    'payload': {
-            'log.login': {
-                'log.login': '{{username}}',
-                'log.password': '{{password}}'
+    def __init__(self, variables):
+        super().__init__(variables)
+        self.variables = variables
+        self.__method = 'POST'
+        self.__request = {
+            'headers': {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            'method': 'POST',
+            'uri': '/www/core-service/rest/LoginService/login',
+            'payload': {
+                'log.login': {
+                    'log.login': variables.get('username', ''),
+                    'log.password': variables.get('password', '')
+                }
             }
-    }
-}
+        }
+
+    def request(self) -> Tuple[str, dict]:
+        return self.__method, self.__request
 
 
 class Uri(str, Enum):
