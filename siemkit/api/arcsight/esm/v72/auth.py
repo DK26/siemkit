@@ -15,6 +15,7 @@
 from typing import Tuple
 
 from siemkit.api.arcsight.esm import ArcSightUri
+from siemkit.api.arcsight.esm import ArcSightUriEnum
 
 
 class Login(ArcSightUri):
@@ -56,3 +57,28 @@ class Logout(ArcSightUri):
                 }
             }
         )
+
+
+class GetSession(ArcSightUri):
+
+    def args(self, variables, **kwargs) -> Tuple[str, dict]:
+        return (
+            '/www/core-service/rest/LoginService/getSession',
+            {
+                'headers': {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'Accept': 'application/json'
+                },
+                'method': 'GET',
+                'params': {
+                    "authToken": variables.get('token', '')
+                }
+            }
+        )
+
+
+class AuthRequestEnum(ArcSightUriEnum):
+    LOGIN = Login()
+    LOGOUT = Logout()
+    GET_SESSION = GetSession()
+

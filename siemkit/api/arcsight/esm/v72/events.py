@@ -13,22 +13,32 @@
 #   limitations under the License.
 
 from typing import Tuple
+from enum import Enum
 
 from siemkit.api.arcsight.esm import ArcSightUri
+from siemkit.api.arcsight.esm import ArcSightUriEnum
+
+
+def init_event_ids(variables):
+
+    event_ids = variables.get('event_ids')
+    if event_ids is None:
+        event_ids = []
+    if isinstance(event_ids, int):
+        event_ids = [str(event_ids)]
+    elif isinstance(event_ids, str):
+        event_ids = [event_ids]
+    else:
+        event_ids = list(event_ids)
+
+    return event_ids
 
 
 class GetSecurityEvents(ArcSightUri):
 
-    def args(self, variables, event_ids=None) -> Tuple[str, dict]:
+    def args(self, variables) -> Tuple[str, dict]:
 
-        if event_ids is None:
-            event_ids = []
-        if isinstance(event_ids, int):
-            event_ids = [str(event_ids)]
-        elif isinstance(event_ids, str):
-            event_ids = [event_ids]
-        else:
-            event_ids = list(event_ids)
+        event_ids = init_event_ids(variables)
 
         return (
             '/www/manager-service/rest/SecurityEventService/getSecurityEvents',
@@ -48,3 +58,7 @@ class GetSecurityEvents(ArcSightUri):
                 }
             }
         )
+
+
+class EventsRequestEnum(ArcSightUriEnum):
+    GET_SECURITY_EVENTS = GetSecurityEvents()

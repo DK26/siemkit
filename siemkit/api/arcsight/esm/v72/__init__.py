@@ -12,3 +12,5 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
+# REF: https://community.microfocus.com/t5/ArcSight-User-Discussions/Unofficial-ArcSight-ESM-API-Examples-released/td-p/2691587#
+

@@ -25,37 +25,7 @@ class ArcSightUri(ABC):
         pass
 
 
-class ArcSightLoginOld(ArcSightUri):
-
-    def __init__(self, variables):
-        super().__init__(variables)
-        self.variables = variables
-
-        server = variables.args('server', '127.0.0.1')
-        port = variables.args('port', 8443)
-        verify = variables.args('verify', True)
-        cert = variables.args('cert')
-        proxies = variables.args('proxies')
-
-        self.__request = {
-            'headers': {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-            },
-            'method': 'POST',
-            'url': f'https://{server}:{port}/www/core-service/rest/LoginService/login',
-            'json': {
-                'log.login': {
-                    'log.login': variables.args('username', ''),
-                    'log.password': variables.args('password', '')
-                }
-            },
-            'verify': verify,
-            'cert': cert,
-            'proxies': proxies
-        }
-
-    def args(self) -> dict:
-        return self.__request
+class ArcSightUriEnum(Enum):
+    pass
 
 

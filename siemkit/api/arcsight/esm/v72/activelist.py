@@ -15,25 +15,35 @@
 from typing import Tuple
 
 from siemkit.api.arcsight.esm import ArcSightUri
+from siemkit.api.arcsight.esm import ArcSightUriEnum
+
+
+def init_columns_entries(variables):
+
+    columns = variables.get('columns')
+    if columns is None:
+        columns = []  # Relevant columns in proper order
+    if isinstance(columns, str):
+        columns = [columns]
+    else:
+        columns = list(columns)
+
+    entries = variables.get('entries')
+    if entries is None:
+        entries = []  # Entries of dict with relevant columns
+    elif isinstance(entries, dict):
+        entries = [entries]
+    else:
+        entries = list(entries)
+
+    return columns, entries
 
 
 class AddEntries(ArcSightUri):
 
-    def args(self, variables, resource_id='', columns=None, entries=None) -> Tuple[str, dict]:
+    def args(self, variables) -> Tuple[str, dict]:
 
-        if columns is None:
-            columns = []  # Relevant columns in proper order
-        if isinstance(columns, str):
-            columns = [columns]
-        else:
-            columns = list(columns)
-
-        if entries is None:
-            entries = []  # Entries of dict with relevant columns
-        elif isinstance(entries, dict):
-            entries = [entries]
-        else:
-            entries = list(entries)
+        columns, entries = init_columns_entries(variables)
 
         entry_columns = []
         entry_list = []
@@ -61,7 +71,7 @@ class AddEntries(ArcSightUri):
                 'json': {
                     "act.addEntries": {
                         "act.authToken": variables.get('token', ''),
-                        "act.resourceId": resource_id,
+                        "act.resourceId": variables.get('resource_id', ''),
                         "act.entryList": {
                             "columns": columns,
                             "entryList": entry_list
@@ -74,7 +84,7 @@ class AddEntries(ArcSightUri):
 
 class ClearEntries(ArcSightUri):
 
-    def args(self, variables, resource_id='') -> Tuple[str, dict]:
+    def args(self, variables) -> Tuple[str, dict]:
 
         return (
             '/www/manager-service/rest/ActiveListService/clearEntries',
@@ -87,7 +97,7 @@ class ClearEntries(ArcSightUri):
                 'json': {
                     "act.clearEntries": {
                         "act.authToken": variables.get('token', ''),
-                        "act.resourceId": resource_id
+                        "act.resourceId": variables.get('resource_id', '')
                     }
                 }
             }
@@ -96,21 +106,9 @@ class ClearEntries(ArcSightUri):
 
 class DeleteEntries(ArcSightUri):
 
-    def args(self, variables, resource_id='', columns=None, entries=None) -> Tuple[str, dict]:
+    def args(self, variables) -> Tuple[str, dict]:
 
-        if columns is None:
-            columns = []  # Relevant columns in proper order
-        if isinstance(columns, str):
-            columns = [columns]
-        else:
-            columns = list(columns)
-
-        if entries is None:
-            entries = []  # Entries of dict with relevant columns
-        elif isinstance(entries, dict):
-            entries = [entries]
-        else:
-            entries = list(entries)
+        columns, entries = init_columns_entries(variables)
 
         entry_columns = []
         entry_list = []
@@ -138,7 +136,7 @@ class DeleteEntries(ArcSightUri):
                 'json': {
                     "act.deleteEntries": {
                         "act.authToken": variables.get('token', ''),
-                        "act.resourceId": resource_id,
+                        "act.resourceId": variables.get('resource_id', ''),
                         "act.entryList": {
                             "columns": columns,
                             "entryList": entry_list
@@ -151,7 +149,7 @@ class DeleteEntries(ArcSightUri):
 
 class GetEntries(ArcSightUri):
 
-    def args(self, variables, resource_id='') -> Tuple[str, dict]:
+    def args(self, variables) -> Tuple[str, dict]:
 
         return (
             '/www/manager-service/rest/ActiveListService/getEntries',
@@ -164,7 +162,30 @@ class GetEntries(ArcSightUri):
                 'json': {
                     "act.getEntries": {
                         "act.authToken": variables.get('token', ''),
-                        "act.resourceId": resource_id
+                        "act.resourceId": variables.get('resource_id', '')
+                    }
+                }
+            }
+        )
+
+
+class FindByUuid(ArcSightUri):
+
+    def args(self, variables) -> Tuple[str, dict]:
+        return (
+            '/www/manager-service/rest/ArchiveReportService/findByUUID',
+            {
+                'headers': {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                'method': 'POST',
+                'json': {
+                    {
+                        "arc.findByUUID": {
+                            "arc.authToken": variables.get('token', ''),
+                            "arc.id": variables.get("uuid", '')
+                        }
                     }
                 }
             }
@@ -191,3 +212,11 @@ class FindAllIds(ArcSightUri):
                 }
             }
         )
+
+
+class ActiveListRequestEnum(ArcSightUriEnum):
+    GET_ENTRIES = GetEntries()
+    ADD_ENTRIES = AddEntries()
+    DELETE_ENTRIES = DeleteEntries()
+    CLEAR_ENTRIES = ClearEntries()
+    FIND_ALL_IDS = FindAllIds()
