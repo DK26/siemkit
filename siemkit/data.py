@@ -116,6 +116,21 @@ class JsonFile(dict):
         return self
 
 
+class RamKeyring(adaptors.Keyring):
+
+    def __init__(self):
+        self.__database = {}
+
+    def set_password(self, service: str, key: str, value: str):
+        self.__database[f'{service}.{key}'] = value
+
+    def get_password(self, service: str, key: str) -> str:
+        return self.__database[f'{service}.{key}']
+
+    def delete_password(self, service: str, key: str):
+        del self.__database[f'{service}.{key}']
+
+
 class Vault:
 
     def __init__(self, name, keyring_adaptor: adaptors.Keyring):

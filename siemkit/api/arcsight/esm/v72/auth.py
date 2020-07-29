@@ -77,7 +77,7 @@ class GetSession(ArcSightUri):
         )
 
 
-class AuthRequestEnum(ArcSightUriEnum):
+class LoginApiEnum(ArcSightUriEnum):
     LOGIN = Login()
     LOGOUT = Logout()
     GET_SESSION = GetSession()

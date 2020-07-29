@@ -13,7 +13,6 @@
 #   limitations under the License.
 
 from typing import Tuple
-from enum import Enum
 
 from siemkit.api.arcsight.esm import ArcSightUri
 from siemkit.api.arcsight.esm import ArcSightUriEnum
@@ -58,5 +57,5 @@ class GetSecurityEvents(ArcSightUri):
         )
 
 
-class EventsRequestEnum(ArcSightUriEnum):
+class EventsApiEnum(ArcSightUriEnum):
     GET_SECURITY_EVENTS = GetSecurityEvents()

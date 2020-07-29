@@ -210,7 +210,7 @@ class FindAllIds(ArcSightUri):
         )
 
 
-class ActiveListRequestEnum(ArcSightUriEnum):
+class ActiveListApiEnum(ArcSightUriEnum):
     GET_ENTRIES = GetEntries()
     ADD_ENTRIES = AddEntries()
     DELETE_ENTRIES = DeleteEntries()

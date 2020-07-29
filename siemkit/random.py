@@ -20,10 +20,25 @@ from ipaddress import IPv4Address
 from typing import Generator
 from enum import EnumMeta
 
+import os
+import threading
+from time import time
+from math import floor
+
 from .const import DOMAINS
 from .const import NAMES
 from . import web
 from . import flag
+
+
+def safe_object_uuid(obj: object) -> str:
+    object_id = hex(id(obj))[2:]
+    process_id = hex(os.getpid())[2:]
+    timestamp = hex(floor(time() * 1e5))[2:]
+    thread_id = hex(threading.get_ident())[2:]
+    random_value = hex(getrandbits(32))[2:]
+
+    return f'{object_id}-{process_id}-{thread_id}-{timestamp}-{random_value}'
 
 
 def byte() -> int:
