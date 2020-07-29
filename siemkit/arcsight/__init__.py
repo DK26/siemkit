@@ -15,6 +15,7 @@
 from typing import Union
 from collections.abc import Iterable
 
+import urllib3
 import requests
 
 from siemkit.api.arcsight.esm import ArcSightUri
@@ -31,6 +32,7 @@ from siemkit.api.arcsight.esm.v72.activelist import ActiveListApiEnum
 from siemkit.api.arcsight.esm.v72.events import EventsApiEnum
 
 http_request_module = RequestsModule(requests)
+urllib3.disable_warnings()  # ToDo: Make Configurable
 
 
 class Esm:
@@ -75,7 +77,7 @@ class Esm:
 
     def refresh_token(self):
 
-        response = self.uri(
+        response = self.unchecked_uri(
             LoginApiEnum.LOGIN, {
                 'username': self.__vault.get_secret('username'),
                 'password': self.__vault.get_secret('password')
@@ -92,7 +94,12 @@ class Esm:
 
         return response.status_code()
 
-    def uri(self, api: Union[ArcSightUri, ArcSightUriEnum], variables) -> HttpResponse:
+    def maintain_session(self):
+        response = self.get_session()
+        if response.status_code() == 500:
+            self.refresh_token()
+
+    def unchecked_uri(self, api: Union[ArcSightUri, ArcSightUriEnum], variables) -> HttpResponse:
 
         if isinstance(api, ArcSightUriEnum):
             api = api.value
@@ -110,9 +117,15 @@ class Esm:
 
         return http_request_module.request(**request_args)
 
+    def uri(self, api: Union[ArcSightUri, ArcSightUriEnum], variables) -> HttpResponse:
+
+        self.maintain_session()
+
+        return self.unchecked_uri(api=api, variables=variables)
+
     def logout(self):
 
-        response = self.uri(
+        response = self.unchecked_uri(
             LoginApiEnum.LOGOUT, self.variables
         )
 
@@ -123,7 +136,7 @@ class Esm:
 
     def get_session(self):
 
-        response = self.uri(
+        response = self.unchecked_uri(
             LoginApiEnum.GET_SESSION, self.variables
         )
 

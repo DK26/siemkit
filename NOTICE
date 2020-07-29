@@ -44,9 +44,14 @@ Third-Party Libraries:
 
 * setuptools - MIT License
     by: Jason R Coombs <jaraco@jaraco.com>
-    github: https://github.com/pypa/setuptools
+    source: https://github.com/pypa/setuptools
     license: https://opensource.org/licenses/MIT
 
+* urllib3 - MIT License
+    by: Andrey Petrov <andrey.petrov@shazow.net>
+    homepage: https://urllib3.readthedocs.io/en/latest/
+    source: https://github.com/urllib3/urllib3
+    license: https://github.com/urllib3/urllib3/blob/master/LICENSE.txt
 
 
 Apache License 2.0 -- About this NOTICE file:
