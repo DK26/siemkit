@@ -196,7 +196,7 @@ class Esm:
         return tuple(normalized_active_list_entries(response))
 
     def __enter__(self):
-        pass
+        return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         try:
