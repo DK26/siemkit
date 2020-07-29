@@ -181,12 +181,10 @@ class FindByUuid(ArcSightUri):
                 },
                 'method': 'POST',
                 'json': {
-                    {
                         "arc.findByUUID": {
                             "arc.authToken": variables.get('token', ''),
                             "arc.id": variables.get("uuid", '')
                         }
-                    }
                 }
             }
         )
@@ -204,11 +202,9 @@ class FindAllIds(ArcSightUri):
                 },
                 'method': 'POST',
                 'json': {
-                    {
                         "act.findAllIds": {
                             "act.authToken": variables.get('token', '')
                         }
-                    }
                 }
             }
         )

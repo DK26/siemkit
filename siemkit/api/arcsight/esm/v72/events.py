@@ -25,9 +25,9 @@ def init_event_ids(variables):
     if event_ids is None:
         event_ids = []
     if isinstance(event_ids, int):
-        event_ids = [str(event_ids)]
-    elif isinstance(event_ids, str):
         event_ids = [event_ids]
+    elif isinstance(event_ids, str):
+        event_ids = [int(event_ids)]
     else:
         event_ids = list(event_ids)
 
@@ -49,12 +49,10 @@ class GetSecurityEvents(ArcSightUri):
                 },
                 'method': 'POST',
                 'json': {
-                    {
                         "sev.getSecurityEvents": {
                             "sev.authToken": variables.get('token', ''),
                             "sev.ids": event_ids
                         }
-                    }
                 }
             }
         )

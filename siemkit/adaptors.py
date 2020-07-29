@@ -312,7 +312,7 @@ class RequestsModule(HttpRequest):
             json=None
     ) -> HttpResponse:
         requests = self.__module
-        response = requests.args(
+        response = requests.request(
             method,
             url,
             params=params,

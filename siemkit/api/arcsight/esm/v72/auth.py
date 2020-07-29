@@ -31,8 +31,8 @@ class Login(ArcSightUri):
                 'method': 'POST',
                 'json': {
                     'log.login': {
-                        'log.login': variables.args('username', ''),
-                        'log.password': variables.args('password', '')
+                        'log.login': variables.get('username', ''),
+                        'log.password': variables.get('password', '')
                     }
                 }
             }

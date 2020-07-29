@@ -13,6 +13,7 @@
 #   limitations under the License.
 
 from typing import Union
+from collections.abc import Iterable
 from enum import EnumMeta
 
 from siemkit.api.arcsight.esm import ArcSightUri
@@ -74,6 +75,9 @@ class Esm:
 
     def uri(self, api: Union[ArcSightUri, ArcSightUriEnum], variables) -> HttpResponse:
 
+        if isinstance(api, ArcSightUriEnum):
+            api = api.value
+
         uri, request_args = api.args(variables=variables)
 
         request_args.update(
@@ -93,10 +97,20 @@ class Esm:
         )
         return response.status_code()
 
-    def get_event_ids(self, event_ids):
+    def get_event_ids(self, *event_ids):
+
+        def extract_ids():
+            for event_id in event_ids:
+                if isinstance(event_id, int):
+                    yield event_id
+                elif isinstance(event_id, str):
+                    yield int(event_id)
+                elif isinstance(event_id, Iterable):
+                    for id_ in event_id:
+                        yield int(id_)
 
         variables = {
-            'event_ids': event_ids
+            'event_ids': list(extract_ids())
         }
 
         variables.update(self.variables)
@@ -108,7 +122,7 @@ class Esm:
         if response.status_code() == 200:
             return simplified_cef_events(response)
 
-    def get_activelist_entries(self, resource_id):
+    def get_activelist(self, resource_id):
 
         variables = {
             'resource_id': resource_id
@@ -160,7 +174,7 @@ def simplify_cef(complex_cef: dict):
 
     for key, item in complex_cef.items():
         if isinstance(item, dict):
-            for simple_key, simple_value in simple_key_value(item):
+            for simple_key, simple_value in simple_key_value(item, key):
                 simple_cef[simple_key] = simple_value
         else:
             simple_cef[key] = item
@@ -174,7 +188,13 @@ def simplified_cef_events(response: HttpResponse):
         return
 
     response_json = response.json()
-    complex_cef_events = response_json['sev.getSecurityEventsResponse']['sev.return']
+
+    sev_get_security_events_response = response_json.get('sev.getSecurityEventsResponse')
+
+    if 'sev.return' not in sev_get_security_events_response:
+        return
+
+    complex_cef_events = sev_get_security_events_response.get('sev.return')
 
     if isinstance(complex_cef_events, dict):
 
