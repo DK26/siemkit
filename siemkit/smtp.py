@@ -14,11 +14,18 @@
 
 import smtplib
 import ssl
-from abc import ABC
+from typing import Generator
+from typing import Collection
 from abc import abstractmethod
+import zlib
+import re
+import os
+
+from email.mime.multipart import MIMEMultipart
+from email.mime.image import MIMEImage
+
 from siemkit.data import Vault
 from siemkit.data import RamKeyring
-import zlib
 
 
 class SmtpLogin:
@@ -53,11 +60,12 @@ class SmtpLogin:
         pass
 
 
-class SmtpProfile:
-    pass
-
-
 class GmailTlsLogin(SmtpLogin):
+    """
+    Current Requirements: an `App Password` must be created for this to work.
+        However GMail change their security protocols on regular basis. Any changes should be
+        documented & updated here.
+    """
 
     def __init__(self, server, port, username=None, password=None, vault: Vault = None):
         super().__init__(server, port, username, password, vault)
@@ -80,11 +88,13 @@ class GmailTlsLogin(SmtpLogin):
 
 class BasicLogin(SmtpLogin):
 
-    def login(self, username=None, password=None, vault: Vault = None):
-        pass
+    def __init__(self, server, port, username=None, password=None, vault: Vault = None):
+        super().__init__(server, port, username, password, vault)
+        self.__smtp_session = None
 
-    def __init__(self):
-        pass
+    def login(self, username=None, password=None, vault: Vault = None):
+        self.__smtp_session = smtplib.SMTP(self.__server, self.__port)
+        return self.__smtp_session
 
 
 class Connection:
@@ -99,8 +109,52 @@ class Connection:
             smtp_mime_payload.as_string()
         )
 
-    def get_session(self):
+    def get_session(self) -> smtplib.SMTP:
         return self.__smtp_session
 
     def quit(self):
         return self.__smtp_session.quit()
+
+
+def map_images(html_content: str) -> dict:
+
+    images = re.findall(r'src=["]?(.*?)["]?[\s\>]', html_content, flags=re.MULTILINE)
+    images_paths = set()
+    images_map = {}
+
+    for image_id, image_path in enumerate(images):
+        if image_path not in images_paths:
+            images_map[f'image_{image_id}'] = image_path
+            images_paths.add(image_path)
+
+    return images_map
+
+
+def create_mime_images(work_dir: str, images_map: dict) -> Generator[MIMEImage, None, None]:
+
+    for image_id, image_path in images_map.items():
+
+        with open(os.path.join(work_dir, image_path), 'rb') as fs:
+            mime_image = MIMEImage(fs.read())
+
+        mime_image.add_header('Content-ID', f'<{image_id}>')
+
+        yield mime_image
+
+
+def attach_images(smtp_mime_multipart: MIMEMultipart, mime_images: Collection) -> MIMEMultipart:
+
+    for mime_image in mime_images:
+        smtp_mime_multipart.attach(mime_image)
+
+    return smtp_mime_multipart
+
+
+def embed_images(html_content: str, images_map: dict) -> str:
+
+    for image_id, image_path in images_map.items():
+        html_content = html_content.replace(image_path, f'cid:{image_id}')
+
+    return html_content
+
+
