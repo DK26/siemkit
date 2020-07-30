@@ -16,6 +16,9 @@ import smtplib
 import ssl
 from abc import ABC
 from abc import abstractmethod
+from siemkit.data import Vault
+from siemkit.data import RamKeyring
+from siemkit.random import safe_object_uuid
 
 
 class SmtpProfile:
@@ -23,5 +26,13 @@ class SmtpProfile:
 
 
 class GmailTls(SmtpProfile):
-    pass
+
+    def __init__(self, vault: Vault = None):
+        self.__context = ssl.create_default_context()
+
+
+class Basic(SmtpProfile):
+
+    def __init__(self):
+        pass
 

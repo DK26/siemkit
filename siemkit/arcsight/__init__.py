@@ -17,6 +17,7 @@ from collections.abc import Iterable
 
 import urllib3
 import requests
+import zlib
 
 from siemkit.api.arcsight.esm import ArcSightUri
 from siemkit.api.arcsight.esm import ArcSightUriEnum
@@ -49,7 +50,8 @@ class Esm:
             vault: Vault = None
     ):
 
-        self.__url_base = f"https://{server}:{port}"
+        server_id = f"{server}:{port}"
+        self.__url_base = f"https://{server_id}"
 
         self.__verify = verify
         self.__cert = cert
@@ -59,9 +61,13 @@ class Esm:
             'token': ''
         }
 
-        self.__uuid = safe_object_uuid(self)
+        self.__server_id = hex(
+            zlib.crc32(
+                bytes(server_id, 'utf-8')
+            )
+        )[2:]
 
-        self.__vault_name = f'arcsight.esm.session.{self.__uuid}'
+        self.__vault_name = f'arcsight.esm.{self.__server_id}'
 
         if vault is None:
             # For now, we are using an unsafe RAM Keyring until we can figure out
@@ -70,12 +76,18 @@ class Esm:
 
         self.__vault = vault
 
-        vault.store_secret('username', username)
-        vault.store_secret('password', password)
+        # vault.store_secret('username', username)
+        # vault.store_secret('password', password)
 
-        self.refresh_token()
+        self.refresh_token(username, password)
 
-    def refresh_token(self):
+    def refresh_token(self, username=None, password=None):
+
+        if isinstance(username, str):
+            self.__vault.store_secret('username', username)
+
+        if isinstance(password, str):
+            self.__vault.store_secret('password', password)
 
         response = self.unchecked_uri(
             LoginApiEnum.LOGIN, {
