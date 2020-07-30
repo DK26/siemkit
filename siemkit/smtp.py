@@ -15,7 +15,8 @@
 import smtplib
 import ssl
 from typing import Generator
-from typing import Collection
+from typing import Callable
+from typing import Iterable
 from abc import abstractmethod
 import zlib
 import re
@@ -23,6 +24,8 @@ import os
 
 from email.mime.multipart import MIMEMultipart
 from email.mime.image import MIMEImage
+from email.mime.text import MIMEText
+from email.mime.application import MIMEApplication
 
 from siemkit.data import Vault
 from siemkit.data import RamKeyring
@@ -118,7 +121,7 @@ class Connection:
 
 def map_images(html_content: str) -> dict:
 
-    images = re.findall(r'src=["]?(.*?)["]?[\s\>]', html_content, flags=re.MULTILINE)
+    images = re.findall(r'^.*?<.*?src=["]?([^;>=]+?)["]?(?:>|\s\w+=)', html_content, flags=re.MULTILINE)
     images_paths = set()
     images_map = {}
 
@@ -142,7 +145,7 @@ def create_mime_images(work_dir: str, images_map: dict) -> Generator[MIMEImage, 
         yield mime_image
 
 
-def attach_images(smtp_mime_multipart: MIMEMultipart, mime_images: Collection) -> MIMEMultipart:
+def attach_images(smtp_mime_multipart: MIMEMultipart, mime_images: Iterable) -> MIMEMultipart:
 
     for mime_image in mime_images:
         smtp_mime_multipart.attach(mime_image)
@@ -157,4 +160,120 @@ def embed_images(html_content: str, images_map: dict) -> str:
 
     return html_content
 
+
+def attach_files(smtp_mime_multipart: MIMEMultipart, files: Iterable) -> MIMEMultipart:
+
+    for file in files:
+
+        with open(file, "rb") as fs:
+
+            attachment = MIMEApplication(
+                fs.read(),
+                Name=os.path.basename(file)
+            )
+
+        attachment['Content-Disposition'] = f'attachment; filename="{file}"'
+        smtp_mime_multipart.attach(attachment)
+
+    return smtp_mime_multipart
+
+
+def remove_comments(html_content):
+    return re.sub("<!--.*?-->", "", html_content, flags=re.DOTALL)
+
+
+class MultipartMessage:
+
+    def __init__(
+            self,
+            from_address,
+            to_addresses,
+            cc_addresses=None,
+            bcc_addresses=None,
+            subject='',
+            content='',
+            content_processor: Callable = None,
+            work_dir='',
+            attachments=None,
+            encoding='utf-8'
+    ):
+
+        # Prep Base
+        self.__smtp_multipart = MIMEMultipart()
+
+        self.__smtp_multipart['From'] = from_address
+        self.from_address = from_address
+
+        if to_addresses is None:
+            to_addresses = []
+        elif isinstance(to_addresses, str):
+            to_addresses = [to_addresses]
+
+        self.__smtp_multipart['To'] = ','.join(to_addresses)
+        self.to_addresses = to_addresses
+
+        if cc_addresses is None:
+            cc_addresses = []
+        elif isinstance(cc_addresses, str):
+            cc_addresses = [cc_addresses]
+
+        self.__smtp_multipart['CC'] = ','.join(cc_addresses)
+        self.cc_addresses = cc_addresses
+
+        if bcc_addresses is None:
+            bcc_addresses = []
+        elif isinstance(bcc_addresses, str):
+            bcc_addresses = [bcc_addresses]
+
+        self.bcc_addresses = bcc_addresses
+
+        self.__smtp_multipart['Subject'] = subject
+        self.subject = subject
+
+        self._work_dir = work_dir
+
+        # Prep Content
+        if os.path.exists(content):
+
+            self._work_dir = os.path.dirname(content)
+
+            with open(content, 'r', encoding=encoding, errors='ignore') as fs:
+                content = fs.read()
+
+        content = remove_comments(content)
+
+        if callable(content_processor):
+            content = content_processor(content)
+
+        images_map = map_images(content)
+
+        if images_map:
+            content = embed_images(content, images_map)
+
+            # Load Images
+            image_loader = create_mime_images(self._work_dir, images_map)
+            attach_images(self.__smtp_multipart, image_loader)
+
+        self.__smtp_multipart.attach(
+            MIMEText(content, 'html', _charset=encoding)
+        )
+
+        self.content = content
+
+        # Load Attachments
+        if attachments is not None:
+
+            if isinstance(attachments, str):
+                attachments = [attachments]
+
+            attach_files(self.__smtp_multipart, attachments)
+
+    def __str__(self):
+        return str(self.__smtp_multipart)
+
+    def as_string(self):
+        return self.__smtp_multipart.as_string()
+
+    def get_smtp_multipart(self):
+        return self.__smtp_multipart
 
