@@ -105,20 +105,18 @@ class Connection:
     def __init__(self, smtp_login: SmtpLogin):
         self.__smtp_session = smtp_login.login()
 
-    def sendmail(self, from_address, to_addresses, smtp_mime_payload, cc_addresses=None, bcc_addresses=None):
+    def sendmail(self, from_address, send_addresses, smtp_mime_payload):
 
-        if isinstance(to_addresses, str):
-            to_addresses = [to_addresses]
-
-        if cc_addresses is None:
-            cc_addresses = []
-
-        if bcc_addresses is None:
-            bcc_addresses = []
+        send_to = []
+        if isinstance(send_addresses, str):
+            send_to.append(send_addresses)
+        elif isinstance(send_addresses, Iterable):
+            for address in send_addresses:
+                send_to.append(address)
 
         self.__smtp_session.sendmail(
             from_address,
-            to_addresses + cc_addresses + bcc_addresses,
+            send_to,
             smtp_mime_payload.as_string()
         )
 
