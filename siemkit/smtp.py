@@ -100,29 +100,6 @@ class BasicLogin(SmtpLogin):
         return self.__smtp_session
 
 
-class Connection:
-
-    def __init__(self, smtp_login: SmtpLogin):
-        self.__smtp_session = smtp_login.login()
-
-    def sendmail(self, from_address, send_addresses, smtp_mime_payload):
-
-        send_to = []
-        if isinstance(send_addresses, str):
-            send_to.append(send_addresses)
-        elif isinstance(send_addresses, Iterable):
-            for address in send_addresses:
-                if isinstance(address, str):
-                    send_to.append(address)
-                else:
-                    send_to.extend(list(address))
-
-        self.__smtp_session.sendmail(
-            from_address,
-            send_to,
-            smtp_mime_payload.as_string()
-        )
-
     def get_session(self) -> smtplib.SMTP:
         return self.__smtp_session
 
@@ -275,3 +252,51 @@ class MultipartMessage:
     def get_smtp_multipart(self):
         return self.__smtp_multipart
 
+
+class Connection:
+
+    def __init__(self, smtp_login: SmtpLogin):
+        self.__smtp_session = smtp_login.login()
+
+    # def sendmail(self, from_address, send_addresses, smtp_mime_payload):
+    #
+    #     send_to = []
+    #     if isinstance(send_addresses, str):
+    #         send_to.append(send_addresses)
+    #     elif isinstance(send_addresses, Iterable):
+    #         for address in send_addresses:
+    #             if isinstance(address, str):
+    #                 send_to.append(address)
+    #             else:
+    #                 send_to.extend(list(address))
+    #
+    #     self.__smtp_session.sendmail(
+    #         from_address,
+    #         send_to,
+    #         smtp_mime_payload.as_string()
+    #     )
+    def sendmail(self, smtp_mime_payload: MultipartMessage):
+
+        from_address = smtp_mime_payload.from_address
+        to_addresses = smtp_mime_payload.to_addresses
+        cc_addresses = smtp_mime_payload.cc_addresses
+        bcc_addresses = smtp_mime_payload.bcc_addresses
+
+        send_to = []
+
+        for addresses_batch in (to_addresses, cc_addresses, bcc_addresses):
+
+            if isinstance(addresses_batch, str):
+                send_to.append(addresses_batch)
+            elif isinstance(addresses_batch, Iterable):
+                for address in addresses_batch:
+                    if isinstance(address, str):
+                        send_to.append(address)
+                    else:
+                        send_to.extend(list(address))
+
+        self.__smtp_session.sendmail(
+            from_address,
+            send_to,
+            smtp_mime_payload.as_string()
+        )
