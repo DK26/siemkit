@@ -115,7 +115,7 @@ class Connection:
                 if isinstance(address, str):
                     send_to.append(address)
                 else:
-                    send_to.extend(address)
+                    send_to.extend(list(address))
 
         self.__smtp_session.sendmail(
             from_address,
