@@ -30,13 +30,14 @@ from email.mime.application import MIMEApplication
 from siemkit.data import Vault
 from siemkit.data import RamKeyring
 
+from siemkit import html
+
 
 class SmtpLogin:
 
     def __init__(self, server, port, username=None, password=None, vault: Vault = None):
-
-        self.__server = server
-        self.__port = port
+        self._server = server
+        self._port = port
 
         server_id = f"{server}:{port}"
 
@@ -53,10 +54,10 @@ class SmtpLogin:
             # something better as default.
             vault = Vault(self.__vault_name, keyring_adaptor=RamKeyring())
 
-        self.__vault = vault
+        self._vault = vault
 
-        self.__vault.store_secret('username', username)
-        self.__vault.store_secret('password', password)
+        self._vault.store_secret('username', username)
+        self._vault.store_secret('password', password)
 
     @abstractmethod
     def login(self) -> smtplib.SMTP:
@@ -76,14 +77,13 @@ class GmailTlsLogin(SmtpLogin):
         self.__smtp_session = None
 
     def login(self) -> smtplib.SMTP:
-
-        self.__smtp_session = smtplib.SMTP(self.__server, self.__port)
+        self.__smtp_session = smtplib.SMTP(self._server, self._port)
         self.__smtp_session.ehlo()
         self.__smtp_session.starttls(context=self.__context)
 
         self.__smtp_session.login(
-            self.__vault.get_secret('username'),
-            self.__vault.get_secret('password')
+            self._vault.get_secret('username'),
+            self._vault.get_secret('password')
         )
 
         return self.__smtp_session
@@ -96,7 +96,7 @@ class BasicLogin(SmtpLogin):
         self.__smtp_session = None
 
     def login(self, username=None, password=None, vault: Vault = None):
-        self.__smtp_session = smtplib.SMTP(self.__server, self.__port)
+        self.__smtp_session = smtplib.SMTP(self._server, self._port)
         return self.__smtp_session
 
 
@@ -105,7 +105,17 @@ class Connection:
     def __init__(self, smtp_login: SmtpLogin):
         self.__smtp_session = smtp_login.login()
 
-    def sendmail(self, from_address, to_addresses, cc_addresses, bcc_addresses, smtp_mime_payload):
+    def sendmail(self, from_address, to_addresses, smtp_mime_payload, cc_addresses=None, bcc_addresses=None):
+
+        if isinstance(to_addresses, str):
+            to_addresses = [to_addresses]
+
+        if cc_addresses is None:
+            cc_addresses = []
+
+        if bcc_addresses is None:
+            bcc_addresses = []
+
         self.__smtp_session.sendmail(
             from_address,
             to_addresses + cc_addresses + bcc_addresses,
@@ -120,7 +130,6 @@ class Connection:
 
 
 def map_images(html_content: str) -> dict:
-
     images = re.findall(r'^.*?<.*?src=["]?([^;>=]+?)["]?(?:>|\s\w+=)', html_content, flags=re.MULTILINE)
     images_paths = set()
     images_map = {}
@@ -134,9 +143,7 @@ def map_images(html_content: str) -> dict:
 
 
 def create_mime_images(work_dir: str, images_map: dict) -> Generator[MIMEImage, None, None]:
-
     for image_id, image_path in images_map.items():
-
         with open(os.path.join(work_dir, image_path), 'rb') as fs:
             mime_image = MIMEImage(fs.read())
 
@@ -146,7 +153,6 @@ def create_mime_images(work_dir: str, images_map: dict) -> Generator[MIMEImage, 
 
 
 def attach_images(smtp_mime_multipart: MIMEMultipart, mime_images: Iterable) -> MIMEMultipart:
-
     for mime_image in mime_images:
         smtp_mime_multipart.attach(mime_image)
 
@@ -154,7 +160,6 @@ def attach_images(smtp_mime_multipart: MIMEMultipart, mime_images: Iterable) -> 
 
 
 def embed_images(html_content: str, images_map: dict) -> str:
-
     for image_id, image_path in images_map.items():
         html_content = html_content.replace(image_path, f'cid:{image_id}')
 
@@ -162,11 +167,8 @@ def embed_images(html_content: str, images_map: dict) -> str:
 
 
 def attach_files(smtp_mime_multipart: MIMEMultipart, files: Iterable) -> MIMEMultipart:
-
     for file in files:
-
         with open(file, "rb") as fs:
-
             attachment = MIMEApplication(
                 fs.read(),
                 Name=os.path.basename(file)
@@ -176,10 +178,6 @@ def attach_files(smtp_mime_multipart: MIMEMultipart, files: Iterable) -> MIMEMul
         smtp_mime_multipart.attach(attachment)
 
     return smtp_mime_multipart
-
-
-def remove_comments(html_content):
-    return re.sub("<!--.*?-->", "", html_content, flags=re.DOTALL)
 
 
 class MultipartMessage:
@@ -234,13 +232,12 @@ class MultipartMessage:
 
         # Prep Content
         if os.path.exists(content):
-
             self._work_dir = os.path.dirname(content)
 
             with open(content, 'r', encoding=encoding, errors='ignore') as fs:
                 content = fs.read()
 
-        content = remove_comments(content)
+        content = html.remove_comments(content)
 
         if callable(content_processor):
             content = content_processor(content)
