@@ -70,7 +70,7 @@ class GmailTlsLogin(SmtpLogin):
         documented & updated here.
     """
 
-    def __init__(self, server, port, username=None, password=None, vault: Vault = None):
+    def __init__(self, server, port=587, username=None, password=None, vault: Vault = None):
         super().__init__(server, port, username, password, vault)
         self.__context = ssl.create_default_context()
         self.__smtp_session = None
