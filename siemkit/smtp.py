@@ -146,13 +146,14 @@ def embed_images(html_content: str, images_map: dict) -> str:
 
 def attach_files(smtp_mime_multipart: MIMEMultipart, files: Iterable) -> MIMEMultipart:
     for file in files:
+        file_name = os.path.basename(file)
         with open(file, "rb") as fs:
             attachment = MIMEApplication(
                 fs.read(),
-                Name=os.path.basename(file)
+                Name=file_name
             )
 
-        attachment['Content-Disposition'] = f'attachment; filename="{file}"'
+        attachment['Content-Disposition'] = f'attachment; filename="{file_name}"'
         smtp_mime_multipart.attach(attachment)
 
     return smtp_mime_multipart
@@ -168,7 +169,8 @@ class MultipartMessage:
             bcc_addresses=None,
             subject='',
             content='',
-            content_processor: Callable = None,
+            content_render: Callable = None,
+            content_variables: dict = None,
             work_dir='',
             attachments=None,
             encoding='utf-8'
@@ -215,10 +217,10 @@ class MultipartMessage:
             with open(content, 'r', encoding=encoding, errors='ignore') as fs:
                 content = fs.read()
 
-        content = html.remove_comments(content)
+        if callable(content_render):
+            content = content_render(content, content_variables)
 
-        if callable(content_processor):
-            content = content_processor(content)
+        content = html.remove_comments(content)
 
         images_map = map_images(content)
 
@@ -268,7 +270,7 @@ class Connection:
     #             if isinstance(address, str):
     #                 send_to.append(address)
     #             else:
-    #                 send_to.extend(list(address))
+    #                 send_to.extend(address)
     #
     #     self.__smtp_session.sendmail(
     #         from_address,
@@ -293,7 +295,7 @@ class Connection:
                     if isinstance(address, str):
                         send_to.append(address)
                     else:
-                        send_to.extend(list(address))
+                        send_to.extend(address)
 
         self.__smtp_session.sendmail(
             from_address,
