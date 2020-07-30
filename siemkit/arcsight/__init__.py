@@ -26,7 +26,6 @@ from siemkit.adaptors import HttpResponse
 
 from siemkit.data import RamKeyring
 from siemkit.data import Vault
-from siemkit.random import safe_object_uuid
 
 from siemkit.api.arcsight.esm.v72.auth import LoginApiEnum
 from siemkit.api.arcsight.esm.v72.activelist import ActiveListApiEnum

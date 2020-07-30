@@ -99,7 +99,6 @@ class BasicLogin(SmtpLogin):
         self.__smtp_session = smtplib.SMTP(self._server, self._port)
         return self.__smtp_session
 
-
     def get_session(self) -> smtplib.SMTP:
         return self.__smtp_session
 
