@@ -112,7 +112,10 @@ class Connection:
             send_to.append(send_addresses)
         elif isinstance(send_addresses, Iterable):
             for address in send_addresses:
-                send_to.append(address)
+                if isinstance(address, str):
+                    send_to.append(address)
+                else:
+                    send_to.extend(address)
 
         self.__smtp_session.sendmail(
             from_address,
