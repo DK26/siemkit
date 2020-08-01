@@ -33,7 +33,7 @@ from siemkit.data import RamKeyring
 from siemkit import html
 
 
-class SmtpLogin:
+class SmtpAuthentication:
 
     def __init__(self, server, port, username=None, password=None, vault: Vault = None):
         self._server = server
@@ -60,23 +60,44 @@ class SmtpLogin:
         self._vault.store_secret('password', password)
 
     @abstractmethod
-    def login(self) -> smtplib.SMTP:
+    def connect(self) -> smtplib.SMTP:
         pass
 
 
-class GmailTlsLogin(SmtpLogin):
+class SslTlsLogin(SmtpAuthentication):
     """
-    Current Requirements: an `App Password` must be created for this to work.
-        However GMail change their security protocols on regular basis. Any changes should be
-        documented & updated here.
+    Start a secure SSL/TLS connection before authenticating.
+    A failure will abort the connection.
     """
 
-    def __init__(self, server="smtp.gmail.com", port=587, username=None, password=None, vault: Vault = None):
+    def __init__(self, server, port=465, username=None, password=None, vault: Vault = None):
+        super().__init__(server, port, username, password, vault)
+        self.__smtp_session = None
+
+    def connect(self) -> smtplib.SMTP:
+
+        self.__smtp_session = smtplib.SMTP_SSL(self._server, self._port)
+
+        self.__smtp_session.login(
+            self._vault.get_secret('username'),
+            self._vault.get_secret('password')
+        )
+
+        return self.__smtp_session
+
+
+class StarttlsLogin(SmtpAuthentication):
+    """
+    Attempt to establish a secure SSL/TLS connection before authenticating.
+    A failure may allow an unsecured connection.
+    """
+
+    def __init__(self, server, port=587, username=None, password=None, vault: Vault = None):
         super().__init__(server, port, username, password, vault)
         self.__context = ssl.create_default_context()
         self.__smtp_session = None
 
-    def login(self) -> smtplib.SMTP:
+    def connect(self) -> smtplib.SMTP:
         self.__smtp_session = smtplib.SMTP(self._server, self._port)
         self.__smtp_session.ehlo()
         self.__smtp_session.starttls(context=self.__context)
@@ -89,13 +110,16 @@ class GmailTlsLogin(SmtpLogin):
         return self.__smtp_session
 
 
-class BasicLogin(SmtpLogin):
+class NoLogin(SmtpAuthentication):
+    """
+    Default unsecured SMTP connection with no authentication.
+    """
 
-    def __init__(self, server, port, username=None, password=None, vault: Vault = None):
+    def __init__(self, server, port=25, username=None, password=None, vault: Vault = None):
         super().__init__(server, port, username, password, vault)
         self.__smtp_session = None
 
-    def login(self, username=None, password=None, vault: Vault = None):
+    def connect(self, username=None, password=None, vault: Vault = None):
         self.__smtp_session = smtplib.SMTP(self._server, self._port)
         return self.__smtp_session
 
@@ -107,6 +131,7 @@ class BasicLogin(SmtpLogin):
 
 
 def map_images(html_content: str) -> dict:
+
     images = re.findall(r'^.*?<.*?src=["]?([^;>=]+?)["]?(?:>|\s\w+=)', html_content, flags=re.MULTILINE)
     images_paths = set()
     images_map = {}
@@ -120,6 +145,7 @@ def map_images(html_content: str) -> dict:
 
 
 def create_mime_images(work_dir: str, images_map: dict) -> Generator[MIMEImage, None, None]:
+
     for image_id, image_path in images_map.items():
         with open(os.path.join(work_dir, image_path), 'rb') as fs:
             mime_image = MIMEImage(fs.read())
@@ -130,6 +156,7 @@ def create_mime_images(work_dir: str, images_map: dict) -> Generator[MIMEImage, 
 
 
 def attach_images(smtp_mime_multipart: MIMEMultipart, mime_images: Iterable) -> MIMEMultipart:
+
     for mime_image in mime_images:
         smtp_mime_multipart.attach(mime_image)
 
@@ -137,6 +164,7 @@ def attach_images(smtp_mime_multipart: MIMEMultipart, mime_images: Iterable) -> 
 
 
 def embed_images(html_content: str, images_map: dict) -> str:
+
     for image_id, image_path in images_map.items():
         html_content = html_content.replace(image_path, f'cid:{image_id}')
 
@@ -144,6 +172,7 @@ def embed_images(html_content: str, images_map: dict) -> str:
 
 
 def attach_files(smtp_mime_multipart: MIMEMultipart, files: Iterable) -> MIMEMultipart:
+
     for file in files:
         file_name = os.path.basename(file)
         with open(file, "rb") as fs:
@@ -256,8 +285,8 @@ class MultipartMessage:
 
 class Connection:
 
-    def __init__(self, smtp_login: SmtpLogin):
-        self.__smtp_session = smtp_login.login()
+    def __init__(self, smtp_login: SmtpAuthentication):
+        self.__smtp_session = smtp_login.connect()
 
     # def sendmail(self, from_address, send_addresses, smtp_mime_payload):
     #
