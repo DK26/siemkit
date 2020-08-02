@@ -15,6 +15,10 @@
 import zlib
 
 
+def crc32(data):
+    return hex(zlib.crc32(data))[2:]
+
+
 def crc32_file(path, chunk_size=1024):
 
     total_bytes = 0
