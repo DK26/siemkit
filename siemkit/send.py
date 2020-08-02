@@ -18,6 +18,10 @@ from telnetlib import Telnet
 from typing import Union
 from ipaddress import ip_address
 
+from siemkit.smtp import AUTH_MODULE_FACTORY as SMTP_AUTH_MODULE_FACTORY
+from siemkit.smtp import Connection as SmtpConnection
+from siemkit.smtp import MultipartMimeMessage
+
 default = {
     'unicode': 'utf-8'
 }
@@ -78,3 +82,57 @@ def broadcast(port: int, payload: Union[bytes, str], ttl: int = 1) -> int:
     broadcast_socket.sendto(payload, address)
 
     return len(payload)
+
+
+def smtp(
+        server,
+        from_address,
+        to_addresses,
+        cc_addresses=None,
+        bcc_addresses=None,
+        subject='',
+        content=None,
+        content_render=None,
+        content_variables=None,
+        attachments=None,
+        auth_module='tls',
+        username=None,
+        password=None,
+        port=None,
+):
+
+    if not isinstance(port, int):
+
+        if ':' in server:
+
+            server, port = server.split(':')
+
+            if port != '':
+                port = int(port)
+
+        if not port:
+            port = {
+                'starttls': 587,
+                'tls': 465
+            }.get(auth_module, 25)
+
+    smtp_auth = SMTP_AUTH_MODULE_FACTORY.create(
+        module_name=auth_module,
+        server=server,
+        port=port,
+        username=username,
+        password=password,
+    )
+    SmtpConnection(smtp_auth).sendmail(
+        MultipartMimeMessage(
+            from_address=from_address,
+            to_addresses=to_addresses,
+            cc_addresses=cc_addresses,
+            bcc_addresses=bcc_addresses,
+            subject=subject,
+            content=content,
+            content_render=content_render,
+            content_variables=content_variables,
+            attachments=attachments
+        )
+    )

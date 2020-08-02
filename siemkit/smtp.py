@@ -17,8 +17,11 @@ import ssl
 from typing import Generator
 from typing import Callable
 from typing import Iterable
+from typing import Type
 from abc import abstractmethod
 from abc import ABC
+from enum import Enum
+
 import zlib
 import re
 import os
@@ -34,7 +37,17 @@ from siemkit.data import RamKeyring
 from siemkit import html
 
 
+class AuthenticationEnum(str, Enum):
+    NO_AUTH = 'noauth'
+    STARTTLS = 'starttls'
+    TLS = 'tls'
+
+    def __str__(self):
+        return self.value
+
+
 class SmtpAuthentication:
+    module_name = 'undefined'
 
     def __init__(self, server, port, username=None, password=None, vault: Vault = None):
         self._server = server
@@ -71,12 +84,13 @@ class TlsAuth(SmtpAuthentication):
     A failure will abort the connection.
     """
 
+    module_name = 'tls'
+
     def __init__(self, server, port=465, username=None, password=None, vault: Vault = None):
         super().__init__(server, port, username, password, vault)
         self.__smtp_session = None
 
     def connect(self) -> smtplib.SMTP:
-
         self.__smtp_session = smtplib.SMTP_SSL(self._server, self._port)
 
         self.__smtp_session.login(
@@ -92,6 +106,8 @@ class StarttlsAuth(SmtpAuthentication):
     Attempt to establish a secure SSL/TLS connection before authenticating.
     A failure may allow an insecure connection.
     """
+
+    module_name = 'starttls'
 
     def __init__(self, server, port=587, username=None, password=None, vault: Vault = None):
         super().__init__(server, port, username, password, vault)
@@ -116,6 +132,8 @@ class NoAuth(SmtpAuthentication):
     SMTP default insecure open mail relay connection with no authentication.
     """
 
+    module_name = 'noauth'
+
     def __init__(self, server, port=25, username=None, password=None, vault: Vault = None):
         super().__init__(server, port, username, password, vault)
         self.__smtp_session = None
@@ -132,7 +150,6 @@ class NoAuth(SmtpAuthentication):
 
 
 def map_images(html_content: str) -> dict:
-
     images = re.findall(r'^.*?<.*?src=["]?([^;>=]+?)["]?(?:>|\s\w+=)', html_content, flags=re.MULTILINE)
     images_paths = set()
     images_map = {}
@@ -146,7 +163,6 @@ def map_images(html_content: str) -> dict:
 
 
 def create_mime_images(work_dir: str, images_map: dict) -> Generator[MIMEImage, None, None]:
-
     for image_id, image_path in images_map.items():
         with open(os.path.join(work_dir, image_path), 'rb') as fs:
             mime_image = MIMEImage(fs.read())
@@ -157,7 +173,6 @@ def create_mime_images(work_dir: str, images_map: dict) -> Generator[MIMEImage, 
 
 
 def attach_images(smtp_mime_multipart: MIMEMultipart, mime_images: Iterable) -> MIMEMultipart:
-
     for mime_image in mime_images:
         smtp_mime_multipart.attach(mime_image)
 
@@ -165,7 +180,6 @@ def attach_images(smtp_mime_multipart: MIMEMultipart, mime_images: Iterable) -> 
 
 
 def embed_images(html_content: str, images_map: dict) -> str:
-
     for image_id, image_path in images_map.items():
         html_content = html_content.replace(image_path, f'cid:{image_id}')
 
@@ -173,7 +187,6 @@ def embed_images(html_content: str, images_map: dict) -> str:
 
 
 def attach_files(smtp_mime_multipart: MIMEMultipart, files: Iterable) -> MIMEMultipart:
-
     for file in files:
         file_name = os.path.basename(file)
         with open(file, "rb") as fs:
@@ -351,6 +364,7 @@ class Connection:
     #         send_to,
     #         smtp_mime_payload.as_string()
     #     )
+
     def sendmail(self, smtp_mime_payload: MimeMessage):
 
         from_address = smtp_mime_payload.from_address
@@ -376,3 +390,29 @@ class Connection:
             send_to,
             smtp_mime_payload.as_string()
         )
+
+
+class AuthenticationModuleFactory:
+
+    def __init__(self):
+        self._modules = {}
+
+    def register_module(self, module: Type[SmtpAuthentication]):
+        self._modules[module.module_name] = module
+        return self
+
+    def create(self, module_name, **kwargs):
+        module = self._modules.get(module_name)
+        if module is None:
+            raise ValueError(module_name)
+
+        return self._modules[module_name](**kwargs)
+
+
+AUTH_MODULE_FACTORY = AuthenticationModuleFactory()
+
+AUTH_MODULE_FACTORY.register_module(TlsAuth)
+AUTH_MODULE_FACTORY.register_module(StarttlsAuth)
+AUTH_MODULE_FACTORY.register_module(NoAuth)
+
+
