@@ -147,7 +147,7 @@ class IDTracker:
 
     def __enter__(self):
         return self
-    
+
     def __exit__(self, exc_type, exc_val, exc_tb):
         if exc_tb:
             raise
@@ -211,9 +211,10 @@ class RamKeyring(adaptors.Keyring):
 
 class Vault:
 
-    def __init__(self, name, keyring_adaptor: adaptors.Keyring):
+    def __init__(self, name, keyring_adaptor: adaptors.Keyring, default_value=None):
         self.__name = name
         self.__keyring_module = keyring_adaptor
+        self.__default_value = default_value
 
     def name(self):
         return self.__name
@@ -223,7 +224,13 @@ class Vault:
         return self
 
     def get_secret(self, key):
-        return self.__keyring_module.get_password(self.__name, key)
+        try:
+            return self.__keyring_module.get_password(self.__name, key)
+        except:
+            if isinstance(self.__default_value, str):
+                return self.__default_value
+            else:
+                raise
 
     def delete_secret(self, key):
         self.__keyring_module.delete_password(self.__name, key)
