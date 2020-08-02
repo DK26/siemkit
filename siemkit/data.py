@@ -214,7 +214,7 @@ class Vault:
     def __init__(self, name, keyring_adaptor: adaptors.Keyring, default_value=None):
         self.__name = name
         self.__keyring_module = keyring_adaptor
-        self.__default_value = default_value
+        self.default_value = default_value
 
     def name(self):
         return self.__name
@@ -227,8 +227,8 @@ class Vault:
         try:
             return self.__keyring_module.get_password(self.__name, key)
         except:
-            if isinstance(self.__default_value, str):
-                return self.__default_value
+            if isinstance(self.default_value, str):
+                return self.default_value
             else:
                 raise
 
