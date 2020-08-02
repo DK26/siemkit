@@ -32,7 +32,7 @@ from siemkit.api.arcsight.esm.v72.activelist import ActiveListApiEnum
 from siemkit.api.arcsight.esm.v72.events import EventsApiEnum
 
 http_request_module = RequestsModule(requests)
-urllib3.disable_warnings()  # ToDo: Make Configurable
+urllib3.disable_warnings()
 
 
 class Esm:
