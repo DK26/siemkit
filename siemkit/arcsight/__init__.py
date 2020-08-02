@@ -224,12 +224,23 @@ def normalized_active_list_entries(response: HttpResponse):
 
     response_json = response.json()
     columns = response_json['act.getEntriesResponse']['act.return']['columns']
-    entry_list = response_json['act.getEntriesResponse']['act.return']['entryList']
+    entry_list = response_json['act.getEntriesResponse']['act.return'].get('entryList')
 
-    for entry in entry_list:
-        dict_entry = dict(zip(columns, entry['entry']))
+    if entry_list is None:
+        return
+
+    # Single Result
+    if isinstance(entry_list, dict):
+        dict_entry = dict(zip(columns, entry_list['entry']))
         dict_entry['_columns_order'] = columns
         yield dict_entry
+
+    # Multiple Results
+    elif isinstance(entry_list, list):
+        for entry in entry_list:
+            dict_entry = dict(zip(columns, entry['entry']))
+            dict_entry['_columns_order'] = columns
+            yield dict_entry
 
 
 def simple_key_value(complex_cef: dict, prev_key):
