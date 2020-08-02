@@ -211,6 +211,8 @@ class RamKeyring(adaptors.Keyring):
 
 class Vault:
 
+    # ToDo: Turn into a dict.
+
     def __init__(self, name, keyring_adaptor: adaptors.Keyring, default_value=None):
         self.__name = name
         self.__keyring_module = keyring_adaptor
