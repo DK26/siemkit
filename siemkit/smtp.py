@@ -65,7 +65,7 @@ class SmtpAuthentication:
         pass
 
 
-class SslTlsLogin(SmtpAuthentication):
+class TlsAuth(SmtpAuthentication):
     """
     Start a secure SSL/TLS connection before authenticating.
     A failure will abort the connection.
@@ -87,10 +87,10 @@ class SslTlsLogin(SmtpAuthentication):
         return self.__smtp_session
 
 
-class StarttlsLogin(SmtpAuthentication):
+class StarttlsAuth(SmtpAuthentication):
     """
     Attempt to establish a secure SSL/TLS connection before authenticating.
-    A failure may allow an unsecured connection.
+    A failure may allow an insecure connection.
     """
 
     def __init__(self, server, port=587, username=None, password=None, vault: Vault = None):
@@ -111,9 +111,9 @@ class StarttlsLogin(SmtpAuthentication):
         return self.__smtp_session
 
 
-class NoLogin(SmtpAuthentication):
+class NoAuth(SmtpAuthentication):
     """
-    Default unsecured SMTP connection with no authentication.
+    SMTP default insecure open mail relay connection with no authentication.
     """
 
     def __init__(self, server, port=25, username=None, password=None, vault: Vault = None):
@@ -277,7 +277,8 @@ class MultipartMimeMessage(MimeMessage):
         # Prep Base
         self.__smtp_multipart = MIMEMultipart()
         self.__smtp_multipart['From'] = from_address
-        self.__smtp_multipart['CC'] = ','.join(cc_addresses)
+        self.__smtp_multipart['To'] = ','.join(self.to_addresses)
+        self.__smtp_multipart['CC'] = ','.join(self.cc_addresses)
         self.__smtp_multipart['Subject'] = subject
         self.subject = subject
 
