@@ -24,6 +24,8 @@ from typing import Tuple
 
 class YamlManager(dict):
 
+    # ToDo: Assign secrets fields to put in a Vault
+
     def __init__(
             self,
             yaml_adaptor: adaptors.Yaml,
@@ -109,6 +111,8 @@ class YamlManager(dict):
 
 
 class CsvManager:
+
+    # ToDo: Refactor to use a Vault
 
     def __init__(
             self,

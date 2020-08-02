@@ -42,13 +42,20 @@ class CommonKeyring(Keyring):
 
         e.g. `pip install keyring`, `pip install rskeyring` or other.
 
-        import keyring
-        adapter = CommonKeyring(keyring)
+            import keyring
+            adapter = CommonKeyring(keyring)
 
         could also be:
 
-        import rskeyring
-        adapter = CommonKeyring(rskeyring)
+            import rskeyring
+            adapter = CommonKeyring(rskeyring)
+
+        Both can run:
+
+            adatper.set_password(service, key, value)
+            adapter.get_password(service, key)
+            adapter.delete_password(service, key)
+
     """
 
     def __init__(self, module):
