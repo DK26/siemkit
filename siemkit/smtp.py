@@ -280,7 +280,7 @@ class MultipartMimeMessage(MimeMessage):
             content='',
             content_render: Callable = None,
             content_variables: dict = None,
-            work_dir='',
+            work_dir=None,
             attachments=None,
             encoding='utf-8'
     ):
@@ -295,6 +295,8 @@ class MultipartMimeMessage(MimeMessage):
         self.__smtp_multipart['Subject'] = subject
         self.subject = subject
 
+        if work_dir is None:
+            work_dir = ''
         self._work_dir = work_dir
 
         # Prep Content

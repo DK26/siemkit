@@ -94,11 +94,13 @@ def smtp(
         content=None,
         content_render=None,
         content_variables=None,
+        work_dir=None,
         attachments=None,
         auth_module='tls',
         username=None,
         password=None,
         port=None,
+        encoding='utf-8'
 ):
 
     if not isinstance(port, int):
@@ -133,6 +135,8 @@ def smtp(
             content=content,
             content_render=content_render,
             content_variables=content_variables,
-            attachments=attachments
+            work_dir=work_dir,
+            attachments=attachments,
+            encoding=encoding
         )
     )
