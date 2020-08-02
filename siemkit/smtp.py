@@ -18,6 +18,7 @@ from typing import Generator
 from typing import Callable
 from typing import Iterable
 from abc import abstractmethod
+from abc import ABC
 import zlib
 import re
 import os
@@ -187,7 +188,74 @@ def attach_files(smtp_mime_multipart: MIMEMultipart, files: Iterable) -> MIMEMul
     return smtp_mime_multipart
 
 
-class MultipartMessage:
+class MimeMessage(ABC):
+
+    def __init__(
+            self,
+            from_address,
+            to_addresses,
+            cc_addresses=None,
+            bcc_addresses=None,
+    ):
+
+        self._from_address = None
+        self._to_addresses = None
+        self._cc_addresses = None
+        self._bcc_addresses = None
+
+        self.from_address = from_address
+        self.to_addresses = to_addresses
+        self.cc_addresses = cc_addresses
+        self.bcc_addresses = bcc_addresses
+
+    @classmethod
+    def init_addresses(cls, addresses):
+
+        if addresses is None:
+            return []
+        elif isinstance(addresses, str):
+            return [addresses]
+        elif isinstance(addresses, Iterable):
+            return list(addresses)
+
+    @abstractmethod
+    def as_string(self) -> str:
+        pass
+
+    @property
+    def from_address(self):
+        return self._from_address
+
+    @from_address.setter
+    def from_address(self, value):
+        self._from_address = value
+
+    @property
+    def to_addresses(self):
+        return self._to_addresses
+
+    @to_addresses.setter
+    def to_addresses(self, value):
+        self._to_addresses = MimeMessage.init_addresses(value)
+
+    @property
+    def cc_addresses(self):
+        return self._cc_addresses
+
+    @cc_addresses.setter
+    def cc_addresses(self, value):
+        self._cc_addresses = MimeMessage.init_addresses(value)
+
+    @property
+    def bcc_addresses(self):
+        return self._bcc_addresses
+
+    @bcc_addresses.setter
+    def bcc_addresses(self, value):
+        self._bcc_addresses = MimeMessage.init_addresses(value)
+
+
+class MultipartMimeMessage(MimeMessage):
 
     def __init__(
             self,
@@ -204,35 +272,12 @@ class MultipartMessage:
             encoding='utf-8'
     ):
 
+        super().__init__(from_address, to_addresses, cc_addresses, bcc_addresses)
+
         # Prep Base
         self.__smtp_multipart = MIMEMultipart()
-
         self.__smtp_multipart['From'] = from_address
-        self.from_address = from_address
-
-        if to_addresses is None:
-            to_addresses = []
-        elif isinstance(to_addresses, str):
-            to_addresses = [to_addresses]
-
-        self.__smtp_multipart['To'] = ','.join(to_addresses)
-        self.to_addresses = to_addresses
-
-        if cc_addresses is None:
-            cc_addresses = []
-        elif isinstance(cc_addresses, str):
-            cc_addresses = [cc_addresses]
-
         self.__smtp_multipart['CC'] = ','.join(cc_addresses)
-        self.cc_addresses = cc_addresses
-
-        if bcc_addresses is None:
-            bcc_addresses = []
-        elif isinstance(bcc_addresses, str):
-            bcc_addresses = [bcc_addresses]
-
-        self.bcc_addresses = bcc_addresses
-
         self.__smtp_multipart['Subject'] = subject
         self.subject = subject
 
@@ -305,7 +350,7 @@ class Connection:
     #         send_to,
     #         smtp_mime_payload.as_string()
     #     )
-    def sendmail(self, smtp_mime_payload: MultipartMessage):
+    def sendmail(self, smtp_mime_payload: MimeMessage):
 
         from_address = smtp_mime_payload.from_address
         to_addresses = smtp_mime_payload.to_addresses
