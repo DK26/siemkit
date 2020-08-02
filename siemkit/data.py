@@ -223,12 +223,13 @@ class Vault:
         self.__keyring_module.set_password(self.__name, key, secret)
         return self
 
-    def get_secret(self, key):
+    def get_secret(self, key, default=None):
         try:
             return self.__keyring_module.get_password(self.__name, key)
         except:
-            if isinstance(self.default_value, str):
-                return self.default_value
+            default_value = default or self.default_value
+            if isinstance(default_value, str):
+                return default_value
             else:
                 raise
 
