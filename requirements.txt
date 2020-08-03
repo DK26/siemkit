@@ -2,6 +2,5 @@ pytimeparse~=1.1.8
 dateparser~=0.7.6
 future~=0.18.2
 requests~=2.24.0
-setuptools~=49.2.0
-siemkit~=0.0.14
+setuptools~=49.2.1
 urllib3~=1.25.10
