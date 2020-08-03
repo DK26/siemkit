@@ -130,7 +130,7 @@ class Esm:
 
     def uri(self, api: Union[ArcSightUri, ArcSightUriEnum], variables) -> HttpResponse:
 
-        self.maintain_session()
+        # self.maintain_session()  # Exposed token in URL
 
         return self.unchecked_uri(api=api, variables=variables)
 
