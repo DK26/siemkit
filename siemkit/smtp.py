@@ -187,7 +187,15 @@ def embed_images(html_content: str, images_map: dict) -> str:
 
 
 def attach_files(smtp_mime_multipart: MIMEMultipart, files: Iterable) -> MIMEMultipart:
+
+    if isinstance(files, str):
+        files = [files]
+
     for file in files:
+
+        if not os.path.exists(file):
+            continue
+
         file_name = os.path.basename(file)
         with open(file, "rb") as fs:
             attachment = MIMEApplication(
