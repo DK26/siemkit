@@ -12,12 +12,14 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-
+import sys
 from traceback import format_exc
 from datetime import datetime
+from threading import get_ident
+
 from .file import open
 from .time import to_format
-import sys
+
 
 # ToDo: Syntax Sugar for `logging` library combined with the functions here.
 
@@ -41,18 +43,18 @@ def print(*args, sep=' ', end='\n', file=None):
         file = sys.stdout  # This behaviour is more expected from a `print()` function.
 
     timestamp = datetime.now().isoformat()
-    builtin_print(f'[{timestamp}]', *args, sep=sep, end=end, file=file)
+    builtin_print(f'[{timestamp}][Thread-{get_ident()}]', *args, sep=sep, end=end, file=file)
 
 
 def format_exception(e):
     timestamp = datetime.now().isoformat()
-    error_message = f"[{timestamp}] EXCEPTION | {type(e).__name__} \n{format_exc()}"
+    error_message = f"[{timestamp}][Thread-{get_ident()}] EXCEPTION | {type(e).__name__} \n{format_exc()}"
     return error_message
 
 
 def format_message(msg):
     timestamp = datetime.now().isoformat()
-    message = f"[{timestamp}] {msg}"
+    message = f"[{timestamp}][Thread-{get_ident()}] {msg}"
     return message
 
 
