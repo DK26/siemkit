@@ -19,6 +19,9 @@ from siemkit.api.arcsight.esm import ArcSightUriEnum
 
 
 def init_columns_entries(variables):
+    """
+    Making sure we have `columns` & `entries` to return, without effecting the original objects.
+    """
 
     columns = variables.get('columns')
     if columns is None:
@@ -113,6 +116,7 @@ class DeleteEntries(ArcSightUri):
         entry_columns = []
         entry_list = []
 
+        # Build JSON
         for entry in entries:
             for column in columns:
                 entry_columns.append(entry[column])

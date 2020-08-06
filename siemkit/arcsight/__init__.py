@@ -78,6 +78,8 @@ class Esm:
         # vault.store_secret('username', username)
         # vault.store_secret('password', password)
 
+        # self._activelist_columns = {}
+
         self.refresh_token(username, password)
 
     def refresh_token(self, username=None, password=None):
@@ -194,7 +196,7 @@ class Esm:
         variables = {
             'resource_id': resource_id
         }
-        variables.update(self.variables)
+        variables.update(self.variables)  # Get the token
 
         response = self.uri(
             ActiveListApiEnum.GET_ENTRIES, variables
@@ -204,7 +206,39 @@ class Esm:
             raise Exception(f"(Response {response.status_code()}) "
                             f"Could not retrieve resource ID '{resource_id}'.")
 
-        return tuple(normalized_active_list_entries(response))
+        entries = tuple(normalized_active_list_entries(response))
+
+        # if entries:
+        #     self._activelist_columns[resource_id] = entries[0].get('_columns_order')
+
+        return entries
+
+    def delete_activelist_entries(self, resource_id, entries):
+
+        # columns = self._activelist_columns.get(resource_id)
+        # if columns is None:
+        #     self.get_activelist(resource_id)  # Update columns just by querying.
+        #     columns = self._activelist_columns.get(resource_id)
+
+        if not entries:
+            return
+
+        columns = entries[0]['_columns_order']
+
+        variables = {
+            'resource_id': resource_id,
+            'columns': columns,
+            'entries': entries
+        }
+        variables.update(self.variables)  # Get the token
+
+        response = self.uri(
+            ActiveListApiEnum.DELETE_ENTRIES, variables
+        )
+
+        if response.status_code() != 200:
+            raise Exception(f"(Response {response.status_code()}) "
+                            f"Could not delete entries for resource ID '{resource_id}'.")
 
     def __enter__(self):
         return self
