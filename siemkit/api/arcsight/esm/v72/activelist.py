@@ -123,7 +123,7 @@ class DeleteEntries(ArcSightUri):
 
             entry_list.append(
                 {
-                    'entry': entry_columns
+                    'entry': list(entry_columns)
                 }
             )
 

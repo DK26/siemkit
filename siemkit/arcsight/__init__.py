@@ -223,7 +223,12 @@ class Esm:
         if not entries:
             return
 
-        columns = entries[0]['_columns_order']
+        if isinstance(entries, dict):
+            columns = entries['_columns_order']
+        elif not isinstance(entries, str) and hasattr(entries, '__getitem__'):
+            columns = entries[0]['_columns_order']
+        else:
+            raise TypeError(f"Illegal entries object: {entries}")
 
         variables = {
             'resource_id': resource_id,
@@ -236,9 +241,9 @@ class Esm:
             ActiveListApiEnum.DELETE_ENTRIES, variables
         )
 
-        if response.status_code() != 200:
+        if response.status_code() != 204:
             raise Exception(f"(Response {response.status_code()}) "
-                            f"Could not delete entries for resource ID '{resource_id}'.")
+                            f"Could not delete entries of resource ID '{resource_id}'.")
 
     def __enter__(self):
         return self
