@@ -44,7 +44,7 @@ from collections import ChainMap
 
 # ToDo: Manual Time Format with Declared fields as time -> Directed for performance
 # ToDo: Automatic Time Format detection -> Comfortable but requires an external library + performance penalty.
-
+# ToDo: Consider a syntax sugar for this: for _ in range(3000): _ = send.udp("127.0.0.1", 514, bytes(random_event(event)))  # Random certain aspects of the event.
 
 class CefSeverity(str, Enum):
 
