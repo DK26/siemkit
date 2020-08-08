@@ -18,6 +18,7 @@ from random import choice
 
 from ipaddress import IPv4Address
 from typing import Generator
+from typing import Union
 from enum import EnumMeta
 
 import os
@@ -45,9 +46,19 @@ def byte() -> int:
     return randint(0, 255)
 
 
-def compose_ip(amount: int = 1) -> Generator[IPv4Address, None, None]:
+def compose_ip(
+        from_address: Union[IPv4Address, str] = '0.0.0.0',
+        to_address: Union[IPv4Address, str] = '255.255.255.255',
+        amount: int = 1) -> Generator[IPv4Address, None, None]:
+
     for _ in range(amount):
-        yield IPv4Address(f"{byte()}.{byte()}.{byte()}.{byte()}")
+
+        yield IPv4Address(
+            randint(
+                int(IPv4Address(from_address)),
+                int(IPv4Address(to_address))
+            )
+        )
 
 
 def compose_domain(amount: int = 1) -> Generator[str, None, None]:
@@ -152,8 +163,15 @@ def flag_value(*enums: EnumMeta, flags=1) -> int:
     return next(compose_flag_value(*enums, flags=flags))
 
 
-def ip() -> IPv4Address:
-    return next(compose_ip())
+def ip(from_address: Union[IPv4Address, str] = '0.0.0.0',
+       to_address: Union[IPv4Address, str] = '255.255.255.255') -> IPv4Address:
+
+    return next(
+        compose_ip(
+            from_address=from_address,
+            to_address=to_address
+        )
+    )
 
 
 def md5() -> str:

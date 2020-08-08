@@ -14,8 +14,10 @@
 
 import socket
 
+from math import floor
+
 from telnetlib import Telnet
-from typing import Union
+from typing import Any
 from ipaddress import ip_address
 
 from siemkit.smtp import AUTH_MODULE_FACTORY as SMTP_AUTH_MODULE_FACTORY
@@ -23,40 +25,79 @@ from siemkit.smtp import Connection as SmtpConnection
 from siemkit.smtp import MultipartMimeMessage
 
 default = {
-    'unicode': 'utf-8'
+    'unicode': 'utf-8',
+    'byte_order': 'big',
+    'signed': False
 }
 
 
-def tcp(host: str, port: int, payload: Union[bytes, str], timeout: int = 3) -> int:
+def to_bytes(payload: Any):
 
-    if isinstance(payload, str):
-        payload = bytes(payload, default['unicode'])
+    if isinstance(payload, bytes):
+        return payload
 
-    with Telnet(host, port, timeout=timeout) as session:
-        session.write(payload)
+    elif callable(payload):
+        return to_bytes(payload())
 
-    return len(payload)
+    elif isinstance(payload, str):
+        return bytes(payload, default['unicode'])
+
+    elif isinstance(payload, int):
+
+        # Calculate how many bytes are required for given integer.
+        bytes_size = floor(payload / 256) + 1
+
+        # Notice: From the int value of 768 (4 bytes),
+        # it is more size efficient to send the number as a string (3 bytes)
+
+        return int.to_bytes(
+            payload,
+            bytes_size,
+            byteorder=default['byte_order'],
+            signed=default['signed']
+        )
+
+    else:
+        return bytes(payload)
 
 
-def udp(host: str, port: int, payload: Union[bytes, str], ttl=32) -> int:
+def tcp(host: str, port: int, payload: Any, repeat: int = 1, timeout: int = 3) -> int:
 
-    if isinstance(payload, str):
-        payload = bytes(payload, default['unicode'])
+    bytes_payload = to_bytes(payload)
 
-    address = host, port
-    udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
-    udp_socket.setsockopt(socket.IPPROTO_IP, socket.IP_TTL, ttl)
-    udp_socket.sendto(payload, address)
+    for iteration in range(repeat):
 
-    return len(payload)
+        with Telnet(host, port, timeout=timeout) as session:
+            session.write(bytes_payload)
+
+        if iteration + 1 < repeat and callable(payload):
+            bytes_payload = to_bytes(payload)
+
+    return len(bytes_payload)
 
 
-def multicast(group: str, port: int, payload: Union[bytes, str], ttl=2) -> int:
+def udp(host: str, port: int, payload: Any, repeat: int = 1, ttl: int = 32) -> int:
+
+    bytes_payload = to_bytes(payload)
+
+    for iteration in range(repeat):
+
+        address = host, port
+        udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
+        udp_socket.setsockopt(socket.IPPROTO_IP, socket.IP_TTL, ttl)
+        udp_socket.sendto(bytes_payload, address)
+
+        if iteration + 1 < repeat and callable(payload):
+            bytes_payload = to_bytes(payload)
+
+    return len(bytes_payload)
+
+
+def multicast(group: str, port: int, payload: Any, ttl: int = 2) -> int:
 
     # REF: https://stackoverflow.com/questions/603852/how-do-you-udp-multicast-in-python
 
-    if isinstance(payload, str):
-        payload = bytes(payload, default['unicode'])
+    bytes_payload = to_bytes(payload)
 
     if not ip_address(group).is_multicast:
         raise ValueError(f"Address '{group}' is not a multi-cast group.")
@@ -64,24 +105,23 @@ def multicast(group: str, port: int, payload: Union[bytes, str], ttl=2) -> int:
     address = group, port
     multicast_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
     multicast_socket.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_TTL, ttl)
-    multicast_socket.sendto(payload, address)
+    multicast_socket.sendto(bytes_payload, address)
 
-    return len(payload)
+    return len(bytes_payload)
 
 
-def broadcast(port: int, payload: Union[bytes, str], ttl: int = 1) -> int:
+def broadcast(port: int, payload: Any, ttl: int = 1) -> int:
 
     # REF: https://gist.github.com/ninedraft/7c47282f8b53ac015c1e326fffb664b5
 
-    if isinstance(payload, str):
-        payload = bytes(payload, default['unicode'])
+    bytes_payload = to_bytes(payload)
 
     address = '255.255.255.255', port
     broadcast_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
     broadcast_socket.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, ttl)
-    broadcast_socket.sendto(payload, address)
+    broadcast_socket.sendto(bytes_payload, address)
 
-    return len(payload)
+    return len(bytes_payload)
 
 
 def smtp(
