@@ -488,7 +488,8 @@ class EventFormat(dict):
     def __set(self, key, value):
         # super().__setattr__(key, value) # Value is an object in the heap. We just set a reference here.
         # Do not set attribute, that way we enforce the calling of __getattr__
-        self.__detected_changes = True
+        self.__detected_changes = True  # Restoring state means editing.
+        self.__commit_context = True
         self_id = id(self)
         if key in EventFormat.__aliases[self_id]:
             key = EventFormat.__aliases[self_id][key]
@@ -536,12 +537,19 @@ class EventFormat(dict):
 
             # We make sure that only the most inner & recent context is committed
             # to allow predicted behaviour
-            self.__commit_context = False
+            # self.__commit_context = False
 
         # ToDo: If a parse() method was activated, use super.clear() instead?
         # ToDo: Or use a different writing style for parsing:
 
         self.restore()
+        # We make sure that only the most inner & recent context is committed
+        # to allow predicted behaviour
+        self.__commit_context = False
+
+        # Todo: Check: if this is the last context, if so, close all outputs.
+        #             for output in self.__output:
+        #                   output.close()
         return self
 
     def abort(self):
