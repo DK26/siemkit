@@ -48,7 +48,7 @@ def to_bytes(payload: Any):
         bytes_size = floor(payload / 256) + 1
 
         # Notice: From the int value of 768 (4 bytes),
-        # it is more size efficient to send the number as a string (3 bytes)
+        # it is more size efficient to send this number or bigger as a string (3 bytes)
 
         return int.to_bytes(
             payload,
