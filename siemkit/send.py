@@ -65,9 +65,8 @@ def tcp(host: str, port: int, payload: Any, repeat: int = 1, timeout: int = 3) -
 
     bytes_payload = to_bytes(payload)
 
-    for iteration in range(repeat):
-
-        with Telnet(host, port, timeout=timeout) as session:
+    with Telnet(host, port, timeout=timeout) as session:
+        for iteration in range(repeat):
             session.write(bytes_payload)
 
         if iteration + 1 < repeat and callable(payload):
