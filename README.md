@@ -73,29 +73,35 @@ _Work in progress . . ._
     source: https://github.com/simonzack/hfilesize  
     license: https://opensource.org/licenses/MIT  
 
+
 * pytimeparse - MIT License  
     by: wroberts  
     source: https://github.com/wroberts/pytimeparse  
     license: https://github.com/wroberts/pytimeparse/blob/master/LICENSE.rst  
 
+
 * dateparser - BSD 3-Clause License  
     source: https://github.com/scrapinghub/dateparser  
     license: https://github.com/scrapinghub/dateparser/blob/master/LICENSE  
+
 
 * requests - Apache 2.0 License  
     by: Kenneth Reitz  
     source: https://github.com/psf/requests  
     license: https://github.com/psf/requests/blob/master/LICENSE  
 
+
 * future - MIT License  
     by: Ed Schofield  
     homepage: https://python-future.org/  
     license: https://opensource.org/licenses/MIT  
 
+
 * setuptools - MIT License  
     by: Jason R Coombs <jaraco@jaraco.com>  
     source: https://github.com/pypa/setuptools  
     license: https://opensource.org/licenses/MIT  
+ 
  
 * urllib3 - MIT License  
     by: Andrey Petrov <andrey.petrov@shazow.net>  

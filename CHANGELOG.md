@@ -1,3 +1,6 @@
+## Version 0.0.16-dev
+* TBD
+
 ## Version 0.0.15-dev
 * Added ArcSight API
 * Added SMTP support
@@ -8,4 +11,4 @@
 * A new, failure tolerant `tcp` implementation for the `net.py` library
 * Logs now generate thread IDs as well
 * New `html.py` library
-* New 'smtp.py' library
+* New `smtp.py` library
