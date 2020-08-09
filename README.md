@@ -39,6 +39,7 @@ GitHub:
     - `siemkit.event`
     - `siemkit.file`
     - `siemkit.flag`
+    - `siemkit.hash`
     - `siemkit.html`
     - `siemkit.ldap`
     - `siemkit.listen`
