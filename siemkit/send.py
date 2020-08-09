@@ -129,7 +129,7 @@ def smtp(
         to_addresses,
         cc_addresses=None,
         bcc_addresses=None,
-        subject='',
+        subject='CyberSIEM(R) Community - SIEM Kit',
         content='',
         content_render=None,
         content_variables=None,
