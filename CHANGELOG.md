@@ -4,7 +4,7 @@
 ## Version 0.0.15-dev
 * Added ArcSight API
 * Added SMTP support
-* Improved `AbstractEvent` context manager
+* Improved `EventFormat` context manager
 * Added `random.ip()` IP range
 * Added `repeat` parameter to `send.py` functions
 * `send.py` functions now accept any kind of object as payload & automatically convert to bytes
