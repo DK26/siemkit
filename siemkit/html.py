@@ -12,6 +12,13 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-"""
-An accessible API database.
-"""
+import re
+
+
+def remove_comments(html_content):
+    return re.sub("<!--.*?-->", "", html_content, flags=re.DOTALL)
+
+
+def newline_to_br(html_content):
+    return html_content.replace('\n', '<BR>')
+

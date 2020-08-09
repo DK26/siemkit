@@ -12,6 +12,20 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-"""
-An accessible API database.
-"""
+from enum import Enum
+from abc import ABC
+from abc import abstractmethod
+from typing import Tuple
+
+
+class ArcSightUri(ABC):
+
+    @abstractmethod
+    def args(self, variables) -> Tuple[str, dict]:
+        pass
+
+
+class ArcSightUriEnum(Enum):
+    pass
+
+

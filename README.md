@@ -29,7 +29,8 @@ GitHub:
 
 * Work in progress
 
-    - `siemkit.api.arcsight`
+    - `siemkit.api.arcsight.esm.v72`
+    - `siemkit.arcsight`
     - `siemkit.win32.registry`
     - `siemkit.adaptors`
     - `siemkit.cfg`
@@ -38,6 +39,7 @@ GitHub:
     - `siemkit.event`
     - `siemkit.file`
     - `siemkit.flag`
+    - `siemkit.html`
     - `siemkit.ldap`
     - `siemkit.listen`
     - `siemkit.logging`
@@ -45,6 +47,7 @@ GitHub:
     - `siemkit.parse`
     - `siemkit.random`
     - `siemkit.send`
+    - `siemkit.smtp`
     - `siemkit.time`
     - `siemkit.web`
 
@@ -54,6 +57,49 @@ GitHub:
 
 _Work in progress . . ._
 
-## Authors
+## Contributors / Authors
+- [@DK26](https://github.com/dk26) - _David Krasnitsky_  (CyberSIEM)
+- _Ofek Sher_ (CyberSIEM)
+- _Yochay Ezra_ (CyberSIEM)
 
-- [@DK26](https://github.com/dk26) - _David Krasnitsky_
+## Special Thanks
+- _Marius2_ (Micro Focus Expert)
+
+
+## Third-Party Libraries:
+
+* hfilesize - MIT License  
+    by: simonzack  
+    source: https://github.com/simonzack/hfilesize  
+    license: https://opensource.org/licenses/MIT  
+
+* pytimeparse - MIT License  
+    by: wroberts  
+    source: https://github.com/wroberts/pytimeparse  
+    license: https://github.com/wroberts/pytimeparse/blob/master/LICENSE.rst  
+
+* dateparser - BSD 3-Clause License  
+    source: https://github.com/scrapinghub/dateparser  
+    license: https://github.com/scrapinghub/dateparser/blob/master/LICENSE  
+
+* requests - Apache 2.0 License  
+    by: Kenneth Reitz  
+    source: https://github.com/psf/requests  
+    license: https://github.com/psf/requests/blob/master/LICENSE  
+
+* future - MIT License  
+    by: Ed Schofield  
+    homepage: https://python-future.org/  
+    license: https://opensource.org/licenses/MIT  
+
+* setuptools - MIT License  
+    by: Jason R Coombs <jaraco@jaraco.com>  
+    source: https://github.com/pypa/setuptools  
+    license: https://opensource.org/licenses/MIT  
+ 
+* urllib3 - MIT License  
+    by: Andrey Petrov <andrey.petrov@shazow.net>  
+    homepage: https://urllib3.readthedocs.io/en/latest/  
+    source: https://github.com/urllib3/urllib3  
+    license: https://github.com/urllib3/urllib3/blob/master/LICENSE.txt  
+

@@ -19,8 +19,83 @@ from typing import Tuple
 from typing import Set
 from typing import Collection
 from collections.abc import Iterable
+
+
 from siemkit.file import open
 from siemkit import adaptors
+from siemkit.hash import crc32_file
+
+
+class FileTracker:
+
+    def __init__(self, tracker_file_path):
+
+        self.__tracker_file_path = tracker_file_path
+
+        self.__data = {}
+
+        self.__update = True
+
+        if os.path.exists(self.__tracker_file_path):
+            self.load()
+        else:
+            path = os.path.dirname(self.__tracker_file_path)
+            if path:
+                if not os.path.exists(path):
+                    os.makedirs(path)
+            self.save()
+
+    def has_changed(self, file_path):
+
+        file_hash = crc32_file(file_path)
+        stored_file_hash = self.__data.get(file_path)
+
+        if stored_file_hash is not None:
+            return file_hash != stored_file_hash
+        else:
+            self.__data[file_path] = file_hash
+            self.__update = True
+            return False
+
+    def update(self, file_path):
+
+        if self.has_changed(file_path):
+            file_hash = crc32_file(file_path)
+            self.__data[file_path] = file_hash
+            self.__update = True
+            return True
+
+        return False
+
+    def save(self):
+        if self.__update:
+            with open(self.__tracker_file_path, 'w', encoding='utf-8') as fs:
+                json.dump(self.__data, fs)
+            self.__update = False
+            return True
+        return False
+
+    def load(self):
+        with open(self.__tracker_file_path, 'r', encoding='utf-8') as fs:
+            self.__data = json.load(fs)
+
+        self.__update = False
+        return self.__data
+
+    def __contains__(self, item):
+        return item in self.__data
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        if exc_tb:
+            raise
+
+        self.save()
+
+    def __str__(self):
+        return str(self.__data)
 
 
 class IDTracker:
@@ -55,13 +130,13 @@ class IDTracker:
 
     def save(self):
         if self.__update:
-            with open(self.__file_name, 'wb') as fs:
+            with open(self.__file_name, 'w', encoding='utf-8') as fs:
 
                 json.dump(self.__data, fs)
             self.__update = False
 
     def load(self):
-        with open(self.__file_name, 'rb') as fs:
+        with open(self.__file_name, 'r', encoding='utf-8') as fs:
             self.__data = json.load(fs)
 
         self.__update = False
@@ -69,6 +144,9 @@ class IDTracker:
     def __contains__(self, item):
         key, value = item
         return self.exist(key, value)
+
+    def __enter__(self):
+        return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         if exc_tb:
@@ -116,11 +194,29 @@ class JsonFile(dict):
         return self
 
 
+class RamKeyring(adaptors.Keyring):
+
+    def __init__(self):
+        self.__database = {}
+
+    def set_password(self, service: str, key: str, value: str):
+        self.__database[f'{service}.{key}'] = value
+
+    def get_password(self, service: str, key: str) -> str:
+        return self.__database[f'{service}.{key}']
+
+    def delete_password(self, service: str, key: str):
+        del self.__database[f'{service}.{key}']
+
+
 class Vault:
 
-    def __init__(self, name, keyring_adaptor: adaptors.Keyring):
+    # ToDo: Turn into a dict.
+
+    def __init__(self, name, keyring_adaptor: adaptors.Keyring, default_value=None):
         self.__name = name
         self.__keyring_module = keyring_adaptor
+        self.default_value = default_value
 
     def name(self):
         return self.__name
@@ -129,8 +225,15 @@ class Vault:
         self.__keyring_module.set_password(self.__name, key, secret)
         return self
 
-    def get_secret(self, key):
-        return self.__keyring_module.get_password(self.__name, key)
+    def get_secret(self, key, default=None):
+        try:
+            return self.__keyring_module.get_password(self.__name, key)
+        except:
+            default_value = default or self.default_value
+            if isinstance(default_value, str):
+                return default_value
+            else:
+                raise
 
     def delete_secret(self, key):
         self.__keyring_module.delete_password(self.__name, key)

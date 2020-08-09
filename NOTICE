@@ -6,6 +6,14 @@ This NOTICE file includes contributors credit.
 Contributors / Authors
 ======================
 - Created by David Krasnitsky @dk26 (https://github.com/DK26)
+- Ofek Sher (CyberSIEM)
+- Yochay Ezra (CyberSIEM)
+
+
+Special Thanks
+==============
+- Marius2 (Micro Focus Expert)
+
 
 
 Third-Party Libraries:
@@ -23,6 +31,27 @@ Third-Party Libraries:
 * dateparser - BSD 3-Clause License
     source: https://github.com/scrapinghub/dateparser
     license: https://github.com/scrapinghub/dateparser/blob/master/LICENSE
+
+* requests - Apache 2.0 License
+    by: Kenneth Reitz
+    source: https://github.com/psf/requests
+    license: https://github.com/psf/requests/blob/master/LICENSE
+
+* future - MIT License
+    by: Ed Schofield
+    homepage: https://python-future.org/
+    license: https://opensource.org/licenses/MIT
+
+* setuptools - MIT License
+    by: Jason R Coombs <jaraco@jaraco.com>
+    source: https://github.com/pypa/setuptools
+    license: https://opensource.org/licenses/MIT
+
+* urllib3 - MIT License
+    by: Andrey Petrov <andrey.petrov@shazow.net>
+    homepage: https://urllib3.readthedocs.io/en/latest/
+    source: https://github.com/urllib3/urllib3
+    license: https://github.com/urllib3/urllib3/blob/master/LICENSE.txt
 
 
 Apache License 2.0 -- About this NOTICE file:

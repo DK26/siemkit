@@ -12,6 +12,26 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-"""
-An accessible API database.
-"""
+import zlib
+
+
+def crc32(data):
+    return hex(zlib.crc32(data))[2:]
+
+
+def crc32_file(path, chunk_size=1024):
+
+    total_bytes = 0
+
+    with open(path, "rb") as fs:
+
+        while True:
+
+            byte = fs.read(chunk_size)
+            if not byte:
+                break
+
+            total_bytes = zlib.crc32(byte, total_bytes)
+
+    return hex(total_bytes & 0xFFFFFFFF)[2:]
+
