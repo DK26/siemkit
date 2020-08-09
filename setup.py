@@ -44,5 +44,5 @@ setup(
         'pytimeparse',
         'dateparser',
     ],
-    python_requires='>=3.6'
+    python_requires='>=3.8'
 )
