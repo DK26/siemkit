@@ -130,7 +130,7 @@ def smtp(
         cc_addresses=None,
         bcc_addresses=None,
         subject='',
-        content=None,
+        content='',
         content_render=None,
         content_variables=None,
         work_dir=None,
