@@ -42,13 +42,20 @@ class CommonKeyring(Keyring):
 
         e.g. `pip install keyring`, `pip install rskeyring` or other.
 
-        import keyring
-        adapter = CommonKeyring(keyring)
+            import keyring
+            adapter = CommonKeyring(keyring)
 
         could also be:
 
-        import rskeyring
-        adapter = CommonKeyring(rskeyring)
+            import rskeyring
+            adapter = CommonKeyring(rskeyring)
+
+        Both can run:
+
+            adatper.set_password(service, key, value)
+            adapter.get_password(service, key)
+            adapter.delete_password(service, key)
+
     """
 
     def __init__(self, module):
@@ -186,7 +193,7 @@ class Ldap3Module(Ldap):
         )
 
         return self.__connection
-    
+
     def get_connection(self):
         return self.__connection
 
@@ -207,4 +214,157 @@ class Ldap3Module(Ldap):
     def entries(self) -> Generator[dict, None, None]:
         for entry in self.__connection.entries:
             yield json.loads(entry.entry_to_json())
+
+
+class HttpResponse(ABC):
+    """
+    A response container / wrapper to allow safe usage of the HTTP Request adapter.
+    """
+
+    @abstractmethod
+    def json(self) -> dict:
+        pass
+
+    @abstractmethod
+    def status_code(self) -> int:
+        pass
+
+    @abstractmethod
+    def text(self) -> str:
+        pass
+
+    @abstractmethod
+    def headers(self) -> dict:
+        pass
+
+    @abstractmethod
+    def cookies(self) -> dict:
+        pass
+
+
+class HttpRequest(ABC):
+    """
+    Uses the `request` function signature from the `requests` library as basis for the HTTP Request adaptor.
+    """
+
+    @abstractmethod
+    def request(
+            self,
+            method,
+            url,
+            params=None,
+            data=None,
+            headers=None,
+            cookies=None,
+            files=None,
+            auth=None,
+            timeout=None,
+            allow_redirects=True,
+            proxies=None,
+            hooks=None,
+            stream=None,
+            verify=None,
+            cert=None,
+            json=None
+    ) -> HttpResponse:
+        pass
+
+
+class RequestsModuleResponse(HttpResponse):
+
+    def __init__(self, response):
+        self.__response = response
+
+    def status_code(self) -> int:
+        return self.__response.status_code
+
+    def text(self) -> str:
+        return self.__response.text
+
+    def headers(self) -> dict:
+        return self.__response.headers
+
+    def cookies(self) -> dict:
+        return self.__response.cookies
+
+    def json(self) -> dict:
+        return self.__response.json()
+
+
+class RequestsModule(HttpRequest):
+
+    def __init__(self, module):
+        if module.__name__ != 'requests':
+            raise Exception("Expected `requests` module.")
+
+        self.__module = module
+
+    def request(
+            self,
+            method,
+            url,
+            params=None,
+            data=None,
+            headers=None,
+            cookies=None,
+            files=None,
+            auth=None,
+            timeout=None,
+            allow_redirects=True,
+            proxies=None,
+            hooks=None,
+            stream=None,
+            verify=None,
+            cert=None,
+            json=None
+    ) -> HttpResponse:
+        requests = self.__module
+        response = requests.request(
+            method,
+            url,
+            params=params,
+            data=data,
+            headers=headers,
+            cookies=cookies,
+            files=files,
+            auth=auth,
+            timeout=timeout,
+            allow_redirects=allow_redirects,
+            proxies=proxies,
+            hooks=hooks,
+            stream=stream,
+            verify=verify,
+            cert=cert,
+            json=json
+        )
+        return RequestsModuleResponse(response)
+
+
+class ArcSightEsm(ABC):
+
+    def __init__(
+            self,
+            http_request_adapter: HttpRequest,
+            server: str,
+            port: int,
+            username: str,
+            password: str,
+            verify=True,
+            cert=None,
+            proxies: dict = None
+    ):
+        pass
+
+    @abstractmethod
+    def refresh_token(self, username, password):
+        pass
+
+    @abstractmethod
+    def request(self, method, uri, headers, payload):
+        pass
+
+    @abstractmethod
+    def logout(self):
+        pass
+
 

@@ -12,12 +12,27 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-from typing import Union
+from typing import Any
 from telnetlib import Telnet
+from time import sleep
+from abc import ABC
+from abc import abstractmethod
+
 from . import send
 
 
-class WriteableConnectionless:
+class WriteableConnection(ABC):
+
+    @abstractmethod
+    def write(self, payload: Any) -> int:
+        pass
+
+    @abstractmethod
+    def close(self):
+        pass
+
+
+class WriteableConnectionless(WriteableConnection):
 
     def __init__(self, send_function: callable, *args, **kwargs):
 
@@ -25,15 +40,72 @@ class WriteableConnectionless:
         self.args = args
         self.kwargs = kwargs
 
-    def write(self, payload: Union[bytes, str]) -> int:
+    def write(self, payload: Any) -> int:
         return self.send_function(*self.args, **self.kwargs, payload=payload)
 
     def close(self):
         pass  # Do nothing.
 
 
-def tcp(host: str, port: int = 514, timeout: int = 3) -> Telnet:
-    return Telnet(host, port, timeout=timeout)
+class TcpConnection(WriteableConnection):
+
+    def __init__(self,
+                 host: str,
+                 port: int,
+                 timeout: int = 3,
+                 retries: int = 2,
+                 retry_suspense: int = 3
+                 ):
+
+        self.__host = host
+        self.__port = port
+        self.__timeout = timeout
+        self.__retries = retries
+        self.__retry_suspense = retry_suspense
+        self.__session = self.connect()
+
+    def connect(self):
+
+        for attempt in range(self.__retries):
+            try:
+
+                return Telnet(
+                    self.__host,
+                    self.__port,
+                    timeout=self.__timeout
+                )
+
+            except:
+
+                if attempt + 1 < self.__retries:
+                    sleep(self.__retry_suspense)
+
+        raise Exception(f"Unable to establish TCP connection with '{self.__host}:{self.__port}'.")
+
+    def write(self, payload: Any) -> int:
+
+        bytes_payload = send.to_bytes(payload)
+
+        try:
+            self.__session.write(bytes_payload)
+        except:
+            self.__session = self.connect()
+            return self.write(bytes_payload)
+
+        return len(bytes_payload)
+
+    def close(self):
+        self.__session.close()
+
+
+def tcp(host: str, port: int = 514, timeout: int = 3, retries: int = 2, retry_suspense: int = 3) -> TcpConnection:
+    return TcpConnection(
+        host=host,
+        port=port,
+        timeout=timeout,
+        retries=retries,
+        retry_suspense=retry_suspense
+    )
 
 
 def udp(host: str, port: int = 514, ttl: int = 32) -> WriteableConnectionless:
