@@ -157,6 +157,9 @@ def smtp(
                 'tls': 465
             }.get(auth_module, 25)
 
+    if username is None and password is not None:
+        username = from_address
+
     smtp_auth = SMTP_AUTH_MODULE_FACTORY.create(
         module_name=auth_module,
         server=server,
