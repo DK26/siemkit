@@ -117,13 +117,50 @@ def variable(var_string: str, var_dict: dict) -> Any:
 
     while keys:
         if assign is not None and len(keys) == 1:
+            if isinstance(var_dict, str):
+                var_dict = {var_dict: None}
             var_dict[keys[0]] = assign
             keys.clear()
         else:
             key = keys.popleft()
             if key not in var_dict:
+                if isinstance(var_dict, str):
+                    var_dict = {var_dict: None}
                 var_dict[key] = {}
 
             var_dict = var_dict.get(key)
 
+    if not assign and not var_dict:
+        return None
+
     return assign or var_dict
+
+
+#
+# def variable(var_string: str, var_dict: dict) -> Any:
+#
+#     assign = None
+#
+#     keys = var_string
+#     if '=' in var_string:
+#         m = re.match(r"^\s?([^=\s]+?)\s?=\s?(.*?)\s?$", var_string)
+#         if m:
+#             keys, assign = m.groups()
+#
+#     keys = deque(keys.split('.'))
+#
+#     while keys:
+#         if assign is not None and len(keys) == 1:
+#             if isinstance(var_dict, str):
+#                 var_dict = {}
+#             else:
+#                 var_dict[keys[0]] = assign
+#                 keys.clear()
+#         else:
+#             key = keys.popleft()
+#             if key not in var_dict:
+#                 var_dict[key] = {}
+#
+#             var_dict = var_dict.get(key)
+#
+#     return assign or var_dict
