@@ -12,6 +12,8 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
+from typing import Any
+from collections import deque
 import datetime
 
 import pytimeparse
@@ -95,5 +97,17 @@ def size(size_string: str) -> int:
 
 
 def boolean(bool_string: str) -> bool:
+
     bool_string = bool_string.strip().lower()
     return bool_string in ('t', 'true', 'yes', 'ok', 'on', '1', 'some')
+
+
+def variable(var_string: str, var_dict: dict) -> Any:
+
+    keys = deque(var_string.split('.'))
+    while keys:
+        var_dict = var_dict.get(keys.popleft())
+
+    return var_dict
+
+
