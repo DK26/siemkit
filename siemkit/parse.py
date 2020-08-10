@@ -15,6 +15,7 @@
 from typing import Any
 from collections import deque
 import datetime
+import re
 
 import pytimeparse
 # * pytimeparse - MIT License
@@ -104,10 +105,25 @@ def boolean(bool_string: str) -> bool:
 
 def variable(var_string: str, var_dict: dict) -> Any:
 
-    keys = deque(var_string.split('.'))
+    assign = None
+
+    keys = var_string
+    if '=' in var_string:
+        m = re.match(r"^\s?([^=\s]+?)\s?=\s?(.*?)\s?$", var_string)
+        if m:
+            keys, assign = m.groups()
+
+    keys = deque(keys.split('.'))
+
     while keys:
-        var_dict = var_dict.get(keys.popleft())
+        if assign is not None and len(keys) == 1:
+            var_dict[keys[0]] = assign
+            keys.clear()
+        else:
+            key = keys.popleft()
+            if key not in var_dict:
+                var_dict[key] = {}
 
-    return var_dict
+            var_dict = var_dict.get(key)
 
-
+    return assign or var_dict
