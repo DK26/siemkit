@@ -31,6 +31,7 @@ GitHub:
 
     - `siemkit.api.arcsight.esm.v72`
     - `siemkit.arcsight`
+    - `siemkit.simulate`
     - `siemkit.win32.registry`
     - `siemkit.adaptors`
     - `siemkit.cfg`
