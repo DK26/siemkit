@@ -24,6 +24,7 @@ def random_number(start_range=0, end_range=4, amount=1, event=None):
         event = Cef()
 
     for _ in range(amount):
-        event.deviceCustomNumber1 = randint(start_range, end_range)
-        yield event
+        with event:
+            event.deviceCustomNumber1 = randint(start_range, end_range)
+            yield event
 
