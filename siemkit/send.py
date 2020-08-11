@@ -32,14 +32,14 @@ default = {
 
 
 def unpack(payload):
-    if (
-            not isinstance(payload, (str, bytes, bytearray))
-            and isinstance(payload, Iterable)):
+    if isinstance(payload, (str, bytes, bytearray)):
+        yield payload
+    elif isinstance(payload, Iterable):
         for item in payload:
             for inner_item in unpack(item):
-                yield inner_item
+                yield from unpack(inner_item)
     elif callable(payload):
-        yield payload()
+        yield from unpack(payload())
     else:
         yield payload
 
