@@ -12,12 +12,17 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
+from siemkit.event import Cef
 from random import randint
 # ToDo: Correlation Event
 # ToDo: Random Number Event
 
 
-def random_number(event, start_range, end_range, amount=1):
+def random_number(start_range=0, end_range=4, amount=1, event=None):
+
+    if event is None:
+        event = Cef()
+
     for _ in range(amount):
         event.deviceCustomNumber1 = randint(start_range, end_range)
         yield event
