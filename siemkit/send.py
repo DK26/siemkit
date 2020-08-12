@@ -32,14 +32,19 @@ default = {
 
 
 def unpack(payload):
+
     if isinstance(payload, (str, bytes, bytearray)):
         yield payload
-    elif isinstance(payload, Iterable):
+
+    #elif isinstance(payload, Iterable) and isinstance(payload, (GeneratorType, list, tuple, set, deque)):
+    elif isinstance(payload, Iterable) and not isinstance(payload, dict):
         for item in payload:
             for inner_item in unpack(item):
                 yield from unpack(inner_item)
+
     elif callable(payload):
         yield from unpack(payload())
+
     else:
         yield payload
 
@@ -77,7 +82,6 @@ def tcp(host: str, port: int, payload: Any, repeat: int = 1, timeout: int = 3) -
     with Telnet(host, port, timeout=timeout) as session:
 
         for iteration in range(repeat):
-
             for unpacked_item in unpack(payload):
                 sent_bytes += session.write(to_bytes(unpacked_item))
 
@@ -88,13 +92,12 @@ def udp(host: str, port: int, payload: Any, repeat: int = 1, ttl: int = 32) -> i
 
     sent_bytes = 0
 
+    address = host, port
+    udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
+    udp_socket.setsockopt(socket.IPPROTO_IP, socket.IP_TTL, ttl)
+
     for iteration in range(repeat):
-
         for unpacked_item in unpack(payload):
-
-            address = host, port
-            udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
-            udp_socket.setsockopt(socket.IPPROTO_IP, socket.IP_TTL, ttl)
             sent_bytes += udp_socket.sendto(to_bytes(unpacked_item), address)
 
     return sent_bytes
@@ -109,13 +112,12 @@ def multicast(group: str, port: int, payload: Any, repeat: int = 1, ttl: int = 2
 
     sent_bytes = 0
 
+    address = group, port
+    multicast_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
+    multicast_socket.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_TTL, ttl)
+
     for iteration in range(repeat):
-
         for unpacked_item in unpack(payload):
-
-            address = group, port
-            multicast_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
-            multicast_socket.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_TTL, ttl)
             sent_bytes += multicast_socket.sendto(to_bytes(unpacked_item), address)
 
     return sent_bytes
@@ -127,13 +129,12 @@ def broadcast(port: int, payload: Any, repeat: int = 1, ttl: int = 1) -> int:
 
     sent_bytes = 0
 
+    address = '255.255.255.255', port
+    broadcast_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
+    broadcast_socket.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, ttl)
+
     for iteration in range(repeat):
-
         for unpacked_item in unpack(payload):
-
-            address = '255.255.255.255', port
-            broadcast_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
-            broadcast_socket.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, ttl)
             sent_bytes += broadcast_socket.sendto(to_bytes(unpacked_item), address)
 
     return sent_bytes
