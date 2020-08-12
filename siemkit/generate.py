@@ -12,24 +12,19 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-from abc import ABC
-from abc import abstractmethod
-from enum import Enum
+from ipaddress import IPv4Address
 from typing import Generator
-from typing import Tuple
-
-import socket
 
 
-class ReceiveInterface:
-    pass
+def ip(start, end=None, amount=1) -> Generator[IPv4Address, None, None]:
 
+    if end is None and amount > 0:
+        start_ip = int(IPv4Address(start))
+        end_ip = start_ip + (amount - 1)
+    else:
+        start_ip = int(IPv4Address(start))
+        end_ip = int(IPv4Address(end))
 
-def udp(ip_address, port, buffer_size=1024) -> Generator[Tuple[bytes, str], None, None]:
+    for decimal_ip in range(start_ip, end_ip + 1):
+        yield IPv4Address(decimal_ip)
 
-    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-
-    sock.bind((ip_address, port))
-
-    while True:
-        yield sock.recvfrom(buffer_size)

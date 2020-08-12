@@ -39,6 +39,9 @@ class GetSecurityEvents(ArcSightUri):
 
         event_ids = init_event_ids(variables)
 
+        start_millis = str(variables.get('start_millis', "-1"))
+        end_millis = str(variables.get('end_millis', "-1"))
+
         return (
             '/www/manager-service/rest/SecurityEventService/getSecurityEvents',
             {
@@ -50,7 +53,9 @@ class GetSecurityEvents(ArcSightUri):
                 'json': {
                         "sev.getSecurityEvents": {
                             "sev.authToken": variables.get('token', ''),
-                            "sev.ids": event_ids
+                            "sev.ids": event_ids,
+                            "sev.startMillis": start_millis,
+                            "sev.endMillis": end_millis
                         }
                 }
             }
