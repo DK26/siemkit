@@ -61,6 +61,7 @@ def fake_ip_scan(event=None):
     fake_scan_addresses = list(generate.ip('192.168.0.1', '192.168.0.254'))
     fake_victim_address = random.ip('192.168.0.1', '192.168.0.254')
 
+    print('Simulating fake IP scan . . .')
     with event:
         event.name = 'Fake IP Scan Simulation'
         event.sourceAddress = attacker_address
@@ -74,8 +75,11 @@ def fake_ip_scan(event=None):
 
         sleep(seconds=10)
 
+        print("Simulating a fake successful Telnet connection . . .")
         with event:
-            event.message = 'Successful Telnet'
+            event.message = 'Fake Successful Telnet'
             event.destinationPort = 23
             event.destinationAddress = fake_victim_address
             yield event
+
+        print("Done simulating.")
