@@ -10,7 +10,7 @@
     - `Generators` serve as a simulation set
     - Slightly improved efficiency
 * Create the `generate.py` library:
-    - Created `siemkit.generate.ip` to generate a collection of IPs by range or amount.
+    - Created `siemkit.generate.ip()` to generate a collection of IPs by range or amount.
 
 ## Version 0.0.15-dev
 * Added ArcSight API
