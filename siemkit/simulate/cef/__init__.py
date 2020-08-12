@@ -23,7 +23,16 @@ from random import randint
 # ToDo: Random Number Event
 
 
-def random_number(start_range=None, end_range=None, amount=1, event=None) -> Generator[Cef, None, None]:
+def random_number(start_range: int = None, end_range: int = None, amount: int = 1, event: Cef = None) \
+        -> Generator[Cef, None, None]:
+    """
+    Simulate for aggregation test by producing a random number value in `deviceCustomNumber1`
+    :param start_range:
+    :param end_range:
+    :param amount:
+    :param event: Optional CEF event to work with. The CEF original state is kept protected.
+    :return:
+    """
 
     if amount < 1:
         amount = 1
@@ -45,12 +54,19 @@ def random_number(start_range=None, end_range=None, amount=1, event=None) -> Gen
             yield event
 
 
-def fake_ip_scan(event=None):
+def fake_ip_scan(event: Cef = None) -> Generator[Cef, None, None]:
     """
     Simulate a fake IP scan & telnet login.
-    :param amount:
-    :param time_gap:
-    :param event:
+
+    Steps:
+
+        1. Pick a random attacker IP address between 172.16.0.1 - 172.16.0.254
+        2. Scan addresses 192.168.0.1 - 192.168.0.10
+        3. Pick a random victim IP address between 192.168.0.1 - 192.168.0.10
+        4. Wait 10 seconds
+        5. Successful Telnet connection to the random victim address (3)
+
+    :param event: Optional CEF event to work with. The CEF original state is kept protected.
     :return:
     """
 
@@ -58,8 +74,8 @@ def fake_ip_scan(event=None):
         event = Cef()
 
     attacker_address = random.ip('172.16.0.1', '172.16.0.254')
-    fake_scan_addresses = list(generate.ip('192.168.0.1', '192.168.0.254'))
-    fake_victim_address = random.ip('192.168.0.1', '192.168.0.254')
+    fake_scan_addresses = list(generate.ip('192.168.0.1', '192.168.0.10'))
+    fake_victim_address = random.ip('192.168.0.1', '192.168.0.10')
 
     print('Simulating fake IP scan . . .')
     with event:
@@ -69,17 +85,16 @@ def fake_ip_scan(event=None):
         with event:
             event.message = 'Ping'
             while fake_scan_addresses:
-                with event:
-                    event.destinationAddress = fake_scan_addresses.pop()
-                    yield event
+                event.destinationAddress = fake_scan_addresses.pop()
+                yield event
 
         sleep(seconds=10)
 
-        print("Simulating a fake successful Telnet connection . . .")
+        print("Simulating fake successful Telnet connection . . .")
         with event:
             event.message = 'Fake Successful Telnet'
             event.destinationPort = 23
             event.destinationAddress = fake_victim_address
             yield event
 
-        print("Done simulating.")
+    print("Done simulating.")
