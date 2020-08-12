@@ -19,8 +19,6 @@ from siemkit.time import sleep
 from siemkit import random
 from siemkit import generate
 from random import randint
-# ToDo: Correlation Event
-# ToDo: Random Number Event
 
 
 def random_number(start_range: int = None, end_range: int = None, amount: int = 1, event: Cef = None) \
