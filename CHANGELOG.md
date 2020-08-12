@@ -1,5 +1,16 @@
 ## Version 0.0.16-dev
-* TBD
+* Implemented prototype UDP listener
+    - `siemkit.listen.udp`
+* Implemented event Simulations:
+    - `siemkit.simulate.cef.random_number()`
+    - `siemkit.simulate.cef.fake_ip_scan()`
+* Improved ArcSight ESM API:
+    - SecurityEvent can optionally be pulled from any timestamp
+* `send.py` functions can now accept Iterables.
+    - `Generators` serve as a simulation set
+    - Slightly improved efficiency
+* Create the `generate.py` library:
+    - Created `siemkit.generate.ip` to generate a collection of IPs by range or amount.
 
 ## Version 0.0.15-dev
 * Added ArcSight API
