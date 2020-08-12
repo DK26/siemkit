@@ -83,7 +83,7 @@ def fake_ip_scan(event: Cef = None) -> Generator[Cef, None, None]:
         event.sourceAddress = attacker_address
 
         with event:
-            event.message = 'Ping'
+            event.message = 'Fake Ping'
             while fake_scan_addresses:
                 event.destinationAddress = fake_scan_addresses.pop()
                 yield event
