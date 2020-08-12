@@ -132,7 +132,7 @@ class Esm:
 
     def uri(self, api: Union[ArcSightUri, ArcSightUriEnum], variables) -> HttpResponse:
 
-        # self.maintain_session()  # Exposed token in URL
+        # self.maintain_session()  # Exposes token in URL
 
         return self.unchecked_uri(api=api, variables=variables)
 
@@ -155,7 +155,7 @@ class Esm:
 
         return response
 
-    def get_event_ids(self, *event_ids):
+    def get_event_ids(self, *event_ids, start_millis='-1', end_millis='-1'):
 
         def extract_ids():
             for event_id in event_ids:
@@ -168,7 +168,9 @@ class Esm:
                         yield int(id_)
 
         variables = {
-            'event_ids': list(extract_ids())
+            'event_ids': list(extract_ids()),
+            'start_millis': start_millis,
+            'end_millis': end_millis
         }
 
         variables.update(self.variables)
