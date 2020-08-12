@@ -14,8 +14,8 @@
 
 import socket
 
+from collections.abc import Iterable
 from math import floor
-
 from telnetlib import Telnet
 from typing import Any
 from ipaddress import ip_address
@@ -31,17 +31,32 @@ default = {
 }
 
 
+def unpack(payload):
+
+    if isinstance(payload, (str, bytes, bytearray)):
+        yield payload
+
+    #elif isinstance(payload, Iterable) and isinstance(payload, (GeneratorType, list, tuple, set, deque)):
+    elif isinstance(payload, Iterable) and not isinstance(payload, dict):
+        for item in payload:
+            for inner_item in unpack(item):
+                yield from unpack(inner_item)
+
+    elif callable(payload):
+        yield from unpack(payload())
+
+    else:
+        yield payload
+
+
 def to_bytes(payload: Any):
 
     if isinstance(payload, bytes):
         return payload
-
-    elif callable(payload):
-        return to_bytes(payload())
-
     elif isinstance(payload, str):
         return bytes(payload, default['unicode'])
-
+    elif callable(payload):
+        return to_bytes(payload())
     elif isinstance(payload, int):
 
         # Calculate how many bytes are required for given integer.
@@ -56,71 +71,73 @@ def to_bytes(payload: Any):
             byteorder=default['byte_order'],
             signed=default['signed']
         )
-
     else:
         return bytes(payload)
 
 
 def tcp(host: str, port: int, payload: Any, repeat: int = 1, timeout: int = 3) -> int:
 
-    bytes_payload = to_bytes(payload)
+    sent_bytes = 0
 
     with Telnet(host, port, timeout=timeout) as session:
+
         for iteration in range(repeat):
-            session.write(bytes_payload)
+            for unpacked_item in unpack(payload):
+                sent_bytes += session.write(to_bytes(unpacked_item))
 
-        if iteration + 1 < repeat and callable(payload):
-            bytes_payload = to_bytes(payload)
-
-    return len(bytes_payload)
+    return sent_bytes
 
 
 def udp(host: str, port: int, payload: Any, repeat: int = 1, ttl: int = 32) -> int:
 
-    bytes_payload = to_bytes(payload)
+    sent_bytes = 0
+
+    address = host, port
+    udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
+    udp_socket.setsockopt(socket.IPPROTO_IP, socket.IP_TTL, ttl)
 
     for iteration in range(repeat):
+        for unpacked_item in unpack(payload):
+            sent_bytes += udp_socket.sendto(to_bytes(unpacked_item), address)
 
-        address = host, port
-        udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
-        udp_socket.setsockopt(socket.IPPROTO_IP, socket.IP_TTL, ttl)
-        udp_socket.sendto(bytes_payload, address)
-
-        if iteration + 1 < repeat and callable(payload):
-            bytes_payload = to_bytes(payload)
-
-    return len(bytes_payload)
+    return sent_bytes
 
 
-def multicast(group: str, port: int, payload: Any, ttl: int = 2) -> int:
+def multicast(group: str, port: int, payload: Any, repeat: int = 1, ttl: int = 2) -> int:
 
     # REF: https://stackoverflow.com/questions/603852/how-do-you-udp-multicast-in-python
-
-    bytes_payload = to_bytes(payload)
 
     if not ip_address(group).is_multicast:
         raise ValueError(f"Address '{group}' is not a multi-cast group.")
 
+    sent_bytes = 0
+
     address = group, port
     multicast_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
     multicast_socket.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_TTL, ttl)
-    multicast_socket.sendto(bytes_payload, address)
 
-    return len(bytes_payload)
+    for iteration in range(repeat):
+        for unpacked_item in unpack(payload):
+            sent_bytes += multicast_socket.sendto(to_bytes(unpacked_item), address)
+
+    return sent_bytes
 
 
-def broadcast(port: int, payload: Any, ttl: int = 1) -> int:
+def broadcast(port: int, payload: Any, repeat: int = 1, ttl: int = 1) -> int:
 
     # REF: https://gist.github.com/ninedraft/7c47282f8b53ac015c1e326fffb664b5
 
-    bytes_payload = to_bytes(payload)
+    sent_bytes = 0
 
     address = '255.255.255.255', port
     broadcast_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
     broadcast_socket.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, ttl)
-    broadcast_socket.sendto(bytes_payload, address)
 
-    return len(bytes_payload)
+    for iteration in range(repeat):
+        for unpacked_item in unpack(payload):
+            sent_bytes += broadcast_socket.sendto(to_bytes(unpacked_item), address)
+
+    return sent_bytes
 
 
 def smtp(
@@ -129,8 +146,8 @@ def smtp(
         to_addresses,
         cc_addresses=None,
         bcc_addresses=None,
-        subject='',
-        content=None,
+        subject='CyberSIEM(R) Community - SIEM Kit',
+        content='',
         content_render=None,
         content_variables=None,
         work_dir=None,
@@ -156,6 +173,9 @@ def smtp(
                 'starttls': 587,
                 'tls': 465
             }.get(auth_module, 25)
+
+    if username is None and password is not None:
+        username = from_address
 
     smtp_auth = SMTP_AUTH_MODULE_FACTORY.create(
         module_name=auth_module,

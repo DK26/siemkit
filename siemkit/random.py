@@ -155,6 +155,15 @@ def compose_flag_value(*enums: EnumMeta, amount: int = 1, flags: int = 1) -> Gen
         yield random_flag
 
 
+def compose_port(from_port: int = 0, to_port: int = 65535, amount: int = 1) -> Generator[int, None, None]:
+
+    if not (0 <= from_port <= to_port <= 65535):
+        raise ValueError("Illegal port range. Legal port range 0-65535.")
+
+    for _ in range(amount):
+        yield randint(from_port, to_port)
+
+
 def enum_value(*enums: EnumMeta) -> object:
     return next(compose_enum_value(*enums, amount=1))
 
@@ -170,6 +179,16 @@ def ip(from_address: Union[IPv4Address, str] = '0.0.0.0',
         compose_ip(
             from_address=from_address,
             to_address=to_address
+        )
+    )
+
+
+def port(from_port: int = 0, to_port: int = 65535) -> int:
+
+    return next(
+        compose_port(
+            from_port=from_port,
+            to_port=to_port
         )
     )
 
