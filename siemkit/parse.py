@@ -59,7 +59,17 @@ def time(time_string: str) -> datetime.datetime:
     :param time_string:
     :return: datetime object
     """
-    return dateparser.parse(time_string)
+    assigned_range = re.match(r'^.*?between\s(.*?)\sand\s(.*?$)', time_string, flags=re.IGNORECASE)
+    if assigned_range:
+        from_time_string, to_time_string = assigned_range.groups()
+        result = random.time(
+            dateparser.parse(from_time_string),
+            dateparser.parse(to_time_string)
+        )
+    else:
+        result = dateparser.parse(time_string)
+
+    return result
 
 
 def timedelta(time_delta_string: str) -> datetime.timedelta:

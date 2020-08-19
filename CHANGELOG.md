@@ -2,7 +2,17 @@
 * Added a random time generation `siemkit.random.time`
 * Added a random time delta generation `siemkit.random.timedelta`
 * Added a random time delta support for timedelta parsing `siemkit.parse.timedelta`
-    - e.g. `from every 2 minutes and 30 seconds to 5 minutes` is now supported.
+    - Examples of supported strings:
+     - `from 1 day to 2 days`
+     - `from 5 minutes to 1 hour`
+     - `from every 2 minutes and 30 seconds to 5 minutes` 
+* Added a random time support for time parsing `siemkit.parse.time`
+    - Examples of supported strings:
+     - `between yesterday and today`
+     - `between yesterday and now`
+     - `between 2 days ago and now`
+     - `between 3 days ago and 2 days ago`
+     - `between 1/1/2020 to 31/12/2023`
 * Re-imported sub-libraries for multi-layered APIs
 
 ## Version 0.0.16-dev
