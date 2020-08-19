@@ -1,5 +1,6 @@
 ## Version 0.0.17-dev
 * Added random time generation `siemkit.random.time`
+* Re-imported sub-libraries for multi-layered APIs
 
 ## Version 0.0.16-dev
 * Implemented prototype UDP listener
