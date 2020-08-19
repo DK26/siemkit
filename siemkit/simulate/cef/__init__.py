@@ -15,13 +15,14 @@
 from collections.abc import Sequence
 from typing import Generator
 from types import GeneratorType
+from random import randint
+from random import choice
 
 from siemkit.event import Cef
 from siemkit.time import sleep
 from siemkit import random
 from siemkit import generate
-from random import randint
-from random import choice
+from siemkit import parse
 
 
 def random_number(start_range: int = None, end_range: int = None, amount: int = 1, event: Cef = None) \
@@ -89,7 +90,7 @@ def fake_ip_scan(event: Cef = None) -> Generator[Cef, None, None]:
                 event.destinationAddress = fake_scan_addresses.pop()
                 yield event
 
-        sleep(seconds=10)
+        sleep(parse.timedelta("from 10 seconds to 25 seconds"))
 
         print("Simulating fake successful Telnet connection . . .")
         with event:
