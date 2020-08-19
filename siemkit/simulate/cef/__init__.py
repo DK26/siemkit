@@ -12,13 +12,16 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
+from collections.abc import Sequence
 from typing import Generator
+from types import GeneratorType
 
 from siemkit.event import Cef
 from siemkit.time import sleep
 from siemkit import random
 from siemkit import generate
 from random import randint
+from random import choice
 
 
 def random_number(start_range: int = None, end_range: int = None, amount: int = 1, event: Cef = None) \
@@ -96,3 +99,29 @@ def fake_ip_scan(event: Cef = None) -> Generator[Cef, None, None]:
             yield event
 
     print("Done simulating.")
+
+
+def random_event(event=None, amount=1,  **fields):
+
+    def random_value(value_):
+
+        if isinstance(value_, GeneratorType):
+            return random_value(next(value_))
+        elif callable(value_):
+            return random_value(value_())
+        elif not isinstance(value_, (dict, str)) and isinstance(value_, Sequence):
+            return choice(value_)
+        else:
+            return value_
+
+    if event is None:
+        event = Cef()
+
+    for _ in range(amount):
+
+        with event:
+
+            for key, value in fields.items():
+                event[key] = random_value(value)
+
+            yield event
