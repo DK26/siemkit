@@ -12,6 +12,7 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
+
 from random import randint
 from random import uniform
 from random import getrandbits
@@ -167,6 +168,54 @@ def generate_port(from_port: int = 0, to_port: int = 65535, amount: int = 1) -> 
         yield randint(from_port, to_port)
 
 
+def generate_timedelta(
+        start_timedelta: datetime_timedelta,
+        end_timedelta: datetime_timedelta,
+        amount: int = 1
+) -> Generator[datetime_timedelta, None, None]:
+    for _ in range(amount):
+        yield datetime_timedelta(
+            seconds=uniform(
+                start_timedelta.total_seconds(),
+                end_timedelta.total_seconds()
+            )
+        )
+
+
+def generate_time(
+        start_time: datetime = None,
+        end_time: datetime = None,
+        gap: datetime_timedelta = None,
+        amount: int = 1
+) -> Generator[datetime, None, None]:
+
+    if end_time is None and isinstance(start_time, datetime) and isinstance(gap, datetime_timedelta):
+        # Gap forward in time
+        end_time = start_time + gap
+
+    elif start_time is None and isinstance(end_time, datetime) and isinstance(gap, datetime_timedelta):
+        # Gap back in time
+        start_time = end_time - gap
+
+    elif start_time is None and end_time is None:
+
+        # Default
+
+        end_time = datetime.now()
+
+        if gap is None:
+            start_time = end_time - datetime_timedelta(minutes=1)
+        else:
+            start_time = end_time - gap
+
+    for _ in range(amount):
+        yield datetime.fromtimestamp(
+            uniform(
+                start_time.timestamp(), end_time.timestamp()
+            )
+        )
+
+
 def enum_value(*enums: EnumMeta) -> object:
     return next(generate_enum_value(*enums, amount=1))
 
@@ -249,40 +298,10 @@ def http_server_error_code() -> int:
 
 
 def time(start_time: datetime = None, end_time: datetime = None, gap: datetime_timedelta = None) -> datetime:
-
-    if end_time is None and isinstance(start_time, datetime) and isinstance(gap, datetime_timedelta):
-        # Gap forward in time
-        end_time = start_time + gap
-
-    elif start_time is None and isinstance(end_time, datetime) and isinstance(gap, datetime_timedelta):
-        # Gap back in time
-        start_time = end_time - gap
-
-    elif start_time is None and end_time is None:
-
-        # Default
-
-        end_time = datetime.now()
-
-        if gap is None:
-            start_time = end_time - datetime_timedelta(minutes=1)
-        else:
-            start_time = end_time - gap
-
-    return datetime.fromtimestamp(
-        uniform(
-            start_time.timestamp(), end_time.timestamp()
-        )
-    )
+    return next(generate_time(start_time, end_time, gap))
 
 
 def timedelta(start_timedelta: datetime_timedelta, end_timedelta: datetime_timedelta) -> datetime_timedelta:
-
-    return datetime_timedelta(
-        seconds=uniform(
-            start_timedelta.total_seconds(),
-            end_timedelta.total_seconds()
-        )
-    )
+    return next(generate_timedelta(start_timedelta, end_timedelta))
 
 

@@ -101,18 +101,26 @@ def fake_ip_scan(event: Cef = None) -> Generator[Cef, None, None]:
     print("Done simulating.")
 
 
-def random_event(event=None, amount=1,  **fields):
+def process_random_value(value_):
 
-    def random_value(value_):
+    if isinstance(value_, GeneratorType):
+        return process_random_value(next(value_))
 
-        if isinstance(value_, GeneratorType):
-            return random_value(next(value_))
-        elif callable(value_):
-            return random_value(value_())
-        elif not isinstance(value_, (dict, str)) and isinstance(value_, Sequence):
-            return choice(value_)
+    elif callable(value_):
+        return process_random_value(value_())
+
+    elif not isinstance(value_, str) and isinstance(value_, Sequence):
+
+        if len(value_) == 2 and callable(value_[0]) and isinstance(value_[1], dict):
+            return process_random_value(value_[0](**value_[1]))
+
         else:
-            return value_
+            return choice(value_)
+    else:
+        return value_
+
+
+def random_event(event=None, amount=1,  **fields):
 
     if event is None:
         event = Cef()
@@ -122,6 +130,6 @@ def random_event(event=None, amount=1,  **fields):
         with event:
 
             for key, value in fields.items():
-                event[key] = random_value(value)
+                event[key] = process_random_value(value)
 
             yield event
