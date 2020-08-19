@@ -13,6 +13,7 @@
         - `between 2 days ago and now`
         - `between 3 days ago and 2 days ago`
         - `between 1/1/2020 and 31/12/2023`
+* Added parsing support for time range: `siemkit.parse.time_range` will produce a tuple of start and end time
 * Re-imported sub-libraries for multi-layered APIs
 
 ## Version 0.0.16-dev
