@@ -1,5 +1,8 @@
 ## Version 0.0.17-dev
-* Added random time generation `siemkit.random.time`
+* Added a random time generation `siemkit.random.time`
+* Added a random time delta generation `siemkit.random.timedelta`
+* Added a random time delta support for timedelta parsing `siemkit.parse.timedelta`
+    - e.g. `from every 2 minutes and 30 seconds to 5 minutes` is now supported.
 * Re-imported sub-libraries for multi-layered APIs
 
 ## Version 0.0.16-dev
