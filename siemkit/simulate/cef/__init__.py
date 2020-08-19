@@ -120,6 +120,7 @@ def process_random_value(value_):
         return value_
 
 
+# ToDo: Remember last time of event generation and use as `start_time` where now is `end_time`, for `random.time`
 def random_event(event=None, amount=1,  **fields):
 
     if event is None:
