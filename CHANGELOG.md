@@ -15,6 +15,7 @@
         - `between 1/1/2020 and 31/12/2023`
 * Added parsing support for time range: `siemkit.parse.time_range` will produce a tuple of start and end time
 * Re-imported sub-libraries for multi-layered APIs
+* All generators under `siemkit.random` were refactored from `compose` to `generate`
 
 ## Version 0.0.16-dev
 * Implemented prototype UDP listener
