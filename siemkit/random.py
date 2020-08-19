@@ -27,7 +27,7 @@ import threading
 from time import time
 from math import floor
 from datetime import datetime
-from datetime import timedelta
+from datetime import timedelta as datetime_timedelta
 
 from .const import DOMAINS
 from .const import NAMES
@@ -248,13 +248,13 @@ def http_server_error_code() -> int:
     return next(compose_http_server_error_code())
 
 
-def time(start_time: datetime = None, end_time: datetime = None, gap: timedelta = None) -> datetime:
+def time(start_time: datetime = None, end_time: datetime = None, gap: datetime_timedelta = None) -> datetime:
 
-    if end_time is None and isinstance(start_time, datetime) and isinstance(gap, timedelta):
+    if end_time is None and isinstance(start_time, datetime) and isinstance(gap, datetime_timedelta):
         # Gap forward in time
         end_time = start_time + gap
 
-    elif start_time is None and isinstance(end_time, datetime) and isinstance(gap, timedelta):
+    elif start_time is None and isinstance(end_time, datetime) and isinstance(gap, datetime_timedelta):
         # Gap back in time
         start_time = end_time - gap
 
@@ -265,7 +265,7 @@ def time(start_time: datetime = None, end_time: datetime = None, gap: timedelta 
         end_time = datetime.now()
 
         if gap is None:
-            start_time = end_time - timedelta(minutes=1)
+            start_time = end_time - datetime_timedelta(minutes=1)
         else:
             start_time = end_time - gap
 
@@ -274,3 +274,15 @@ def time(start_time: datetime = None, end_time: datetime = None, gap: timedelta 
             start_time.timestamp(), end_time.timestamp()
         )
     )
+
+
+def timedelta(start_timedelta: datetime_timedelta, end_timedelta: datetime_timedelta) -> datetime_timedelta:
+
+    return datetime_timedelta(
+        seconds=uniform(
+            start_timedelta.total_seconds(),
+            end_timedelta.total_seconds()
+        )
+    )
+
+

@@ -17,6 +17,8 @@ from collections import deque
 import datetime
 import re
 
+from siemkit import random
+
 import pytimeparse
 # * pytimeparse - MIT License
 #     by: wroberts
@@ -72,11 +74,30 @@ def timedelta(time_delta_string: str) -> datetime.timedelta:
         Results in:
          datetime.timedelta(days=15, seconds=45015)
 
+        Words like `every` and `and` are ignored.
+
+        A random timedelta can also be acquired using `from` and `to` words:
+            "from every 1 second to 2 minutes"
+
+        This will produce a random timedelta between `1 second` to `2 minutes`.
+
     :param time_delta_string:
     :return: timedelta object
     """
     time_delta_string = time_delta_string.lower().replace("and", '').replace('every', '')
-    return datetime.timedelta(seconds=pytimeparse.parse(time_delta_string))
+
+    assigned_range = re.match(r'^.*?from\s(.*?)\sto\s(.*?$)', time_delta_string)
+
+    if assigned_range:
+        from_time_string, to_time_string = assigned_range.groups()
+        result = random.timedelta(
+            datetime.timedelta(seconds=pytimeparse.parse(from_time_string)),
+            datetime.timedelta(seconds=pytimeparse.parse(to_time_string))
+        )
+    else:
+        result = datetime.timedelta(seconds=pytimeparse.parse(time_delta_string))
+
+    return result
 
 
 def size(size_string: str) -> int:
