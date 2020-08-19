@@ -12,7 +12,7 @@
         - `between yesterday and now`
         - `between 2 days ago and now`
         - `between 3 days ago and 2 days ago`
-        - `between 1/1/2020 to 31/12/2023`
+        - `between 1/1/2020 and 31/12/2023`
 * Re-imported sub-libraries for multi-layered APIs
 
 ## Version 0.0.16-dev

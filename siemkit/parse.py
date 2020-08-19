@@ -13,6 +13,7 @@
 #   limitations under the License.
 
 from typing import Any
+from typing import Tuple
 from collections import deque
 import datetime
 import re
@@ -35,6 +36,13 @@ import dateparser
 #     license: https://github.com/scrapinghub/dateparser/blob/master/LICENSE
 
 
+def time_range(time_string: str) -> Tuple[datetime.datetime, datetime.datetime]:
+    assigned_range = re.match(r'^.*?between\s(.*?)\sand\s(.*?$)', time_string, flags=re.IGNORECASE)
+    if assigned_range:
+        from_time_string, to_time_string = assigned_range.groups()
+        return dateparser.parse(from_time_string), dateparser.parse(to_time_string)
+
+
 def time(time_string: str) -> datetime.datetime:
     """
     Parse a time string into a datetime object.
@@ -55,16 +63,22 @@ def time(time_string: str) -> datetime.datetime:
         Results in a `datetime` object set to 1 day before
          the current time of execution.
 
+    A random datetime can also be acquired using `between` and `and` words:
+        "between 3 days ago and 2 days ago"
+        "between yesterday and today"
+        "between yesterday and now"
+        "between 1/1/2020 and 31/12/2023"
+
 
     :param time_string:
     :return: datetime object
     """
-    assigned_range = re.match(r'^.*?between\s(.*?)\sand\s(.*?$)', time_string, flags=re.IGNORECASE)
-    if assigned_range:
-        from_time_string, to_time_string = assigned_range.groups()
+    datetime_range = time_range(time_string)
+    if datetime_range:
+        from_time_string, to_time_string = datetime_range
         result = random.time(
-            dateparser.parse(from_time_string),
-            dateparser.parse(to_time_string)
+            from_time_string,
+            to_time_string
         )
     else:
         result = dateparser.parse(time_string)
@@ -88,6 +102,7 @@ def timedelta(time_delta_string: str) -> datetime.timedelta:
 
         A random timedelta can also be acquired using `from` and `to` words:
             "from every 1 second to 2 minutes"
+            "from 5 minutes to 1 hour"
 
         This will produce a random timedelta between `1 second` to `2 minutes`.
 
