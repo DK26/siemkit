@@ -65,7 +65,7 @@ def fake_ip_scan(event: Cef = None) -> Generator[Cef, None, None]:
         1. Pick a random attacker IP address between 172.16.0.1 - 172.16.0.254
         2. Scan addresses 192.168.0.1 - 192.168.0.10
         3. Pick a random victim IP address between 192.168.0.1 - 192.168.0.10
-        4. Wait 10 seconds
+        4. Wait a random time from 10 to 25 seconds
         5. Successful Telnet connection to the random victim address (3)
 
     :param event: Optional CEF event to work with. The CEF original state is kept protected.
