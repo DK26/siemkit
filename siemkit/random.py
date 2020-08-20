@@ -55,7 +55,10 @@ def generate_ip(
         to_address: Union[IPv4Address, str] = '255.255.255.255',
         amount: int = 1) -> Generator[IPv4Address, None, None]:
 
-    for _ in range(amount):
+    for current_count in range(amount):
+
+        if current_count == amount:
+            break
 
         yield IPv4Address(
             randint(
@@ -66,13 +69,22 @@ def generate_ip(
 
 
 def generate_domain(amount: int = 1) -> Generator[str, None, None]:
-    for _ in range(amount):
+
+    for current_count in range(amount):
+
+        if current_count == amount:
+            break
+
         yield choice(DOMAINS)
 
 
 def generate_url(amount: int = 1) -> Generator[str, None, None]:
 
-    for _ in range(amount):
+    for current_count in range(amount):
+
+        if current_count == amount:
+            break
+
         yield (f"{enum_value(web.Protocol)}://{choice(DOMAINS)}/"
                f"{choice(NAMES).lower()}/{randint(0, 1000)}/"
                f"{choice(NAMES).lower()}?{choice(NAMES).lower()}={randint(0, 1000)}"
@@ -80,32 +92,62 @@ def generate_url(amount: int = 1) -> Generator[str, None, None]:
 
 
 def generate_email(amount: int = 1) -> Generator[str, None, None]:
-    for _ in range(amount):
+
+    for current_count in range(amount):
+
+        if current_count == amount:
+            break
+
         yield f"{choice(NAMES).lower()}{randint(10, 80)}@{choice(DOMAINS)}"
 
 
 def generate_user(amount: int = 1) -> Generator[str, None, None]:
-    for _ in range(amount):
+
+    for current_count in range(amount):
+
+        if current_count == amount:
+            break
+
         yield f"{choice(NAMES)}{choice(NAMES)}{randint(10, 80)}"
 
 
 def generate_md5(amount: int = 1) -> Generator[str, None, None]:
-    for _ in range(amount):
+
+    for current_count in range(amount):
+
+        if current_count == amount:
+            break
+
         yield hex(getrandbits(128))[2:]
 
 
 def generate_sha1(amount: int = 1) -> Generator[str, None, None]:
-    for _ in range(amount):
+
+    for current_count in range(amount):
+
+        if current_count == amount:
+            break
+
         yield hex(getrandbits(160))[2:]
 
 
 def generate_enum_value(*enums: EnumMeta, amount: int = 1) -> Generator[object, None, None]:
-    for _ in range(amount):
+
+    for current_count in range(amount):
+
+        if current_count == amount:
+            break
+
         yield choice(tuple(choice(enums))).value
 
 
 def generate_http_code(amount: int = 1) -> Generator[int, None, None]:
-    for _ in range(amount):
+
+    for current_count in range(amount):
+
+        if current_count == amount:
+            break
+
         yield enum_value(
             web.HttpInformationalCode,
             web.HttpSuccessCode,
@@ -116,22 +158,42 @@ def generate_http_code(amount: int = 1) -> Generator[int, None, None]:
 
 
 def generate_http_information_code(amount: int = 1) -> Generator[int, None, None]:
-    for _ in range(amount):
+
+    for current_count in range(amount):
+
+        if current_count == amount:
+            break
+
         yield enum_value(web.HttpInformationalCode)
 
 
 def generate_http_success_code(amount: int = 1) -> Generator[int, None, None]:
-    for _ in range(amount):
+
+    for current_count in range(amount):
+
+        if current_count == amount:
+            break
+
         yield enum_value(web.HttpSuccessCode)
 
 
 def generate_http_redirection_code(amount: int = 1) -> Generator[int, None, None]:
-    for _ in range(amount):
+
+    for current_count in range(amount):
+
+        if current_count == amount:
+            break
+
         yield enum_value(web.HttpRedirectionCode)
 
 
 def generate_http_error_code(amount: int = 1) -> Generator[int, None, None]:
-    for _ in range(amount):
+
+    for current_count in range(amount):
+
+        if current_count == amount:
+            break
+
         yield enum_value(
             web.HttpClientErrorCode,
             web.HttpServerErrorCode
@@ -139,17 +201,31 @@ def generate_http_error_code(amount: int = 1) -> Generator[int, None, None]:
 
 
 def generate_http_client_error_code(amount: int = 1) -> Generator[int, None, None]:
-    for _ in range(amount):
+
+    for current_count in range(amount):
+
+        if current_count == amount:
+            break
+
         yield enum_value(web.HttpClientErrorCode)
 
 
 def generate_http_server_error_code(amount: int = 1) -> Generator[int, None, None]:
-    for _ in range(amount):
+
+    for current_count in range(amount):
+
+        if current_count == amount:
+            break
+
         yield enum_value(web.HttpServerErrorCode)
 
 
 def generate_flag_value(*enums: EnumMeta, amount: int = 1, flags: int = 1) -> Generator[int, None, None]:
-    for _ in range(amount):
+
+    for current_count in range(amount):
+
+        if current_count == amount:
+            break
 
         random_flag = 0
 
@@ -164,7 +240,11 @@ def generate_port(from_port: int = 0, to_port: int = 65535, amount: int = 1) -> 
     if not (0 <= from_port <= to_port <= 65535):
         raise ValueError("Illegal port range. Legal port range 0-65535.")
 
-    for _ in range(amount):
+    for current_count in range(amount):
+
+        if current_count == amount:
+            break
+
         yield randint(from_port, to_port)
 
 
@@ -173,7 +253,12 @@ def generate_timedelta(
         end_timedelta: datetime_timedelta,
         amount: int = 1
 ) -> Generator[datetime_timedelta, None, None]:
-    for _ in range(amount):
+
+    for current_count in range(amount):
+
+        if current_count == amount:
+            break
+
         yield datetime_timedelta(
             seconds=uniform(
                 start_timedelta.total_seconds(),
@@ -208,7 +293,11 @@ def generate_time(
         else:
             start_time = end_time - gap
 
-    for _ in range(amount):
+    for current_count in range(amount):
+
+        if current_count == amount:
+            break
+
         yield datetime.fromtimestamp(
             uniform(
                 start_time.timestamp(), end_time.timestamp()
