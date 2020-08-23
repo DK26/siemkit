@@ -21,7 +21,7 @@
     - `Esm.get_activelist.columns()`,
     - `Esm.add_activelist.entries()`
 * Passing columns to `remove_activelist_entries()` & `add_activelist_entries()` is only optional.
-    - Not proving `_columns_order` field for an entry, will cause the API to automatically make a `get_activelist_columns()` call.
+    - Not providing the `_columns_order` field for an entry, will cause the API to automatically make a `get_activelist_columns()` call.
 
 ## Version 0.0.16-dev
 * Implemented prototype UDP listener
