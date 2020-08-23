@@ -193,6 +193,39 @@ class Esm:
 
         return simplified_cef_events(response)
 
+    def get_activelist_attributes(self, resource_id):
+        variables = {
+            'uuid': resource_id
+        }
+        variables.update(self.variables)  # Get the token
+
+        response = self.uri(
+            ActiveListApiEnum.FIND_BY_UUID, variables
+        )
+
+        if response.status_code() != 200:
+            raise Exception(f"(Response {response.status_code()}) "
+                            f"Could not retrieve resource ID '{resource_id}'.")
+
+        return response.json()['act.findByUUIDResponse']['act.return']
+
+    def get_activelist_columns(self, resource_id):
+        return self.get_activelist_attributes(resource_id)['fieldNames']
+
+    def get_activelist_fields(self, resource_id):
+
+        response_json = self.get_activelist_attributes(resource_id)
+
+        result = {}
+
+        for index, field in enumerate(response_json['fieldNames']):
+            result[field] = {
+                'key': response_json['keyFields'][index],
+                'type': response_json['fieldTypes'][index]
+            }
+
+        return result
+
     def get_activelist(self, resource_id):
 
         variables = {
@@ -215,6 +248,36 @@ class Esm:
 
         return entries
 
+    def add_activelist_entries(self, resource_id, entries):
+
+        if not entries:
+            return
+
+        if isinstance(entries, dict):
+            columns = entries.get('_columns_order')
+        elif not isinstance(entries, str) and hasattr(entries, '__getitem__'):
+            columns = entries[0].get('_columns_order')
+        else:
+            raise TypeError(f"Illegal entries object: {entries}")
+
+        if columns is None:
+            columns = self.get_activelist_columns(resource_id)
+
+        variables = {
+            'resource_id': resource_id,
+            'columns': columns,
+            'entries': entries
+        }
+        variables.update(self.variables)  # Get the token
+
+        response = self.uri(
+            ActiveListApiEnum.ADD_ENTRIES, variables
+        )
+
+        if response.status_code() != 204:
+            raise Exception(f"(Response {response.status_code()}) "
+                            f"Could not add entries to resource ID '{resource_id}'.")
+
     def delete_activelist_entries(self, resource_id, entries):
 
         # columns = self._activelist_columns.get(resource_id)
@@ -226,11 +289,14 @@ class Esm:
             return
 
         if isinstance(entries, dict):
-            columns = entries['_columns_order']
+            columns = entries.get('_columns_order')
         elif not isinstance(entries, str) and hasattr(entries, '__getitem__'):
-            columns = entries[0]['_columns_order']
+            columns = entries[0].get('_columns_order')
         else:
             raise TypeError(f"Illegal entries object: {entries}")
+
+        if columns is None:
+            columns = self.get_activelist_columns(resource_id)
 
         variables = {
             'resource_id': resource_id,

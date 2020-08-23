@@ -51,13 +51,14 @@ class AddEntries(ArcSightUri):
         entry_columns = []
         entry_list = []
 
+        # Build JSON
         for entry in entries:
             for column in columns:
                 entry_columns.append(entry[column])
 
             entry_list.append(
                 {
-                    'entry': entry_columns
+                    'entry': list(entry_columns)
                 }
             )
 
@@ -177,7 +178,7 @@ class FindByUuid(ArcSightUri):
 
     def args(self, variables) -> Tuple[str, dict]:
         return (
-            '/www/manager-service/rest/ArchiveReportService/findByUUID',
+            '/www/manager-service/rest/ActiveListService/findByUUID',
             {
                 'headers': {
                     'Content-Type': 'application/json',
@@ -185,9 +186,9 @@ class FindByUuid(ArcSightUri):
                 },
                 'method': 'POST',
                 'json': {
-                        "arc.findByUUID": {
-                            "arc.authToken": variables.get('token', ''),
-                            "arc.id": variables.get("uuid", '')
+                        "act.findByUUID": {
+                            "act.authToken": variables.get('token', ''),
+                            "act.id": variables.get("uuid", '')
                         }
                 }
             }
@@ -220,3 +221,4 @@ class ActiveListApiEnum(ArcSightUriEnum):
     DELETE_ENTRIES = DeleteEntries()
     CLEAR_ENTRIES = ClearEntries()
     FIND_ALL_IDS = FindAllIds()
+    FIND_BY_UUID = FindByUuid()
