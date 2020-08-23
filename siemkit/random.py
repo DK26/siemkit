@@ -392,5 +392,3 @@ def time(start_time: datetime = None, end_time: datetime = None, gap: datetime_t
 
 def timedelta(start_timedelta: datetime_timedelta, end_timedelta: datetime_timedelta) -> datetime_timedelta:
     return next(generate_timedelta(start_timedelta, end_timedelta))
-
-
