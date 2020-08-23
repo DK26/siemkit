@@ -16,7 +16,7 @@
 * Added parsing support for time range: `siemkit.parse.time_range` will produce a tuple of start and end time
 * Re-imported sub-libraries for multi-layered APIs
 * All generators under `siemkit.random` were refactored from `compose` to `generate`
-* Added ESM API Manager methods:
+* Added ArcSight ESM API Manager methods:
     - `Esm.get_activelist_fields()`,
     - `Esm.get_activelist.columns()`,
     - `Esm.add_activelist.entries()`
