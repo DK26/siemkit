@@ -17,8 +17,8 @@
 * Re-imported sub-libraries for multi-layered APIs
 * All generators under `siemkit.random` were refactored from `compose` to `generate`
 * Added ArcSight ESM API Manager methods:
-    - `Esm.get_activelist_fields()`,
-    - `Esm.get_activelist_columns()`,
+    - `Esm.get_activelist_fields()`
+    - `Esm.get_activelist_columns()`
     - `Esm.add_activelist_entries()`
 * Passing columns to `remove_activelist_entries()` & `add_activelist_entries()` is only optional.
     - Not providing the `_columns_order` field for an entry, will cause the API to automatically make a `get_activelist_columns()` call.
