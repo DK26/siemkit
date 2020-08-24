@@ -35,6 +35,8 @@ http_request_module = RequestsModule(requests)
 urllib3.disable_warnings()
 
 
+# ToDo: Separate event ID generator from getter(?)
+# ToDo: If correlation event, yield base_events(?)
 class Esm:
 
     def __init__(
