@@ -157,7 +157,10 @@ class Esm:
 
         return response
 
-    def get_event_ids(self, *event_ids, start_millis='-1', end_millis='-1'):
+    # def get_event_ids(self, *event_ids, start_millis='-1', end_millis='-1'):
+    #     return list(self.retrieve_event_ids(*event_ids, start_millis=start_millis, end_millis=end_millis))
+
+    def retrieve_event_ids(self, *event_ids, start_millis='-1', end_millis='-1'):
 
         def extract_ids():
             for event_id in event_ids:
@@ -194,6 +197,15 @@ class Esm:
             raise Exception(f"Event IDs '{' ,'.join((str(event_id) for event_id in event_ids))}' were not found.")
 
         return simplified_cef_events(response)
+
+    def base_events(self, correlation_event):
+
+        if isinstance(correlation_event, dict):
+            base_events_list = correlation_event.get('baseEventIds')
+
+            if base_events_list is not None:
+                for event in self.retrieve_event_ids(base_events_list):
+                    yield event
 
     def get_activelist_attributes(self, resource_id):
         variables = {
