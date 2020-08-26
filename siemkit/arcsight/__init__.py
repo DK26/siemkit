@@ -204,8 +204,7 @@ class Esm:
             base_events_list = correlation_event.get('baseEventIds')
 
             if base_events_list is not None:
-                for event in self.retrieve_event_ids(base_events_list):
-                    yield event
+                yield from self.retrieve_event_ids(base_events_list)
 
     def get_activelist_attributes(self, resource_id):
         variables = {
