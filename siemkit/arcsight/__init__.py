@@ -216,12 +216,12 @@ class Esm:
         if events_cache is None:
             events_cache = {}
 
-        # ToDo: If deduplication is enabled, skip already cached IDs
-        # ToDo: If event is already cached, do not request, just yield from cache.
-        # ToDo: The remaining should be added to a single future re-request (recursive mode)
-        # ToDo: Cache newly retrieved events (recursive mode)
-        # ToDo: Yield event if its type allowed.
-        # ToDo: Recurse on event IDs from base (if recurse==True).
+        # Done: If deduplication is enabled, skip already cached IDs
+        # Done: If event is already cached, do not request, just yield from cache.
+        # Done: The remaining should be added to a single future re-request (recursive mode)
+        # Done: Cache newly retrieved events (recursive mode)
+        # Done: Yield event if its type allowed.
+        # Done: Recurse on event IDs from base (if recurse==True).
 
         def unpack_ids(event_ids_):
             for event_id_ in event_ids_:
@@ -243,12 +243,12 @@ class Esm:
                 if event_id_ in events_cache:
                     yield event_id_
 
-        unpacked_event_ids = unpack_ids(event_ids)
+        unpacked_event_ids = list(unpack_ids(event_ids))
         if deduplicate:
             # Only new event IDs -- For recursive use
             event_ids = new_event_ids(unpacked_event_ids)
         else:
-            event_ids = list(unpacked_event_ids)
+            event_ids = unpacked_event_ids
 
         retrieve_types = set()
 
@@ -273,7 +273,7 @@ class Esm:
 
         # New events to retrieve
         retrieve_event_ids = list(new_event_ids(event_ids))
-        input(f"Cache: {events_cache.keys()} | To Retrieve: {retrieve_event_ids}")
+        # input(f"Cache: {events_cache.keys()} | To Retrieve: {retrieve_event_ids}")
 
         for event in self._retrieve_event_ids(
                 retrieve_event_ids,
@@ -287,12 +287,12 @@ class Esm:
             if event_id in events_cache:
                 if deduplicate:
                     continue
-
             events_cache[event_id] = event  # Store in cache
 
             if event_type is not None:
                 if event_type in retrieve_types:
-                    print(f"Current level {level} | Event ID: {event_id} | Cache: {events_cache.keys()} | To Retrieve: {retrieve_event_ids}")
+                    # print(f"Current level {level} | Event ID: {event_id} | Cache: {events_cache.keys()}
+                    # | To Retrieve: {retrieve_event_ids}")
                     yield event
 
                 if recurse:
@@ -311,24 +311,6 @@ class Esm:
                             deduplicate=deduplicate,
                             level=level + 1
                         )
-                        # for inner_event in self.retrieve_event_ids(
-                        #     base_event_ids,
-                        #     start_millis=start_millis,
-                        #     end_millis=end_millis,
-                        #     correlation=correlation,
-                        #     aggregated=aggregated,
-                        #     base=base,
-                        #     action=action,
-                        #     recurse=recurse,
-                        #     events_cache=events_cache,
-                        #     deduplicate=deduplicate
-                        # ):
-                        #     # if deduplicate and event_id in events_cache:
-                        #     #     pass
-                        #     # else:
-                        #     #     yield inner_event
-                        #     print(inner_event['eventId'])
-                        #     yield inner_event
 
     def base_events(self, correlation_event, events_cache=None):
 
