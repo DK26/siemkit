@@ -153,7 +153,7 @@ def boolean(bool_string: str) -> bool:
         'create', 'created', 'awake', 'wake', 'wakeup', 'wake-up', 'wake up', 'power', 'power-up', 'powerup',
         'power up', 'alive', 'live', 'lives', 'contain', 'contained', 'insert', 'inserted', 'assign', 'assigned',
         'import', 'imported', 'extract', 'extracted', 'promote', 'promoted', 'acknowledge', 'acknowledged',
-        'affirmative'
+        'affirmative', 'happy', 'positive'
     }
 
 
