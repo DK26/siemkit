@@ -22,6 +22,7 @@
     - `Esm.add_activelist_entries()`
 * Passing columns to `remove_activelist_entries()` & `add_activelist_entries()` is only optional.
     - Not providing the `_columns_order` field for an entry, will cause the API to automatically make a `get_activelist_columns()` call.
+* Improved ArcSight ESM API `retrieve_event_ids` generator to be able to filter event types and retrieve recursively.
 
 ## Version 0.0.16-dev
 * Implemented prototype UDP listener
