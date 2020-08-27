@@ -152,7 +152,8 @@ def boolean(bool_string: str) -> bool:
         'run', 'running', 'go', 'start', 'able', 'capable', 'possible', 'can', 'permit', 'permitted', 'show',
         'create', 'created', 'awake', 'wake', 'wakeup', 'wake-up', 'wake up', 'power', 'power-up', 'powerup',
         'power up', 'alive', 'live', 'lives', 'contain', 'contained', 'insert', 'inserted', 'assign', 'assigned',
-        'import', 'imported', 'extract', 'extracted'
+        'import', 'imported', 'extract', 'extracted', 'promote', 'promoted', 'acknowledge', 'acknowledged',
+        'affirmative'
     }
 
 
