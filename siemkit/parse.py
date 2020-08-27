@@ -146,7 +146,13 @@ def size(size_string: str) -> int:
 def boolean(bool_string: str) -> bool:
 
     bool_string = bool_string.strip().lower()
-    return bool_string in ('t', 'true', 'yes', 'ok', 'on', '1', 'some', 'active', 'activated', 'include', 'included')
+    return bool_string in {
+        't', 'true', 'yes', 'ok', 'on', '1', 'some', 'active', 'activated', 'include', 'included',
+        'enable', 'enabled', 'allow', 'allowed', 'set', 'ready', 'process', 'processed', 'add', 'added',
+        'run', 'running', 'go', 'start', 'able', 'capable', 'possible', 'can', 'permit', 'permitted', 'show',
+        'create', 'created', 'awake', 'wake', 'wakeup', 'wake-up', 'wake up', 'power', 'power-up', 'powerup',
+        'power up', 'alive', 'live', 'lives'
+    }
 
 
 def variable(var_string: str, var_dict: dict) -> Any:

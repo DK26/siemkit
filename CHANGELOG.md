@@ -30,6 +30,42 @@
     - `activated`
     - `include`
     - `included`
+    - `enable`
+    - `enabled`
+    - `set`
+    - `ready`
+    - `allow`
+    - `allowed`
+    - `process`
+    - `processed`
+    - `add`
+    - `added`
+    - `run`
+    - `running`
+    - `go`
+    - `start`
+    - `able`
+    - `capable`
+    - `possible`
+    - `can`
+    - `permit`
+    - `permitted`
+    - `show`
+    - `create`
+    - `created`
+    - `awake`
+    - `wake`
+    - `wakeup`
+    - `wake-up`
+    - `wake up`
+    - `power`
+    - `power-up`
+    - `powerup`
+    - `power up`
+    - `alive`
+    - `live`
+    - `lives`
+* Changed: `siemkit.parse.boolean` is now using a `set` type for value testing instead of a `tuple`.
 
 ## Version 0.0.16-dev
 * Implemented prototype UDP listener
