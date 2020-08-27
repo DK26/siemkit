@@ -76,6 +76,8 @@
     - `extract`
     - `extracted`
     - `+`
+    - `v`
+    - `x`
     - `promote`
     - `promoted`
     - `acknowledge`
@@ -83,6 +85,8 @@
     - `affirmative`
     - `happy`
     - `positive`
+    - `select`
+    - `selected`
 * Changed: `siemkit.parse.boolean` is now using a `set` type for value testing instead of a `tuple`.
 
 ## Version 0.0.16-dev
