@@ -78,6 +78,7 @@
     - `+`
     - `v`
     - `x`
+    - `k`
     - `y`
     - `promote`
     - `promoted`
