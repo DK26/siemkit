@@ -146,7 +146,7 @@ def size(size_string: str) -> int:
 def boolean(bool_string: str) -> bool:
 
     bool_string = bool_string.strip().lower()
-    return bool_string in ('t', 'true', 'yes', 'ok', 'on', '1', 'some')
+    return bool_string in ('t', 'true', 'yes', 'ok', 'on', '1', 'some', 'active', 'activated')
 
 
 def variable(var_string: str, var_dict: dict) -> Any:

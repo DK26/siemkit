@@ -160,7 +160,7 @@ class Esm:
     # def get_event_ids(self, *event_ids, start_millis='-1', end_millis='-1'):
     #     return list(self.retrieve_event_ids(*event_ids, start_millis=start_millis, end_millis=end_millis))
 
-    def retrieve_event_ids(self, *event_ids, start_millis='-1', end_millis='-1'):
+    def _retrieve_event_ids(self, *event_ids, start_millis='-1', end_millis='-1'):
 
         def extract_ids():
             for event_id in event_ids:
@@ -198,13 +198,145 @@ class Esm:
 
         return simplified_cef_events(response)
 
-    def base_events(self, correlation_event):
+    def retrieve_event_ids(
+            self,
+            *event_ids,
+            start_millis='-1',
+            end_millis='-1',
+            correlation=True,
+            aggregated=True,
+            base=True,
+            action=True,
+            recurse=False,
+            events_cache=None,
+            deduplicate=True,
+            level=0
+    ):
+
+        if events_cache is None:
+            events_cache = {}
+
+        # ToDo: If deduplication is enabled, skip already cached IDs
+        # ToDo: If event is already cached, do not request, just yield from cache.
+        # ToDo: The remaining should be added to a single future re-request (recursive mode)
+        # ToDo: Cache newly retrieved events (recursive mode)
+        # ToDo: Yield event if its type allowed.
+        # ToDo: Recurse on event IDs from base (if recurse==True).
+
+        def unpack_ids(event_ids_):
+            for event_id_ in event_ids_:
+                if isinstance(event_id_, int):
+                    yield event_id_
+                elif isinstance(event_id_, str):
+                    yield int(event_id_)
+                elif isinstance(event_id_, Iterable):
+                    for id_ in event_id_:
+                        yield int(id_)
+
+        def new_event_ids(event_ids_):
+            for event_id_ in event_ids_:
+                if event_id_ not in events_cache:
+                    yield event_id_
+
+        def cached_event_ids(event_ids_):
+            for event_id_ in event_ids_:
+                if event_id_ in events_cache:
+                    yield event_id_
+
+        unpacked_event_ids = unpack_ids(event_ids)
+        if deduplicate:
+            # Only new event IDs -- For recursive use
+            event_ids = new_event_ids(unpacked_event_ids)
+        else:
+            event_ids = list(unpacked_event_ids)
+
+        retrieve_types = set()
+
+        if correlation:
+            retrieve_types.add('CORRELATION')
+        if aggregated:
+            retrieve_types.add('AGGREGATED')
+        if base:
+            retrieve_types.add('BASE')
+        if action:
+            retrieve_types.add('ACTION')
+
+        # # Unload from cache
+        # if not deduplicate:
+        #     for event_id in cached_event_ids(event_ids):
+        #         cached_event = events_cache.get(event_id)
+        #         if cached_event is not None:
+        #             cached_event_type = cached_event.get('type')
+        #             if cached_event_type in retrieve_types:
+        #                 input("From Cache:")
+        #                 yield cached_event
+
+        # New events to retrieve
+        retrieve_event_ids = list(new_event_ids(event_ids))
+        input(f"Cache: {events_cache.keys()} | To Retrieve: {retrieve_event_ids}")
+
+        for event in self._retrieve_event_ids(
+                retrieve_event_ids,
+                start_millis=start_millis,
+                end_millis=end_millis
+        ):
+
+            event_id = event.get('eventId')
+            event_type = event.get('type')
+
+            if event_id in events_cache:
+                if deduplicate:
+                    continue
+
+            events_cache[event_id] = event  # Store in cache
+
+            if event_type is not None:
+                if event_type in retrieve_types:
+                    print(f"Current level {level} | Event ID: {event_id} | Cache: {events_cache.keys()} | To Retrieve: {retrieve_event_ids}")
+                    yield event
+
+                if recurse:
+                    base_event_ids = event.get('baseEventIds')
+                    if base_event_ids:
+                        yield from self.retrieve_event_ids(
+                            [base_event_id for base_event_id in base_event_ids if base_event_id not in events_cache or (deduplicate and base_event_id not in retrieve_event_ids)],
+                            start_millis=start_millis,
+                            end_millis=end_millis,
+                            correlation=correlation,
+                            aggregated=aggregated,
+                            base=base,
+                            action=action,
+                            recurse=recurse,
+                            events_cache=events_cache,
+                            deduplicate=deduplicate,
+                            level=level + 1
+                        )
+                        # for inner_event in self.retrieve_event_ids(
+                        #     base_event_ids,
+                        #     start_millis=start_millis,
+                        #     end_millis=end_millis,
+                        #     correlation=correlation,
+                        #     aggregated=aggregated,
+                        #     base=base,
+                        #     action=action,
+                        #     recurse=recurse,
+                        #     events_cache=events_cache,
+                        #     deduplicate=deduplicate
+                        # ):
+                        #     # if deduplicate and event_id in events_cache:
+                        #     #     pass
+                        #     # else:
+                        #     #     yield inner_event
+                        #     print(inner_event['eventId'])
+                        #     yield inner_event
+
+    def base_events(self, correlation_event, events_cache=None):
 
         if isinstance(correlation_event, dict):
             base_events_list = correlation_event.get('baseEventIds')
 
             if base_events_list is not None:
-                yield from self.retrieve_event_ids(base_events_list)
+                yield from self.retrieve_event_ids(base_events_list, events_cache=events_cache)
 
     def get_activelist_attributes(self, resource_id):
         variables = {
