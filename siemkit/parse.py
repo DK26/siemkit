@@ -14,6 +14,7 @@
 
 from typing import Any
 from typing import Tuple
+from typing import Union
 from collections import deque
 import datetime
 import re
@@ -143,7 +144,10 @@ def size(size_string: str) -> int:
     return hfilesize.FileSize(size_string)
 
 
-def boolean(bool_string: str) -> bool:
+def boolean(bool_string: Union[str, bool]) -> bool:
+
+    if type(bool_string, bool):
+        return bool_string
 
     bool_string = bool_string.strip().lower()
     return bool_string in {
