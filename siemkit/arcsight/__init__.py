@@ -210,18 +210,12 @@ class Esm:
             recurse=False,
             events_cache=None,
             deduplicate=True,
-            level=0
+            limit=-1,
+            debug_recurse_level=0
     ):
 
         if events_cache is None:
             events_cache = {}
-
-        # Done: If deduplication is enabled, skip already cached IDs
-        # Done: If event is already cached, do not request, just yield from cache.
-        # Done: The remaining should be added to a single future re-request (recursive mode)
-        # Done: Cache newly retrieved events (recursive mode)
-        # Done: Yield event if its type allowed.
-        # Done: Recurse on event IDs from base (if recurse==True).
 
         def unpack_ids(event_ids_):
             for event_id_ in event_ids_:
@@ -238,10 +232,10 @@ class Esm:
                 if event_id_ not in events_cache:
                     yield event_id_
 
-        def cached_event_ids(event_ids_):
-            for event_id_ in event_ids_:
-                if event_id_ in events_cache:
-                    yield event_id_
+        # def cached_event_ids(event_ids_):
+        #     for event_id_ in event_ids_:
+        #         if event_id_ in events_cache:
+        #             yield event_id_
 
         unpacked_event_ids = list(unpack_ids(event_ids))
         if deduplicate:
@@ -291,9 +285,14 @@ class Esm:
 
             if event_type is not None:
                 if event_type in retrieve_types:
+
                     # print(f"Current level {level} | Event ID: {event_id} | Cache: {events_cache.keys()}
                     # | To Retrieve: {retrieve_event_ids}")
+
+                    if limit == 0:
+                        return
                     yield event
+                    limit -= 1
 
                 if recurse:
                     base_event_ids = event.get('baseEventIds')
@@ -309,7 +308,8 @@ class Esm:
                             recurse=recurse,
                             events_cache=events_cache,
                             deduplicate=deduplicate,
-                            level=level + 1
+                            limit=limit,
+                            debug_recurse_level=debug_recurse_level + 1
                         )
 
     def base_events(self, correlation_event, events_cache=None):
