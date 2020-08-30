@@ -146,7 +146,7 @@ def size(size_string: str) -> int:
 
 def boolean(bool_string: Union[str, bool]) -> bool:
 
-    if type(bool_string, bool):
+    if isinstance(bool_string, bool):
         return bool_string
 
     bool_string = bool_string.strip().lower()
