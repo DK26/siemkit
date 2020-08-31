@@ -158,7 +158,7 @@ def boolean(bool_string: Union[str, bool]) -> bool:
         'power up', 'alive', 'live', 'lives', 'contain', 'contained', 'insert', 'inserted', 'assign', 'assigned',
         'import', 'imported', 'extract', 'extracted', 'promote', 'promoted', 'acknowledge', 'acknowledged',
         'affirmative', 'happy', 'positive', 'select', 'selected', 'matter', 'important', 'done', 'load', 'loaded',
-        'do', 'perform', 'save', 'saved', 'load', 'loaded', 'reload'
+        'do', 'perform', 'save', 'saved', 'load', 'loaded', 'reload', 'get'
     }
 
 
