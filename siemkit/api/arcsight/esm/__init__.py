@@ -17,6 +17,8 @@ from abc import ABC
 from abc import abstractmethod
 from typing import Tuple
 
+from . import v72
+
 
 class ArcSightUri(ABC):
 

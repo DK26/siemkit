@@ -25,6 +25,8 @@ from siemkit.file import open
 from siemkit import adaptors
 from siemkit.hash import crc32_file
 
+# ToDo: Create a dict class with context manager states control like our CommonEvent class
+
 
 class FileTracker:
 

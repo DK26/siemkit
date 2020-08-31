@@ -12,13 +12,17 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
+from collections.abc import Sequence
 from typing import Generator
+from types import GeneratorType
+from random import randint
+from random import choice
 
 from siemkit.event import Cef
 from siemkit.time import sleep
 from siemkit import random
 from siemkit import generate
-from random import randint
+from siemkit import parse
 
 
 def random_number(start_range: int = None, end_range: int = None, amount: int = 1, event: Cef = None) \
@@ -61,7 +65,7 @@ def fake_ip_scan(event: Cef = None) -> Generator[Cef, None, None]:
         1. Pick a random attacker IP address between 172.16.0.1 - 172.16.0.254
         2. Scan addresses 192.168.0.1 - 192.168.0.10
         3. Pick a random victim IP address between 192.168.0.1 - 192.168.0.10
-        4. Wait 10 seconds
+        4. Wait a random time from 10 to 25 seconds
         5. Successful Telnet connection to the random victim address (3)
 
     :param event: Optional CEF event to work with. The CEF original state is kept protected.
@@ -86,7 +90,7 @@ def fake_ip_scan(event: Cef = None) -> Generator[Cef, None, None]:
                 event.destinationAddress = fake_scan_addresses.pop()
                 yield event
 
-        sleep(seconds=10)
+        sleep(parse.timedelta("from 10 seconds to 25 seconds"))
 
         print("Simulating fake successful Telnet connection . . .")
         with event:
@@ -96,3 +100,38 @@ def fake_ip_scan(event: Cef = None) -> Generator[Cef, None, None]:
             yield event
 
     print("Done simulating.")
+
+
+def process_random_value(value_):
+
+    if isinstance(value_, GeneratorType):
+        return process_random_value(next(value_))
+
+    elif callable(value_):
+        return process_random_value(value_())
+
+    elif not isinstance(value_, str) and isinstance(value_, Sequence):
+
+        if len(value_) == 2 and callable(value_[0]) and isinstance(value_[1], dict):
+            return process_random_value(value_[0](**value_[1]))
+
+        else:
+            return choice(value_)
+    else:
+        return value_
+
+
+# ToDo: Remember last time of event generation and use as `start_time` where now is `end_time`, for `random.time`
+def random_event(event=None, amount=1,  **fields):
+
+    if event is None:
+        event = Cef()
+
+    for _ in range(amount):
+
+        with event:
+
+            for key, value in fields.items():
+                event[key] = process_random_value(value)
+
+            yield event

@@ -35,6 +35,8 @@ http_request_module = RequestsModule(requests)
 urllib3.disable_warnings()
 
 
+# ToDo: Separate event ID generator from getter(?)
+# ToDo: If correlation event, yield base_events(?)
 class Esm:
 
     def __init__(
@@ -155,7 +157,10 @@ class Esm:
 
         return response
 
-    def get_event_ids(self, *event_ids, start_millis='-1', end_millis='-1'):
+    # def get_event_ids(self, *event_ids, start_millis='-1', end_millis='-1'):
+    #     return list(self.retrieve_event_ids(*event_ids, start_millis=start_millis, end_millis=end_millis))
+
+    def _retrieve_event_ids(self, *event_ids, start_millis='-1', end_millis='-1'):
 
         def extract_ids():
             for event_id in event_ids:
@@ -193,6 +198,161 @@ class Esm:
 
         return simplified_cef_events(response)
 
+    def retrieve_event_ids(
+            self,
+            *event_ids,
+            start_millis='-1',
+            end_millis='-1',
+            correlation=True,
+            aggregated=True,
+            base=True,
+            action=True,
+            sub_events=False,
+            events_cache=None,
+            deduplicate=True,
+            limit=-1,
+            debug_recurse_level=0
+    ):
+
+        if events_cache is None:
+            events_cache = {}
+
+        def unpack_ids(event_ids_):
+            for event_id_ in event_ids_:
+                if isinstance(event_id_, int):
+                    yield event_id_
+                elif isinstance(event_id_, str):
+                    yield int(event_id_)
+                elif isinstance(event_id_, Iterable):
+                    for id_ in event_id_:
+                        yield int(id_)
+
+        def new_event_ids(event_ids_):
+            for event_id_ in event_ids_:
+                if event_id_ not in events_cache:
+                    yield event_id_
+
+        # def cached_event_ids(event_ids_):
+        #     for event_id_ in event_ids_:
+        #         if event_id_ in events_cache:
+        #             yield event_id_
+
+        unpacked_event_ids = list(unpack_ids(event_ids))
+        if deduplicate:
+            # Only new event IDs -- For recursive use
+            event_ids = new_event_ids(unpacked_event_ids)
+        else:
+            event_ids = unpacked_event_ids
+
+        retrieve_types = set()
+
+        if correlation:
+            retrieve_types.add('CORRELATION')
+        if aggregated:
+            retrieve_types.add('AGGREGATED')
+        if base:
+            retrieve_types.add('BASE')
+        if action:
+            retrieve_types.add('ACTION')
+
+        # # Unload from cache
+        # if not deduplicate:
+        #     for event_id in cached_event_ids(event_ids):
+        #         cached_event = events_cache.get(event_id)
+        #         if cached_event is not None:
+        #             cached_event_type = cached_event.get('type')
+        #             if cached_event_type in retrieve_types:
+        #                 input("From Cache:")
+        #                 yield cached_event
+
+        # New events to retrieve
+        retrieve_event_ids = list(new_event_ids(event_ids))
+        # input(f"Cache: {events_cache.keys()} | To Retrieve: {retrieve_event_ids}")
+
+        for event in self._retrieve_event_ids(
+                retrieve_event_ids,
+                start_millis=start_millis,
+                end_millis=end_millis
+        ):
+
+            event_id = event.get('eventId')
+            event_type = event.get('type')
+
+            if event_id in events_cache:
+                if deduplicate:
+                    continue
+            events_cache[event_id] = event  # Store in cache
+
+            if event_type is not None:
+                if event_type in retrieve_types:
+
+                    # print(f"Current level {level} | Event ID: {event_id} | Cache: {events_cache.keys()}
+                    # | To Retrieve: {retrieve_event_ids}")
+
+                    if limit == 0:
+                        return
+                    yield event
+                    limit -= 1
+
+                if sub_events:
+                    base_event_ids = event.get('baseEventIds')
+                    if base_event_ids:
+                        yield from self.retrieve_event_ids(
+                            [base_event_id for base_event_id in base_event_ids if base_event_id not in events_cache or (deduplicate and base_event_id not in retrieve_event_ids)],
+                            start_millis=start_millis,
+                            end_millis=end_millis,
+                            correlation=correlation,
+                            aggregated=aggregated,
+                            base=base,
+                            action=action,
+                            sub_events=sub_events,
+                            events_cache=events_cache,
+                            deduplicate=deduplicate,
+                            limit=limit,
+                            debug_recurse_level=debug_recurse_level + 1
+                        )
+
+    def base_events(self, correlation_event, events_cache=None):
+
+        if isinstance(correlation_event, dict):
+            base_events_list = correlation_event.get('baseEventIds')
+
+            if base_events_list is not None:
+                yield from self.retrieve_event_ids(base_events_list, events_cache=events_cache)
+
+    def get_activelist_attributes(self, resource_id):
+        variables = {
+            'uuid': resource_id
+        }
+        variables.update(self.variables)  # Get the token
+
+        response = self.uri(
+            ActiveListApiEnum.FIND_BY_UUID, variables
+        )
+
+        if response.status_code() != 200:
+            raise Exception(f"(Response {response.status_code()}) "
+                            f"Could not retrieve resource ID '{resource_id}'.")
+
+        return response.json()['act.findByUUIDResponse']['act.return']
+
+    def get_activelist_columns(self, resource_id):
+        return self.get_activelist_attributes(resource_id)['fieldNames']
+
+    def get_activelist_fields(self, resource_id):
+
+        response_json = self.get_activelist_attributes(resource_id)
+
+        result = {}
+
+        for index, field in enumerate(response_json['fieldNames']):
+            result[field] = {
+                'key': response_json['keyFields'][index],
+                'type': response_json['fieldTypes'][index]
+            }
+
+        return result
+
     def get_activelist(self, resource_id):
 
         variables = {
@@ -215,6 +375,36 @@ class Esm:
 
         return entries
 
+    def add_activelist_entries(self, resource_id, entries):
+
+        if not entries:
+            return
+
+        if isinstance(entries, dict):
+            columns = entries.get('_columns_order')
+        elif not isinstance(entries, str) and hasattr(entries, '__getitem__'):
+            columns = entries[0].get('_columns_order')
+        else:
+            raise TypeError(f"Illegal entries object: {entries}")
+
+        if columns is None:
+            columns = self.get_activelist_columns(resource_id)
+
+        variables = {
+            'resource_id': resource_id,
+            'columns': columns,
+            'entries': entries
+        }
+        variables.update(self.variables)  # Get the token
+
+        response = self.uri(
+            ActiveListApiEnum.ADD_ENTRIES, variables
+        )
+
+        if response.status_code() != 204:
+            raise Exception(f"(Response {response.status_code()}) "
+                            f"Could not add entries to resource ID '{resource_id}'.")
+
     def delete_activelist_entries(self, resource_id, entries):
 
         # columns = self._activelist_columns.get(resource_id)
@@ -226,11 +416,14 @@ class Esm:
             return
 
         if isinstance(entries, dict):
-            columns = entries['_columns_order']
+            columns = entries.get('_columns_order')
         elif not isinstance(entries, str) and hasattr(entries, '__getitem__'):
-            columns = entries[0]['_columns_order']
+            columns = entries[0].get('_columns_order')
         else:
             raise TypeError(f"Illegal entries object: {entries}")
+
+        if columns is None:
+            columns = self.get_activelist_columns(resource_id)
 
         variables = {
             'resource_id': resource_id,

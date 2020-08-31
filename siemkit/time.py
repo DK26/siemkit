@@ -166,10 +166,10 @@ class LdapTimestamp(Timestamp):
         zulu_time_zone = '.0Z'
 
         return (
-                datetime_
-                    .replace(tzinfo=tz)
-                    .astimezone(tz=timezone.utc)
-                    .strftime("%Y%m%d%H%M%S") + zulu_time_zone
+            datetime_
+                .replace(tzinfo=tz)
+                .astimezone(tz=timezone.utc)
+                .strftime("%Y%m%d%H%M%S") + zulu_time_zone
         )
 
     @classmethod
