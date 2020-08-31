@@ -207,7 +207,7 @@ class Esm:
             aggregated=True,
             base=True,
             action=True,
-            recurse=False,
+            sub_events=False,
             events_cache=None,
             deduplicate=True,
             limit=-1,
@@ -294,7 +294,7 @@ class Esm:
                     yield event
                     limit -= 1
 
-                if recurse:
+                if sub_events:
                     base_event_ids = event.get('baseEventIds')
                     if base_event_ids:
                         yield from self.retrieve_event_ids(
@@ -305,7 +305,7 @@ class Esm:
                             aggregated=aggregated,
                             base=base,
                             action=action,
-                            recurse=recurse,
+                            sub_events=sub_events,
                             events_cache=events_cache,
                             deduplicate=deduplicate,
                             limit=limit,
