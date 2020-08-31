@@ -151,8 +151,8 @@ def boolean(bool_string: Union[str, bool]) -> bool:
 
     bool_string = bool_string.strip().lower()
     return bool_string in {
-        't', 'true', 'yes', 'y', 'ok', 'on', '1', '+', 'v', 'x', 'k', 'some', 'active', 'activated', 'include', 'included',
-        'enable', 'enabled', 'allow', 'allowed', 'set', 'ready', 'process', 'processed', 'add', 'added',
+        't', 'true', 'yes', 'y', 'ok', 'on', '1', '+', 'v', 'x', 'k', '*', 'some', 'active', 'activated', 'include',
+        'included', 'enable', 'enabled', 'allow', 'allowed', 'set', 'ready', 'process', 'processed', 'add', 'added',
         'run', 'running', 'go', 'start', 'able', 'capable', 'possible', 'can', 'permit', 'permitted', 'show',
         'create', 'created', 'awake', 'wake', 'wakeup', 'wake-up', 'wake up', 'power', 'power-up', 'powerup',
         'power up', 'alive', 'live', 'lives', 'contain', 'contained', 'insert', 'inserted', 'assign', 'assigned',
