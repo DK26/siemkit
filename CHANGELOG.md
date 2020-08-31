@@ -101,7 +101,7 @@
     - `load`
     - `loaded`
     - `reload`
-    - `*`
+
 * Changed: `siemkit.parse.boolean` is now using a `set` type for value testing instead of a `tuple`
     - Also supports `bool` value type as argument
 
