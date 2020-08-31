@@ -723,6 +723,7 @@ class Cef(EventFormat):
         'destinationGeoLongitude': 'dlong',
         'sourceGeoLatitude': 'slat',
         'sourceGeoLongitude': 'slong',
+        'severity': 'deviceSeverity'
     }
 
     __default_keys = siemkit_data.words_set(__default_aliases)

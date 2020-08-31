@@ -12,6 +12,8 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
+# ToDo: Verify this: https://blackhattutorial.com/what-is-ldap-injection-and-how-to-prevent-it/
+
 from enum import IntFlag
 from enum import Enum
 from typing import Generator

@@ -12,7 +12,9 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
+
 from random import randint
+from random import uniform
 from random import getrandbits
 from random import choice
 
@@ -25,6 +27,8 @@ import os
 import threading
 from time import time
 from math import floor
+from datetime import datetime
+from datetime import timedelta as datetime_timedelta
 
 from .const import DOMAINS
 from .const import NAMES
@@ -46,12 +50,15 @@ def byte() -> int:
     return randint(0, 255)
 
 
-def compose_ip(
+def generate_ip(
         from_address: Union[IPv4Address, str] = '0.0.0.0',
         to_address: Union[IPv4Address, str] = '255.255.255.255',
         amount: int = 1) -> Generator[IPv4Address, None, None]:
 
-    for _ in range(amount):
+    for current_count in range(amount):
+
+        if current_count == amount:
+            break
 
         yield IPv4Address(
             randint(
@@ -61,47 +68,86 @@ def compose_ip(
         )
 
 
-def compose_domain(amount: int = 1) -> Generator[str, None, None]:
-    for _ in range(amount):
+def generate_domain(amount: int = 1) -> Generator[str, None, None]:
+
+    for current_count in range(amount):
+
+        if current_count == amount:
+            break
+
         yield choice(DOMAINS)
 
 
-def compose_url(amount: int = 1) -> Generator[str, None, None]:
+def generate_url(amount: int = 1) -> Generator[str, None, None]:
 
-    for _ in range(amount):
+    for current_count in range(amount):
+
+        if current_count == amount:
+            break
+
         yield (f"{enum_value(web.Protocol)}://{choice(DOMAINS)}/"
                f"{choice(NAMES).lower()}/{randint(0, 1000)}/"
                f"{choice(NAMES).lower()}?{choice(NAMES).lower()}={randint(0, 1000)}"
                f"&{choice(NAMES).lower()}={randint(0, 1000)}")
 
 
-def compose_email(amount: int = 1) -> Generator[str, None, None]:
-    for _ in range(amount):
+def generate_email(amount: int = 1) -> Generator[str, None, None]:
+
+    for current_count in range(amount):
+
+        if current_count == amount:
+            break
+
         yield f"{choice(NAMES).lower()}{randint(10, 80)}@{choice(DOMAINS)}"
 
 
-def compose_user(amount: int = 1) -> Generator[str, None, None]:
-    for _ in range(amount):
+def generate_user(amount: int = 1) -> Generator[str, None, None]:
+
+    for current_count in range(amount):
+
+        if current_count == amount:
+            break
+
         yield f"{choice(NAMES)}{choice(NAMES)}{randint(10, 80)}"
 
 
-def compose_md5(amount: int = 1) -> Generator[str, None, None]:
-    for _ in range(amount):
+def generate_md5(amount: int = 1) -> Generator[str, None, None]:
+
+    for current_count in range(amount):
+
+        if current_count == amount:
+            break
+
         yield hex(getrandbits(128))[2:]
 
 
-def compose_sha1(amount: int = 1) -> Generator[str, None, None]:
-    for _ in range(amount):
+def generate_sha1(amount: int = 1) -> Generator[str, None, None]:
+
+    for current_count in range(amount):
+
+        if current_count == amount:
+            break
+
         yield hex(getrandbits(160))[2:]
 
 
-def compose_enum_value(*enums: EnumMeta, amount: int = 1) -> Generator[object, None, None]:
-    for _ in range(amount):
+def generate_enum_value(*enums: EnumMeta, amount: int = 1) -> Generator[object, None, None]:
+
+    for current_count in range(amount):
+
+        if current_count == amount:
+            break
+
         yield choice(tuple(choice(enums))).value
 
 
-def compose_http_code(amount: int = 1) -> Generator[int, None, None]:
-    for _ in range(amount):
+def generate_http_code(amount: int = 1) -> Generator[int, None, None]:
+
+    for current_count in range(amount):
+
+        if current_count == amount:
+            break
+
         yield enum_value(
             web.HttpInformationalCode,
             web.HttpSuccessCode,
@@ -111,41 +157,75 @@ def compose_http_code(amount: int = 1) -> Generator[int, None, None]:
         )
 
 
-def compose_http_information_code(amount: int = 1) -> Generator[int, None, None]:
-    for _ in range(amount):
+def generate_http_information_code(amount: int = 1) -> Generator[int, None, None]:
+
+    for current_count in range(amount):
+
+        if current_count == amount:
+            break
+
         yield enum_value(web.HttpInformationalCode)
 
 
-def compose_http_success_code(amount: int = 1) -> Generator[int, None, None]:
-    for _ in range(amount):
+def generate_http_success_code(amount: int = 1) -> Generator[int, None, None]:
+
+    for current_count in range(amount):
+
+        if current_count == amount:
+            break
+
         yield enum_value(web.HttpSuccessCode)
 
 
-def compose_http_redirection_code(amount: int = 1) -> Generator[int, None, None]:
-    for _ in range(amount):
+def generate_http_redirection_code(amount: int = 1) -> Generator[int, None, None]:
+
+    for current_count in range(amount):
+
+        if current_count == amount:
+            break
+
         yield enum_value(web.HttpRedirectionCode)
 
 
-def compose_http_error_code(amount: int = 1) -> Generator[int, None, None]:
-    for _ in range(amount):
+def generate_http_error_code(amount: int = 1) -> Generator[int, None, None]:
+
+    for current_count in range(amount):
+
+        if current_count == amount:
+            break
+
         yield enum_value(
             web.HttpClientErrorCode,
             web.HttpServerErrorCode
         )
 
 
-def compose_http_client_error_code(amount: int = 1) -> Generator[int, None, None]:
-    for _ in range(amount):
+def generate_http_client_error_code(amount: int = 1) -> Generator[int, None, None]:
+
+    for current_count in range(amount):
+
+        if current_count == amount:
+            break
+
         yield enum_value(web.HttpClientErrorCode)
 
 
-def compose_http_server_error_code(amount: int = 1) -> Generator[int, None, None]:
-    for _ in range(amount):
+def generate_http_server_error_code(amount: int = 1) -> Generator[int, None, None]:
+
+    for current_count in range(amount):
+
+        if current_count == amount:
+            break
+
         yield enum_value(web.HttpServerErrorCode)
 
 
-def compose_flag_value(*enums: EnumMeta, amount: int = 1, flags: int = 1) -> Generator[int, None, None]:
-    for _ in range(amount):
+def generate_flag_value(*enums: EnumMeta, amount: int = 1, flags: int = 1) -> Generator[int, None, None]:
+
+    for current_count in range(amount):
+
+        if current_count == amount:
+            break
 
         random_flag = 0
 
@@ -155,28 +235,89 @@ def compose_flag_value(*enums: EnumMeta, amount: int = 1, flags: int = 1) -> Gen
         yield random_flag
 
 
-def compose_port(from_port: int = 0, to_port: int = 65535, amount: int = 1) -> Generator[int, None, None]:
+def generate_port(from_port: int = 0, to_port: int = 65535, amount: int = 1) -> Generator[int, None, None]:
 
     if not (0 <= from_port <= to_port <= 65535):
         raise ValueError("Illegal port range. Legal port range 0-65535.")
 
-    for _ in range(amount):
+    for current_count in range(amount):
+
+        if current_count == amount:
+            break
+
         yield randint(from_port, to_port)
 
 
+def generate_timedelta(
+        start_timedelta: datetime_timedelta,
+        end_timedelta: datetime_timedelta,
+        amount: int = 1
+) -> Generator[datetime_timedelta, None, None]:
+
+    for current_count in range(amount):
+
+        if current_count == amount:
+            break
+
+        yield datetime_timedelta(
+            seconds=uniform(
+                start_timedelta.total_seconds(),
+                end_timedelta.total_seconds()
+            )
+        )
+
+
+def generate_time(
+        start_time: datetime = None,
+        end_time: datetime = None,
+        gap: datetime_timedelta = None,
+        amount: int = 1
+) -> Generator[datetime, None, None]:
+
+    if end_time is None and isinstance(start_time, datetime) and isinstance(gap, datetime_timedelta):
+        # Gap forward in time
+        end_time = start_time + gap
+
+    elif start_time is None and isinstance(end_time, datetime) and isinstance(gap, datetime_timedelta):
+        # Gap back in time
+        start_time = end_time - gap
+
+    elif start_time is None and end_time is None:
+
+        # Default
+
+        end_time = datetime.now()
+
+        if gap is None:
+            start_time = end_time - datetime_timedelta(minutes=1)
+        else:
+            start_time = end_time - gap
+
+    for current_count in range(amount):
+
+        if current_count == amount:
+            break
+
+        yield datetime.fromtimestamp(
+            uniform(
+                start_time.timestamp(), end_time.timestamp()
+            )
+        )
+
+
 def enum_value(*enums: EnumMeta) -> object:
-    return next(compose_enum_value(*enums, amount=1))
+    return next(generate_enum_value(*enums, amount=1))
 
 
 def flag_value(*enums: EnumMeta, flags=1) -> int:
-    return next(compose_flag_value(*enums, flags=flags))
+    return next(generate_flag_value(*enums, flags=flags))
 
 
 def ip(from_address: Union[IPv4Address, str] = '0.0.0.0',
        to_address: Union[IPv4Address, str] = '255.255.255.255') -> IPv4Address:
 
     return next(
-        compose_ip(
+        generate_ip(
             from_address=from_address,
             to_address=to_address
         )
@@ -186,7 +327,7 @@ def ip(from_address: Union[IPv4Address, str] = '0.0.0.0',
 def port(from_port: int = 0, to_port: int = 65535) -> int:
 
     return next(
-        compose_port(
+        generate_port(
             from_port=from_port,
             to_port=to_port
         )
@@ -194,53 +335,60 @@ def port(from_port: int = 0, to_port: int = 65535) -> int:
 
 
 def md5() -> str:
-    return next(compose_md5())
+    return next(generate_md5())
 
 
 def sha1() -> str:
-    return next(compose_sha1())
+    return next(generate_sha1())
 
 
 def email() -> str:
-    return next(compose_email())
+    return next(generate_email())
 
 
 def url() -> str:
-    return next(compose_url())
+    return next(generate_url())
 
 
 def user() -> str:
-    return next(compose_user())
+    return next(generate_user())
 
 
 def domain() -> str:
-    return next(compose_domain())
+    return next(generate_domain())
 
 
 def http_code() -> int:
-    return next(compose_http_code())
+    return next(generate_http_code())
 
 
 def http_information_code() -> int:
-    return next(compose_http_information_code())
+    return next(generate_http_information_code())
 
 
 def http_success_code() -> int:
-    return next(compose_http_success_code())
+    return next(generate_http_success_code())
 
 
 def http_error_code() -> int:
-    return next(compose_http_error_code())
+    return next(generate_http_error_code())
 
 
 def http_client_error_code() -> int:
-    return next(compose_http_client_error_code())
+    return next(generate_http_client_error_code())
 
 
 def http_redirection_code() -> int:
-    return next(compose_http_redirection_code())
+    return next(generate_http_redirection_code())
 
 
 def http_server_error_code() -> int:
-    return next(compose_http_server_error_code())
+    return next(generate_http_server_error_code())
 
+
+def time(start_time: datetime = None, end_time: datetime = None, gap: datetime_timedelta = None) -> datetime:
+    return next(generate_time(start_time, end_time, gap))
+
+
+def timedelta(start_timedelta: datetime_timedelta, end_timedelta: datetime_timedelta) -> datetime_timedelta:
+    return next(generate_timedelta(start_timedelta, end_timedelta))

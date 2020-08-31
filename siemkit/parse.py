@@ -13,9 +13,13 @@
 #   limitations under the License.
 
 from typing import Any
+from typing import Tuple
+from typing import Union
 from collections import deque
 import datetime
 import re
+
+from siemkit import random
 
 import pytimeparse
 # * pytimeparse - MIT License
@@ -31,6 +35,27 @@ import dateparser
 # * dateparser - BSD 3-Clause License
 #     source: https://github.com/scrapinghub/dateparser
 #     license: https://github.com/scrapinghub/dateparser/blob/master/LICENSE
+
+
+default = {
+    'parse_true': {
+        't', 'true', 'yes', 'y', 'ok', 'on', '1', '+', 'v', 'x', 'k', 'some', 'active', 'activated', 'include',
+        'included', 'enable', 'enabled', 'allow', 'allowed', 'set', 'ready', 'process', 'processed', 'add', 'added',
+        'run', 'running', 'go', 'start', 'able', 'capable', 'possible', 'can', 'permit', 'permitted', 'show',
+        'create', 'created', 'awake', 'wake', 'wakeup', 'wake-up', 'wake up', 'power', 'power-up', 'powerup',
+        'power up', 'alive', 'live', 'lives', 'contain', 'contained', 'insert', 'inserted', 'assign', 'assigned',
+        'import', 'imported', 'extract', 'extracted', 'promote', 'promoted', 'acknowledge', 'acknowledged',
+        'affirmative', 'happy', 'positive', 'select', 'selected', 'matter', 'important', 'done', 'load', 'loaded',
+        'do', 'perform', 'save', 'saved', 'load', 'loaded', 'reload', 'get'
+    }
+}
+
+
+def time_range(time_string: str) -> Tuple[datetime.datetime, datetime.datetime]:
+    assigned_range = re.match(r'^.*?between\s(.*?)\sand\s(.*?$)', time_string, flags=re.IGNORECASE)
+    if assigned_range:
+        from_time_string, to_time_string = assigned_range.groups()
+        return dateparser.parse(from_time_string), dateparser.parse(to_time_string)
 
 
 def time(time_string: str) -> datetime.datetime:
@@ -53,11 +78,27 @@ def time(time_string: str) -> datetime.datetime:
         Results in a `datetime` object set to 1 day before
          the current time of execution.
 
+    A random datetime can also be acquired using `between` and `and` words:
+        "between 3 days ago and 2 days ago"
+        "between yesterday and today"
+        "between yesterday and now"
+        "between 1/1/2020 and 31/12/2023"
+
 
     :param time_string:
     :return: datetime object
     """
-    return dateparser.parse(time_string)
+    datetime_range = time_range(time_string)
+    if datetime_range:
+        from_time_string, to_time_string = datetime_range
+        result = random.time(
+            from_time_string,
+            to_time_string
+        )
+    else:
+        result = dateparser.parse(time_string)
+
+    return result
 
 
 def timedelta(time_delta_string: str) -> datetime.timedelta:
@@ -72,11 +113,31 @@ def timedelta(time_delta_string: str) -> datetime.timedelta:
         Results in:
          datetime.timedelta(days=15, seconds=45015)
 
+        Words like `every` and `and` are ignored.
+
+        A random timedelta can also be acquired using `from` and `to` words:
+            "from every 1 second to 2 minutes"
+            "from 5 minutes to 1 hour"
+
+        This will produce a random timedelta between `1 second` to `2 minutes`.
+
     :param time_delta_string:
     :return: timedelta object
     """
     time_delta_string = time_delta_string.lower().replace("and", '').replace('every', '')
-    return datetime.timedelta(seconds=pytimeparse.parse(time_delta_string))
+
+    assigned_range = re.match(r'^.*?from\s(.*?)\sto\s(.*?$)', time_delta_string)
+
+    if assigned_range:
+        from_time_string, to_time_string = assigned_range.groups()
+        result = random.timedelta(
+            datetime.timedelta(seconds=pytimeparse.parse(from_time_string)),
+            datetime.timedelta(seconds=pytimeparse.parse(to_time_string))
+        )
+    else:
+        result = datetime.timedelta(seconds=pytimeparse.parse(time_delta_string))
+
+    return result
 
 
 def size(size_string: str) -> int:
@@ -97,10 +158,13 @@ def size(size_string: str) -> int:
     return hfilesize.FileSize(size_string)
 
 
-def boolean(bool_string: str) -> bool:
+def boolean(bool_string: Union[str, bool]) -> bool:
+
+    if isinstance(bool_string, bool):
+        return bool_string
 
     bool_string = bool_string.strip().lower()
-    return bool_string in ('t', 'true', 'yes', 'ok', 'on', '1', 'some')
+    return bool_string in default['parse_true']
 
 
 def variable(var_string: str, var_dict: dict) -> Any:

@@ -83,7 +83,9 @@ def tcp(host: str, port: int, payload: Any, repeat: int = 1, timeout: int = 3) -
 
         for iteration in range(repeat):
             for unpacked_item in unpack(payload):
-                sent_bytes += session.write(to_bytes(unpacked_item))
+                bytes_payload = to_bytes(unpacked_item)
+                session.write(bytes_payload)
+                sent_bytes += len(bytes_payload)
 
     return sent_bytes
 
