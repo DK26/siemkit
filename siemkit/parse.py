@@ -37,6 +37,20 @@ import dateparser
 #     license: https://github.com/scrapinghub/dateparser/blob/master/LICENSE
 
 
+default = {
+    'parse_true': {
+        't', 'true', 'yes', 'y', 'ok', 'on', '1', '+', 'v', 'x', 'k', 'some', 'active', 'activated', 'include',
+        'included', 'enable', 'enabled', 'allow', 'allowed', 'set', 'ready', 'process', 'processed', 'add', 'added',
+        'run', 'running', 'go', 'start', 'able', 'capable', 'possible', 'can', 'permit', 'permitted', 'show',
+        'create', 'created', 'awake', 'wake', 'wakeup', 'wake-up', 'wake up', 'power', 'power-up', 'powerup',
+        'power up', 'alive', 'live', 'lives', 'contain', 'contained', 'insert', 'inserted', 'assign', 'assigned',
+        'import', 'imported', 'extract', 'extracted', 'promote', 'promoted', 'acknowledge', 'acknowledged',
+        'affirmative', 'happy', 'positive', 'select', 'selected', 'matter', 'important', 'done', 'load', 'loaded',
+        'do', 'perform', 'save', 'saved', 'load', 'loaded', 'reload', 'get'
+    }
+}
+
+
 def time_range(time_string: str) -> Tuple[datetime.datetime, datetime.datetime]:
     assigned_range = re.match(r'^.*?between\s(.*?)\sand\s(.*?$)', time_string, flags=re.IGNORECASE)
     if assigned_range:
@@ -150,16 +164,7 @@ def boolean(bool_string: Union[str, bool]) -> bool:
         return bool_string
 
     bool_string = bool_string.strip().lower()
-    return bool_string in {
-        't', 'true', 'yes', 'y', 'ok', 'on', '1', '+', 'v', 'x', 'k', 'some', 'active', 'activated', 'include',
-        'included', 'enable', 'enabled', 'allow', 'allowed', 'set', 'ready', 'process', 'processed', 'add', 'added',
-        'run', 'running', 'go', 'start', 'able', 'capable', 'possible', 'can', 'permit', 'permitted', 'show',
-        'create', 'created', 'awake', 'wake', 'wakeup', 'wake-up', 'wake up', 'power', 'power-up', 'powerup',
-        'power up', 'alive', 'live', 'lives', 'contain', 'contained', 'insert', 'inserted', 'assign', 'assigned',
-        'import', 'imported', 'extract', 'extracted', 'promote', 'promoted', 'acknowledge', 'acknowledged',
-        'affirmative', 'happy', 'positive', 'select', 'selected', 'matter', 'important', 'done', 'load', 'loaded',
-        'do', 'perform', 'save', 'saved', 'load', 'loaded', 'reload', 'get'
-    }
+    return bool_string in default['parse_true']
 
 
 def variable(var_string: str, var_dict: dict) -> Any:
