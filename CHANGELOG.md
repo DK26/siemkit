@@ -25,7 +25,9 @@
 * Improved ArcSight ESM API `retrieve_event_ids()` generator to be able to filter event types and retrieve recursively
 * Fixed `siemkit.send.tcp` function
 * Added `siemkit.event.Cef` aliases for `severity` & `deviceSeverity` are now both acceptable
-* Added `siemkit.parse.boolean` new valid values for `True`:
+* Created a `default` settings dictionary for the `siemkit.parse` library
+    - Included: `parse_true` key holding a set of words to parse as `True`
+* Added `siemkit.parse.boolean` (based on `default['parse_true']`) new valid values for `True`:
     - `active`
     - `activated`
     - `include`
