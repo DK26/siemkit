@@ -21,8 +21,13 @@ import json
 
 from collections import deque
 from enum import Enum
+from ipaddress import IPv4Address
+
+
 from . import data as siemkit_data
-from collections import ChainMap
+from .time import to_timestamp
+from .time import TimeType
+from . import parse
 
 # ToDo: 1. Timeformats -> Have the time.py to either specify a format to parse, turn into a timestamp,
 #  or have the 'auto' string for using the timeparse library.
@@ -44,7 +49,44 @@ from collections import ChainMap
 
 # ToDo: Manual Time Format with Declared fields as time -> Directed for performance
 # ToDo: Automatic Time Format detection -> Comfortable but requires an external library + performance penalty.
-# ToDo: Consider a syntax sugar for this: for _ in range(3000): _ = send.udp("127.0.0.1", 514, bytes(random_event(event)))  # Random certain aspects of the event.
+# Done: Consider a syntax sugar for this: for _ in range(3000): _ = send.udp("127.0.0.1", 514, bytes(random_event(event)))  # Random certain aspects of the event.
+
+
+def smart_value(key, value):
+
+    empty_values = (
+        -2147483648,
+        -9223372036854775808,
+        5e-324,
+        -128
+    )
+
+    time_fields = (
+        'Time'
+        'Date',
+        'Date1',
+        'Date2',
+        'Date3',
+        'Date4',
+        'Date5',
+        'Date6'
+    )
+
+    if value in empty_values:
+        return
+    elif key.endswith('Address'):
+        return IPv4Address(value)
+    elif key.endswith(time_fields):
+        # if isinstance(value, str):
+        #     try:
+        #         value = int(value)
+        #         return value
+        #     except ValueError:
+        #         return parse.time(value)
+        # else:
+        #     return value
+        return parse.time(str(value))
+
 
 class CefSeverity(str, Enum):
 
@@ -279,10 +321,34 @@ class EventFormat(dict):
     def from_timestamp():
         pass
 
-    def __init__(self, format_, version, headers, data=None, raw=b'', aliases=None, fields=None, warnings=False,
-                 key_assertion=None, value_assertion=None, deserializer=None, serializer=None, syslog_header=None,
-                 timestamp_fields=None, to_timestamp=None, from_timestamp=None, allow_empty_keys=False, outputs=None,
-                 tcp=None, udp=None, file=None, size_limit=1024, optimized_state_levels=5):
+    def __init__(
+            self,
+            format_,
+            version,
+            headers,
+            data=None,
+            raw=b'',
+            aliases=None,
+            fields=None,
+            warnings=False,
+            key_assertion=None,
+            value_assertion=None,
+            deserializer=None,
+            serializer=None,
+            syslog_header=None,
+            timestamp_fields=None,
+            to_timestamp=None,
+            from_timestamp=None,
+            allow_empty_keys=False,
+            outputs=None,
+            tcp=None,
+            udp=None,
+            file=None,
+            size_limit=1024,
+            optimized_state_levels=5,
+            filter_out=None,
+            filter_in=None
+    ):
 
         """
             format_             - Format name, as will be presented in serialized form (CEF, LEEF, etc.)
@@ -340,6 +406,9 @@ class EventFormat(dict):
 
         if fields is None:
             fields = set()
+
+        self.__filter_out = filter_out  # Not those -> black list
+        self.__filter_in = filter_in    # Only those -> white list
 
         # Keep the dictionary outside of the object's scope in order to avoid paradox when setting/getting data.
         EventFormat.__aliases[id(self)] = aliases
@@ -760,6 +829,230 @@ class Cef(EventFormat):
         'name',
         'deviceSeverity'
     })
+
+    __time_fields = (
+        'Time'
+        'Date',
+        'Date1',
+        'Date2',
+        'Date3',
+        'Date4',
+        'Date5',
+        'Date6'
+    )
+
+    __empty_values = (
+        -9223372036854775808,
+        -2147483648,
+        5e-324,
+        -128
+    )
+
+    __arcsight_special_fields = {
+        'agentMutable',
+        'agentAddress',
+        'agentAddressAsBytes',
+        'agentAssetId',
+        'agentAssetLocalId',
+        'agentAssetName',
+        'agentHostName',
+        'agentMacAddress',
+        'agentTranslatedAddress',
+        'agentZoneId',
+        'agentZoneIsModifiable',
+        'agentZoneManagerID',
+        'agentZoneReferenceID',
+        'agentZoneReferenceName',
+        'agentZoneReferenceString',
+        'agentZoneReferenceType',
+        'agentZoneUri',
+        'agentTimeZone',
+        'agentVersion',
+        'agentId',
+        'agentName',
+        'agentType',
+        'agentReceiptTime',
+        'agentSeverity',
+        'aggregatedEventCount',
+        'assetCriticality',
+        # 'baseEventCount',
+        'concentratorAgentsMutable',
+        'concentratorAgentsAddress',
+        'concentratorAgentsAddressAsBytes',
+        'concentratorAgentsAssetId',
+        'concentratorAgentsAssetLocalId',
+        'concentratorAgentsAssetName',
+        'concentratorAgentsHostName',
+        'concentratorAgentsMacAddress',
+        'concentratorAgentsTranslatedAddress',
+        'concentratorAgentsZoneId',
+        'concentratorAgentsZoneIsModifiable',
+        'concentratorAgentsZoneManagerID',
+        'concentratorAgentsZoneReferenceID',
+        'concentratorAgentsZoneReferenceName',
+        'concentratorAgentsZoneReferenceString',
+        'concentratorAgentsZoneReferenceType',
+        'concentratorAgentsZoneUri',
+        'concentratorAgentsTimeZone',
+        'concentratorAgentsVersion',
+        'concentratorAgentsId',
+        'concentratorAgentsName',
+        'concentratorAgentsType',
+        'concentratorDevicesMutable',
+        'concentratorDevicesAddress',
+        'concentratorDevicesAddressAsBytes',
+        'concentratorDevicesAssetId',
+        'concentratorDevicesAssetLocalId',
+        'concentratorDevicesAssetName',
+        'concentratorDevicesMacAddress',
+        'concentratorDevicesTranslatedAddress',
+        'concentratorDevicesZoneId',
+        'concentratorDevicesZoneIsModifiable',
+        'concentratorDevicesZoneManagerID',
+        'concentratorDevicesZoneReferenceID',
+        'concentratorDevicesZoneReferenceName',
+        'concentratorDevicesZoneReferenceString',
+        'concentratorDevicesZoneReferenceType',
+        'concentratorDevicesZoneUri',
+        'concentratorDevicesTimeZone',
+        'concentratorDevicesVersion',
+        'concentratorDevicesProduct',
+        'concentratorDevicesVendor',
+        'correlatedEventCount',
+        'deviceMutable',
+        # 'deviceAddress',
+        'deviceAddressAsBytes',
+        'deviceAssetId',
+        'deviceAssetLocalId',
+        # 'deviceAssetName',
+        'deviceMacAddress',
+        'deviceTranslatedAddress',
+        'deviceZoneId',
+        'deviceZoneIsModifiable',
+        'deviceZoneManagerID',
+        'deviceZoneReferenceID',
+        'deviceZoneReferenceName',
+        'deviceZoneReferenceString',
+        'deviceZoneReferenceType',
+        'deviceZoneUri',
+        'deviceTimeZone',
+        'deviceDirection',
+        'domainDate1',
+        'domainDate2',
+        'domainDate3',
+        'domainDate4',
+        'domainDate5',
+        'domainDate6',
+        'domainFp1',
+        'domainFp2',
+        'domainFp3',
+        'domainFp4',
+        'domainFp5',
+        'domainFp6',
+        'domainFp7',
+        'domainFp8',
+        'domainIpv4addr1',
+        'domainIpv4addr2',
+        'domainIpv4addr3',
+        'domainIpv4addr4',
+        'domainNumber1',
+        'domainNumber2',
+        'domainNumber3',
+        'domainNumber4',
+        'domainNumber5',
+        'domainNumber6',
+        'domainNumber7',
+        'domainNumber8',
+        'domainNumber9',
+        'domainNumber10',
+        'domainNumber11',
+        'domainNumber12',
+        'domainNumber13',
+        'eventAnnotationAuditTrail',
+        'eventAnnotationFlags',
+        'eventAnnotationModificationTime',
+        'eventAnnotationStageId',
+        'eventAnnotationStageIsModifiable',
+        'eventAnnotationStageManagerID',
+        'eventAnnotationStageReferenceID',
+        'eventAnnotationStageReferenceName',
+        'eventAnnotationStageReferenceString',
+        'eventAnnotationStageReferenceType',
+        'eventAnnotationStageUri',
+        'eventAnnotationStageUpdateTime',
+        'eventAnnotationVersion',
+        'eventAnnotationEndTime',
+        'eventAnnotationEventId',
+        'eventAnnotationManagerReceiptTime',
+        'eventId',
+        'finalDeviceMutable',
+        'finalDeviceAddress',
+        'finalDeviceAddressAsBytes',
+        'finalDeviceAssetId',
+        'finalDeviceAssetLocalId',
+        'finalDeviceAssetName',
+        'finalDeviceMacAddress',
+        'finalDeviceTranslatedAddress',
+        'finalDeviceZoneId',
+        'finalDeviceZoneIsModifiable',
+        'finalDeviceZoneManagerID',
+        'finalDeviceZoneReferenceID',
+        'finalDeviceZoneReferenceName',
+        'finalDeviceZoneReferenceString',
+        'finalDeviceZoneReferenceType',
+        'finalDeviceZoneUri',
+        'finalDeviceTimeZone',
+        'finalDeviceVersion',
+        'finalDeviceProduct',
+        'finalDeviceVendor',
+        'locality',
+        'managerId',
+        # 'managerReceiptTime',
+        'modelConfidence',
+        'originalAgentMutable',
+        'originalAgentAddress',
+        'originalAgentAddressAsBytes',
+        'originalAgentAssetId',
+        'originalAgentAssetLocalId',
+        'originalAgentAssetName',
+        'originalAgentHostName',
+        'originalAgentMacAddress',
+        'originalAgentTranslatedAddress',
+        'originalAgentZoneId',
+        'originalAgentZoneIsModifiable',
+        'originalAgentZoneManagerID',
+        'originalAgentZoneReferenceID',
+        'originalAgentZoneReferenceName',
+        'originalAgentZoneReferenceString',
+        'originalAgentZoneReferenceType',
+        'originalAgentZoneUri',
+        'originalAgentTimeZone',
+        'originalAgentVersion',
+        'originalAgentId',
+        'originalAgentName',
+        'originalAgentType',
+        'originator',
+        'persistence',
+        'sessionId',
+        'ttl',
+        'type',
+        'ruleThreadId',
+        'generatorId',
+        'generatorIsModifiable',
+        'generatorManagerID',
+        'generatorReferenceID',
+        'generatorReferenceName',
+        'generatorReferenceString',
+        'generatorReferenceType',
+        'generatorUri',
+        'categorySignificance',
+        'categoryOutcome',
+        'categoryObject',
+        'categoryDeviceGroup',
+        'categoryBehavior',
+        'categoryMutable',
+        'baseEventIds'
+    }
 
     @classmethod
     def default_keys(cls):

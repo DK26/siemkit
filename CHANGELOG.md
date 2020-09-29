@@ -1,3 +1,6 @@
+## Version 0.0.18-dev
+   - TBD
+    
 ## Version 0.0.17-dev
 * Added a random time generation `siemkit.random.time`
 * Added a random time delta generation `siemkit.random.timedelta`
