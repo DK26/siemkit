@@ -162,7 +162,7 @@ def map_images(html_content: str) -> dict:
     return images_map
 
 
-def create_mime_images(work_dir: str, images_map: dict) -> Generator[MIMEImage, None, None]:
+def mime_image_loader(work_dir: str, images_map: dict) -> Generator[MIMEImage, None, None]:
     for image_id, image_path in images_map.items():
         with open(os.path.join(work_dir, image_path), 'rb') as fs:
             mime_image = MIMEImage(fs.read())
@@ -325,7 +325,7 @@ class MultipartMimeMessage(MimeMessage):
             content = embed_images(content, images_map)
 
             # Load Images
-            image_loader = create_mime_images(self._work_dir, images_map)
+            image_loader = mime_image_loader(self._work_dir, images_map)
             attach_images(self.__smtp_multipart, image_loader)
 
         self.__smtp_multipart.attach(
