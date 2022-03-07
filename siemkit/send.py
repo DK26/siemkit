@@ -32,11 +32,10 @@ default = {
 
 
 def unpack(payload):
-
     if isinstance(payload, (str, bytes, bytearray)):
         yield payload
 
-    #elif isinstance(payload, Iterable) and isinstance(payload, (GeneratorType, list, tuple, set, deque)):
+    # elif isinstance(payload, Iterable) and isinstance(payload, (GeneratorType, list, tuple, set, deque)):
     elif isinstance(payload, Iterable) and not isinstance(payload, dict):
         for item in payload:
             for inner_item in unpack(item):
@@ -50,7 +49,6 @@ def unpack(payload):
 
 
 def to_bytes(payload: Any):
-
     if isinstance(payload, bytes):
         return payload
     elif isinstance(payload, str):
@@ -76,7 +74,6 @@ def to_bytes(payload: Any):
 
 
 def tcp(host: str, port: int, payload: Any, repeat: int = 1, timeout: int = 3) -> int:
-
     sent_bytes = 0
 
     with Telnet(host, port, timeout=timeout) as session:
@@ -91,7 +88,6 @@ def tcp(host: str, port: int, payload: Any, repeat: int = 1, timeout: int = 3) -
 
 
 def udp(host: str, port: int, payload: Any, repeat: int = 1, ttl: int = 32) -> int:
-
     sent_bytes = 0
 
     address = host, port
@@ -106,7 +102,6 @@ def udp(host: str, port: int, payload: Any, repeat: int = 1, ttl: int = 32) -> i
 
 
 def multicast(group: str, port: int, payload: Any, repeat: int = 1, ttl: int = 2) -> int:
-
     # REF: https://stackoverflow.com/questions/603852/how-do-you-udp-multicast-in-python
 
     if not ip_address(group).is_multicast:
@@ -126,7 +121,6 @@ def multicast(group: str, port: int, payload: Any, repeat: int = 1, ttl: int = 2
 
 
 def broadcast(port: int, payload: Any, repeat: int = 1, ttl: int = 1) -> int:
-
     # REF: https://gist.github.com/ninedraft/7c47282f8b53ac015c1e326fffb664b5
 
     sent_bytes = 0
@@ -160,7 +154,6 @@ def smtp(
         port=None,
         encoding='utf-8'
 ):
-
     if not isinstance(port, int):
 
         if ':' in server:

@@ -37,7 +37,7 @@ class Keyring(ABC):
 
 class CommonKeyring(Keyring):
     """
-    CommonKeyring gets one of the commonly keyring libraries which already implement:
+    CommonKeyring gets some kind of common keyring library which already implements:
         `set_password()`, `get_password()` & `delete_password()` exactly by these names.
 
         e.g. `pip install keyring`, `pip install rskeyring` or other.
@@ -52,7 +52,7 @@ class CommonKeyring(Keyring):
 
         Both can run:
 
-            adatper.set_password(service, key, value)
+            adapter.set_password(service, key, value)
             adapter.get_password(service, key)
             adapter.delete_password(service, key)
 

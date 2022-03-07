@@ -21,7 +21,7 @@ from .file import open
 from .time import to_format
 
 
-# ToDo: Syntax Sugar for `logging` library combined with the functions here.
+# TODO: Syntax Sugar for `logging` library combined with the functions here.
 
 settings = {
     'stdout': sys.stdout,
