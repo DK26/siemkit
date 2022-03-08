@@ -150,7 +150,10 @@ class NoAuth(SmtpAuthentication):
 
 
 def map_images(html_content: str) -> dict:
-    images = re.findall(r'^.*?<.*?src=["]?([^;>=]+?)["]?(?:>|\s\w+=)', html_content, flags=re.MULTILINE)
+
+    images = re.findall(r'^.*?<.*?src=["\']?([^;>=]+?)["\']?(?:>|\s\w+=)', html_content, flags=re.MULTILINE)
+    images.extend(re.findall(r'^.*?<.*?url\(["\']?([^;>=]+?)["\']?\)(?:>|\s\w+=)', html_content, flags=re.MULTILINE))
+
     images_paths = set()
     images_map = {}
 
@@ -163,6 +166,7 @@ def map_images(html_content: str) -> dict:
 
 
 def mime_image_loader(work_dir: str, images_map: dict) -> Generator[MIMEImage, None, None]:
+
     for image_id, image_path in images_map.items():
         with open(os.path.join(work_dir, image_path), 'rb') as fs:
             mime_image = MIMEImage(fs.read())
