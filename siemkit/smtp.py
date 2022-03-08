@@ -151,8 +151,8 @@ class NoAuth(SmtpAuthentication):
 
 def map_images(html_content: str) -> dict:
 
-    images = re.findall(r'^.*?<.*?src=["\']?([^;>=]+?)["\']?(?:>|\s\w+=)', html_content, flags=re.MULTILINE)
-    images.extend(re.findall(r'^.*?<.*?url\(["\']?([^;>=]+?)["\']?\)(?:>|\s\w+=)', html_content, flags=re.MULTILINE))
+    images = re.findall(r"""^.*?<.*?src=["']?([^;>=]+?)["']?(?:>|\s\w+=)""", html_content, flags=re.MULTILINE)
+    images.extend(re.findall(r"""^.*?<.*?url\(["']?([^;>=]+?)["']?\)""", html_content, flags=re.MULTILINE))
 
     images_paths = set()
     images_map = {}
