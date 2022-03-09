@@ -168,8 +168,15 @@ def map_images(html_content: str) -> dict:
 def mime_image_loader(work_dir: str, images_map: dict) -> Generator[MIMEImage, None, None]:
 
     for image_id, image_path in images_map.items():
+
+        file_path = os.path.join(work_dir, image_path)
+        sub_type = None
+
+        if file_path.lower().endswith('jpg'):
+            sub_type = 'jpeg'
+
         with open(os.path.join(work_dir, image_path), 'rb') as fs:
-            mime_image = MIMEImage(fs.read())
+            mime_image = MIMEImage(fs.read(), _subtype=sub_type)
 
         mime_image.add_header('Content-ID', f'<{image_id}>')
 
