@@ -228,17 +228,20 @@ class MimeMessage(ABC):
             to_addresses,
             cc_addresses=None,
             bcc_addresses=None,
+            reply_to=None,
     ):
 
         self._from_address = None
         self._to_addresses = None
         self._cc_addresses = None
         self._bcc_addresses = None
+        self._replay_to = None
 
         self.from_address = from_address
         self.to_addresses = to_addresses
         self.cc_addresses = cc_addresses
         self.bcc_addresses = bcc_addresses
+        self.reply_to = reply_to
 
     @classmethod
     def init_addresses(cls, addresses):
@@ -295,6 +298,7 @@ class MultipartMimeMessage(MimeMessage):
             to_addresses,
             cc_addresses=None,
             bcc_addresses=None,
+            reply_to=None,
             subject='',
             content='',
             content_render: Callable = None,
@@ -304,13 +308,15 @@ class MultipartMimeMessage(MimeMessage):
             encoding='utf-8'
     ):
 
-        super().__init__(from_address, to_addresses, cc_addresses, bcc_addresses)
+        super().__init__(from_address, to_addresses, cc_addresses, bcc_addresses, reply_to)
 
         # Prep Base
         self.__smtp_multipart = MIMEMultipart()
         self.__smtp_multipart['From'] = from_address
         self.__smtp_multipart['To'] = ','.join(self.to_addresses)
         self.__smtp_multipart['CC'] = ','.join(self.cc_addresses)
+        if reply_to is not None:
+            self.__smtp_multipart.add_header('reply-to', reply_to)
         self.__smtp_multipart['Subject'] = subject
         self.subject = subject
 
