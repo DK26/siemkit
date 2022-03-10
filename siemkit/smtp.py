@@ -170,8 +170,8 @@ def mime_image_loader(work_dir: str, images_map: dict) -> Generator[MIMEImage, N
     for image_id, image_path in images_map.items():
 
         file_path = os.path.join(work_dir, image_path)
-        sub_type = None
 
+        sub_type = None
         if file_path.lower().endswith('jpg'):
             sub_type = 'jpeg'
 
@@ -374,24 +374,6 @@ class Connection:
     def __init__(self, smtp_login: SmtpAuthentication):
         self.__smtp_session = smtp_login.connect()
 
-    # def sendmail(self, from_address, send_addresses, smtp_mime_payload):
-    #
-    #     send_to = []
-    #     if isinstance(send_addresses, str):
-    #         send_to.append(send_addresses)
-    #     elif isinstance(send_addresses, Iterable):
-    #         for address in send_addresses:
-    #             if isinstance(address, str):
-    #                 send_to.append(address)
-    #             else:
-    #                 send_to.extend(address)
-    #
-    #     self.__smtp_session.sendmail(
-    #         from_address,
-    #         send_to,
-    #         smtp_mime_payload.as_string()
-    #     )
-
     def sendmail(self, smtp_mime_payload: MimeMessage):
 
         from_address = smtp_mime_payload.from_address
@@ -441,5 +423,3 @@ AUTH_MODULE_FACTORY = AuthenticationModuleFactory()
 AUTH_MODULE_FACTORY.register_module(TlsAuth)
 AUTH_MODULE_FACTORY.register_module(StarttlsAuth)
 AUTH_MODULE_FACTORY.register_module(NoAuth)
-
-
