@@ -1,4 +1,4 @@
-## [CyberSIEM<sup>(R)</sup>](https://www.cybersiem.com/) Community Kit
+## SIEM Community Kit
 
 * An open-source "Swiss Army Knife" for anything SIEM related!
 
@@ -23,7 +23,7 @@ Package:
    - https://pypi.org/project/siemkit/  
 
 GitHub: 
-   - https://github.com/cybersiem/community
+   - https://github.com/dk26/siemkit
 
 ## Libraries
 
